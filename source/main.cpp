@@ -103,7 +103,9 @@ int main(int argc, char** argv) {
 	ApplicationWindow->color( COLOR_BACKGROUND );
     ApplicationWindow->callback(onMainWindowCloseCallback);	// Window close event is handled
 
-    initializeGui();
+    initializeDisc( 0, 0, 0 );
+    initializeDisc( 1, 350, 0 );
+    initializeDisc( 2, 700, 0 );
 
     ApplicationWindow->end();
     ApplicationWindow->show();
@@ -111,8 +113,6 @@ int main(int argc, char** argv) {
     Fl::lock();  // Enable multi-threading support in FLTK; register a callback function for Fl::awake()
 //    std::thread(peripheralThread).detach();
     return Fl::run();
-
-	return 0;
 }
 
 //.................................................................................................

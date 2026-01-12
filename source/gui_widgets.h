@@ -18,13 +18,14 @@
 
 #define COLOR_BACKGROUND	0x36
 #define COLOR_STRONGER_BLUE	0xE5
-#define COLOR_WEAK_BLUE		0xEE
+#define COLOR_MEDIUM_BLUE	0xEE
+#define COLOR_WEAK_BLUE		0xF7
 
 //.................................................................................................
 // Function prototypes
 //.................................................................................................
 
-void initializeGui(void);
+void initializeDisc( uint8_t DiscIndex, uint16_t X, uint16_t Y);
 
 
 
