@@ -3,7 +3,9 @@
 #include <cstdio>
 #include <string>
 #include <iostream>
+#include <assert.h>
 #include "gui_widgets.h"
+#include "shared_data.h"
 
 //.................................................................................................
 // Preprocessor directives
@@ -15,9 +17,6 @@
 #define DISC_VALUE1_Y		30
 #define DISC_VALUE2_Y		80
 #define DISC_TEXTS_SPACE	10
-
-#define CUPS_NUMBER			3
-#define VALUES_PER_DISC		4
 
 //.................................................................................................
 // Definitions of types
@@ -34,11 +33,15 @@ public:
 // Local variables
 //.................................................................................................
 
-static TripleDiscWidget * Disc1;
+static TripleDiscWidget * DiscGraphics[CUPS_NUMBER];
 
 static Fl_Box * CupValueLabelPtr[CUPS_NUMBER][VALUES_PER_DISC];
 
-static double CurrentValues[CUPS_NUMBER][VALUES_PER_DISC];
+//.................................................................................................
+// Local function prototypes
+//.................................................................................................
+
+static void recalculateValues( uint8_t Disc );
 
 //.................................................................................................
 // Function definitions
@@ -46,20 +49,20 @@ static double CurrentValues[CUPS_NUMBER][VALUES_PER_DISC];
 
 void TripleDiscWidget::draw(){
 	fl_color( COLOR_STRONGER_BLUE );
-	fl_pie(x(), y(), w(), h(), 90+DISC_RING_GAP, 270-DISC_RING_GAP);
+	fl_pie(x(), y(), w(), h(), 90+DISC_RING_GAP, 270-DISC_RING_GAP);	// outer ring, sector 1
 
-	fl_pie(x(), y(), w(), h(), 270+DISC_RING_GAP, 360);
+	fl_pie(x(), y(), w(), h(), 270+DISC_RING_GAP, 360);					// outer ring, sector 2
 	fl_pie(x(), y(), w(), h(), 0, 90-DISC_RING_GAP);
 
-	fl_color( COLOR_MEDIUM_BLUE );
+	fl_color( COLOR_MEDIUM_BLUE );	// medium ring
 	fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
 
-	fl_color( COLOR_WEAK_BLUE );
+	fl_color( COLOR_WEAK_BLUE ); // inner circle
 	fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
 }
 
 void initializeDisc( uint8_t DiscIndex, uint16_t X, uint16_t Y ){
-	Disc1 = new TripleDiscWidget( X+20, Y+20, 256, 256 );
+	DiscGraphics[DiscIndex] = new TripleDiscWidget( X+20, Y+20, 256, 256 );
 
 	for (int J=0; J <VALUES_PER_DISC; J++){
 		if (0 == J){
@@ -77,18 +80,28 @@ void initializeDisc( uint8_t DiscIndex, uint16_t X, uint16_t Y ){
 		CupValueLabelPtr[DiscIndex][J]->labelsize( 26 );
 	}
 
-	for (int J=0; J < VALUES_PER_DISC; J++){
-		CurrentValues[DiscIndex][J] = DiscIndex*12345.6 + 7.8*J;
-	}
+	recalculateValues(DiscIndex);
+}
 
+static void recalculateValues( uint8_t Disc ){
 	for (int J=0; J < VALUES_PER_DISC; J++){
-		double TemporaryValue = CurrentValues[DiscIndex][J];
+		int TemporaryRegisterIndex = Disc*VALUES_PER_DISC + J;
+		assert( TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER );
+		double TemporaryValue = atomic_load_explicit( &ModbusInputRegisters[TemporaryRegisterIndex], std::memory_order_acquire );
 		char TemporaryBuffer[64];
 		std::snprintf(TemporaryBuffer, sizeof(TemporaryBuffer), "%.1fμA", TemporaryValue);
 		std::string TemporaryLabel = TemporaryBuffer;
 #if 0 // debugging
 		std::cout << TemporaryLabel << std::endl;
 #endif
-		CupValueLabelPtr[DiscIndex][J]->copy_label( TemporaryLabel.c_str() );
+		CupValueLabelPtr[Disc][J]->copy_label( TemporaryLabel.c_str() );
+		CupValueLabelPtr[Disc][J]->redraw();
 	}
 }
+
+void refreshDisc(void* Data){
+	uint8_t Disc = *((uint8_t*)Data);
+	DiscGraphics[Disc]->redraw();
+	recalculateValues(Disc);
+}
+

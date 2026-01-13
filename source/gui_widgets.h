@@ -12,6 +12,8 @@
 #include <FL/Fl_Text_Display.H>
 #include <FL/Fl_Box.H>
 
+#include "config.h"
+
 //.................................................................................................
 // Preprocessor directives
 //.................................................................................................
@@ -27,6 +29,6 @@
 
 void initializeDisc( uint8_t DiscIndex, uint16_t X, uint16_t Y);
 
-
+void refreshDisc(void* Data);
 
 #endif // SOURCE_GUI_WIDGETS_H_

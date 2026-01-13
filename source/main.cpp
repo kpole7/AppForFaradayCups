@@ -1,3 +1,5 @@
+/// @file main.cpp
+///
 
 #include <iostream>
 #include <string>
@@ -8,6 +10,8 @@
 #include <csignal>
 #include <execinfo.h>
 #include <unistd.h>
+#include <cassert>
+#include <thread>
 #include <FL/Fl.H>
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Double_Window.H> // to eliminate flickering
@@ -17,6 +21,8 @@
 #include <FL/Fl_Box.H>
 
 #include "gui_widgets.h"
+#include "shared_data.h"
+#include "serial_communication.h"
 
 //.................................................................................................
 // Preprocessor directives
@@ -78,6 +84,7 @@ int WindowEscProof::handle(int event){
 //.................................................................................................
 
 int main(int argc, char** argv) {
+	setupCriticalSignalHandler();
 
 	std::cout << "Hello world!" << std::endl;
 
@@ -103,6 +110,18 @@ int main(int argc, char** argv) {
 	ApplicationWindow->color( COLOR_BACKGROUND );
     ApplicationWindow->callback(onMainWindowCloseCallback);	// Window close event is handled
 
+
+#if 1 // debugging
+    for (int Cup = 0; Cup < CUPS_NUMBER; Cup++){
+    	for (int J=0; J < VALUES_PER_DISC; J++){
+    		int TemporaryRegisterIndex = Cup*VALUES_PER_DISC + J;
+    		assert( TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER );
+    		atomic_store_explicit( &ModbusInputRegisters[TemporaryRegisterIndex], Cup*12345.6 + 7.8*J, std::memory_order_release );
+    	}
+    }
+#endif
+
+
     initializeDisc( 0, 0, 0 );
     initializeDisc( 1, 350, 0 );
     initializeDisc( 2, 700, 0 );
@@ -111,7 +130,7 @@ int main(int argc, char** argv) {
     ApplicationWindow->show();
 
     Fl::lock();  // Enable multi-threading support in FLTK; register a callback function for Fl::awake()
-//    std::thread(peripheralThread).detach();
+    std::thread(peripheralThread).detach();
     return Fl::run();
 }
 

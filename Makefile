@@ -1,9 +1,5 @@
-CC	        = gcc
 CXX	        = g++
 OBJCOPY	    = objcopy
-
-CFLAGS	    =  -g -rdynamic -Wall -pthread -MMD -MP
-CFLAGS      += -Iinclude -IfreeModbus/include -IfreeModbus/tcp -IfreeModbus/port
 
 CCFLAGS	    =  -g -rdynamic -Wall -Wextra -Iinclude -MMD -MP
 
@@ -15,7 +11,9 @@ NAME_APP   = appForFaradayCups
 BIN_APP    = $(BUILD_DIR)/$(NAME_APP)
 
 CCSRC       = source/main.cpp \
-              source/serial_ports.cpp \
+              source/serial_communication.cpp \
+              source/shared_data.cpp \
+              source/uart_ports.cpp \
               source/gui_widgets.cpp
 
 OBJS_RSTL  = $(addprefix $(BUILD_DIR)/, $(CCSRC:.cpp=.o))
