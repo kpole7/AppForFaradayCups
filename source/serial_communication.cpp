@@ -12,6 +12,10 @@
 #include "uart_ports.h"
 #include "gui_widgets.h"
 
+//.................................................................................................
+// Preprocessor directives
+//.................................................................................................
+
 #define PERIPHERAL_THREAD_LOOP_DURATION		5	// milliseconds
 
 //...............................................................................................
@@ -21,6 +25,12 @@
 static std::chrono::high_resolution_clock::time_point PeripheralThreadLoopStart;
 static int64_t PeripheralThreadTimeInMilliseconds;
 
+//.................................................................................................
+// Function definitions
+//.................................................................................................
+
+/// This function runs the second thread (FLTK is the main thread).
+/// The peripheral thread supports Modbus communication and sends signals to FLTK to refresh graphics.
 void peripheralThread(void) {
 
 	PeripheralThreadTimeInMilliseconds = 0;

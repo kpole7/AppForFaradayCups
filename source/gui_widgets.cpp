@@ -47,20 +47,7 @@ static void recalculateValues( uint8_t Disc );
 // Function definitions
 //.................................................................................................
 
-void TripleDiscWidget::draw(){
-	fl_color( COLOR_STRONGER_BLUE );
-	fl_pie(x(), y(), w(), h(), 90+DISC_RING_GAP, 270-DISC_RING_GAP);	// outer ring, sector 1
-
-	fl_pie(x(), y(), w(), h(), 270+DISC_RING_GAP, 360);					// outer ring, sector 2
-	fl_pie(x(), y(), w(), h(), 0, 90-DISC_RING_GAP);
-
-	fl_color( COLOR_MEDIUM_BLUE );	// medium ring
-	fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
-
-	fl_color( COLOR_WEAK_BLUE ); // inner circle
-	fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
-}
-
+/// This function creates a single disc with texts
 void initializeDisc( uint8_t DiscIndex, uint16_t X, uint16_t Y ){
 	DiscGraphics[DiscIndex] = new TripleDiscWidget( X+20, Y+20, 256, 256 );
 
@@ -83,6 +70,22 @@ void initializeDisc( uint8_t DiscIndex, uint16_t X, uint16_t Y ){
 	recalculateValues(DiscIndex);
 }
 
+/// This function draws a single disc including rings and a circle in the middle (no texts)
+void TripleDiscWidget::draw(){
+	fl_color( COLOR_STRONGER_BLUE );
+	fl_pie(x(), y(), w(), h(), 90+DISC_RING_GAP, 270-DISC_RING_GAP);	// outer ring, sector 1
+
+	fl_pie(x(), y(), w(), h(), 270+DISC_RING_GAP, 360);					// outer ring, sector 2
+	fl_pie(x(), y(), w(), h(), 0, 90-DISC_RING_GAP);
+
+	fl_color( COLOR_MEDIUM_BLUE );	// medium ring
+	fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
+
+	fl_color( COLOR_WEAK_BLUE ); // inner circle
+	fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
+}
+
+/// This function modifies texts (displayed as graphic widgets) related to a single disk based on ModbusInputRegisters
 static void recalculateValues( uint8_t Disc ){
 	for (int J=0; J < VALUES_PER_DISC; J++){
 		int TemporaryRegisterIndex = Disc*VALUES_PER_DISC + J;
@@ -99,6 +102,8 @@ static void recalculateValues( uint8_t Disc ){
 	}
 }
 
+/// This function modifies texts (displayed as graphic widgets) associated with a single disk based on ModbusInputRegisters
+/// and refreshes the entire single disc
 void refreshDisc(void* Data){
 	uint8_t Disc = *((uint8_t*)Data);
 	DiscGraphics[Disc]->redraw();

@@ -24,6 +24,7 @@
 #include "shared_data.h"
 #include "serial_communication.h"
 
+
 //.................................................................................................
 // Preprocessor directives
 //.................................................................................................
@@ -32,24 +33,29 @@
 #define MAIN_WINDOW_HEIGHT			400
 
 
-// This is Esc-proof window
+//.................................................................................................
+// Definitions of types
+//.................................................................................................
+
+/// This is Esc-proof window (a FLTK standard window is sensitive to Esc)
 class WindowEscProof : public Fl_Double_Window {
 public:
 	WindowEscProof(int W, int H, const char* title) : Fl_Double_Window(W, H, title) { }
     int handle(int event) override;
 };
 
+
 //.................................................................................................
 // Global variables
 //.................................................................................................
 
-// This variable is set if there is argument "-v" or "--verbose" in command line
+/// This variable is set if there is argument "-v" or "--verbose" in command line
 bool VerboseMode;
 
-// This variable is used to locate the configuration file
+/// This variable is used to locate the configuration file
 std::string* ConfigurationFilePathPtr;
 
-
+/// This variable points to the main application window
 WindowEscProof* ApplicationWindow;
 
 
@@ -69,18 +75,7 @@ static int determineApplicationPath( char* Argv0 );
 static void onMainWindowCloseCallback(Fl_Widget *Widget, void *Data);
 
 //.................................................................................................
-
-// Overlay handle() method
-int WindowEscProof::handle(int event){
-    if (event == FL_KEYDOWN) {  // Check if it is a key event
-        if (Fl::event_key() == FL_Escape) {  // Check if it is the Esc key
-            return 1;  // Block the default behavior
-        }
-    }
-    return Fl_Window::handle(event);  // For other events, call the default handler
-}
-
-
+// The main application
 //.................................................................................................
 
 int main(int argc, char** argv) {
@@ -121,7 +116,7 @@ int main(int argc, char** argv) {
     }
 #endif
 
-
+    // the main graphic objects
     initializeDisc( 0, 0, 0 );
     initializeDisc( 1, 350, 0 );
     initializeDisc( 2, 700, 0 );
@@ -137,6 +132,16 @@ int main(int argc, char** argv) {
 //.................................................................................................
 // Function definitions
 //.................................................................................................
+
+// Overlay handle() method
+int WindowEscProof::handle(int event){
+    if (event == FL_KEYDOWN) {  // Check if it is a key event
+        if (Fl::event_key() == FL_Escape) {  // Check if it is the Esc key
+            return 1;  // Block the default behavior
+        }
+    }
+    return Fl_Window::handle(event);  // For other events, call the default handler
+}
 
 // This function is used to save the log file in case of SIGSEGV and so on
 void criticalHandler(int sig) {

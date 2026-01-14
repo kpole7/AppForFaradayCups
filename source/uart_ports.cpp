@@ -34,6 +34,7 @@ void openModbusPort( void ){
 
 	PortNameCharPtr = PortName.c_str();
 	Result = access(PortNameCharPtr, F_OK );
+	SerialPortHandler = -1;
 	if(0 == Result){
 		SerialPortHandler = configureSerialPort( PortNameCharPtr );
 	}
