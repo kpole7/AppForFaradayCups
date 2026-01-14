@@ -4,25 +4,20 @@
 #include <iostream>
 #include <string>
 #include <atomic>
-#include <limits.h>  // for PATH_MAX
-#include <libgen.h>  // for dirname
-#include <cstdlib>   // for realpath
 #include <csignal>
-#include <execinfo.h>
-#include <unistd.h>
+#include <execinfo.h> // backtrace
 #include <cassert>
 #include <thread>
 #include <FL/Fl.H>
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Double_Window.H> // to eliminate flickering
 #include <FL/Fl_Button.H>
-#include <FL/Fl_Float_Input.H>
-#include <FL/Fl_Text_Display.H>
 #include <FL/Fl_Box.H>
 
 #include "gui_widgets.h"
 #include "shared_data.h"
 #include "serial_communication.h"
+#include "settings_file.h"
 
 
 //.................................................................................................
@@ -52,9 +47,6 @@ public:
 /// This variable is set if there is argument "-v" or "--verbose" in command line
 bool VerboseMode;
 
-/// This variable is used to locate the configuration file
-std::string* ConfigurationFilePathPtr;
-
 /// This variable points to the main application window
 WindowEscProof* ApplicationWindow;
 
@@ -68,9 +60,6 @@ void criticalHandler(int sig);
 
 // this function hooks up the function criticalHandler()
 void setupCriticalSignalHandler();
-
-// The function searches for the directory where the executable file is located
-static int determineApplicationPath( char* Argv0 );
 
 static void onMainWindowCloseCallback(Fl_Widget *Widget, void *Data);
 
@@ -98,6 +87,7 @@ int main(int argc, char** argv) {
 	if (0 != determineApplicationPath( argv[0] )){
 		return -1;
 	}
+	configurationFileParsing();
 
     // Main window of the application
 	ApplicationWindow = new WindowEscProof(MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT, "Pomiar Wiązki w Linii Iniekcyjnej" );
@@ -190,27 +180,6 @@ void setupCriticalSignalHandler() {
 	signal(SIGFPE, criticalHandler);
 	signal(SIGILL, criticalHandler);
 	signal(SIGBUS, criticalHandler);
-}
-
-// The function searches for the directory where the executable file is located
-static int determineApplicationPath( char* Argv0 ){
-    char Path[PATH_MAX];
-    ConfigurationFilePathPtr = nullptr;
-
-    if (realpath( Argv0, Path)) {
-        static std::string MyDirectory = dirname(Path);
-        ConfigurationFilePathPtr = &MyDirectory;
-        if (VerboseMode){
-#if 0
-        	std::cout << "PATH_MAX= " << PATH_MAX << std::endl;
-#endif
-        	std::cout << " Katalog programu: " << MyDirectory << std::endl;
-    	}
-    } else {
-        std::cerr << "Nie udało się uzyskać ścieżki do programu." << std::endl;
-        return -1;
-    }
-    return 0;
 }
 
 // Window close event is handled here
