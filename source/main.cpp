@@ -78,6 +78,10 @@ int main(int argc, char** argv) {
         if (Argument == "-v" || Argument == "--verbose") {
         	VerboseMode = true;
         	std::cout << "Tryb \"verbose\"" << std::endl;
+#if 0 // debugging
+            std::string Argument0 = argv[0];
+        	std::cout << "Wywołanie programu: " << Argument0 << std::endl;
+#endif
         }
         else {
             std::cout << "Nieznany argument: " << Argument << std::endl;
@@ -155,7 +159,7 @@ void criticalHandler(int sig) {
     void* frames[100];
     int num_frames = backtrace(frames, 100);
 
-    FILE* f = fopen("backtrace_psu_app.log", "a");
+    FILE* f = fopen("backtrace_Faraday_cups.log", "a");
     if (f) {
         time_t now = time(NULL);
         fprintf(f, "\n=== Backtrace (");
