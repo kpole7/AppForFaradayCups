@@ -1,48 +1,72 @@
 /// @file uart_ports.cpp
 
 
+#include <iostream>
 #include <unistd.h>
 #include <fcntl.h>
 #include <termios.h>
 #include <string>
 #include "uart_ports.h"
+#include "settings_file.h"
+#include "config.h"
+
 
 //.................................................................................................
 // Preprocessor directives
 //.................................................................................................
 
-// This constant determines Modbus speed; it is defined in termios.h
+/// This constant determines Modbus speed; it is defined in termios.h
 #define MODBUS_RTU_HARDWARE_SPEED		B19200
 
 
-std::string PortName = "/dev/ttyUSB0";
+//.................................................................................................
+// Local variables
+//.................................................................................................
 
-int SerialPortHandler;
+static int SerialPortHandler;
 
+
+//.................................................................................................
+// Local function prototypes
+//.................................................................................................
 
 static int configureSerialPort(const char *DeviceName);
 
 
 //........................................................................................................
-// Local function definitions
+// Global function definitions
 //........................................................................................................
 
-
-void openModbusPort( void ){
-	int Result;
-	static const char* PortNameCharPtr;
-
-	PortNameCharPtr = PortName.c_str();
-	Result = access(PortNameCharPtr, F_OK );
+/// This function opens serial port
+/// @return code defined in FailureCodes
+int openModbusPort( void ){
 	SerialPortHandler = -1;
-	if(0 == Result){
-		SerialPortHandler = configureSerialPort( PortNameCharPtr );
+	if (nullptr == SerialPortRequestedNamePtr){
+       	std::cout << " Nie znaleziono nazwy portu szeregowego" << std::endl;
+		return FAILURE_UART_PORT_NAME;
 	}
-	if(-1 == SerialPortHandler){
 
+	int Result;
+	const char* PortNameCharPtr;
+
+	PortNameCharPtr = SerialPortRequestedNamePtr->c_str();
+	Result = access(PortNameCharPtr, F_OK );
+	if(0 != Result){
+       	std::cout << " Nie uzyskano dostępu do portu szeregowego" << std::endl;
+		return FAILURE_UART_PORT_ACCESS;
 	}
+	SerialPortHandler = configureSerialPort( PortNameCharPtr );
+	if(-1 == SerialPortHandler){
+       	std::cout << " Nieprawidłowa konfiguracja portu szeregowego" << std::endl;
+		return FAILURE_UART_PORT_CONFIGURE;
+	}
+	return NO_FAILURE;
 }
 
+
+//........................................................................................................
+// Local function definitions
+//........................................................................................................
 
 // This function opens and configures a serial port
 static int configureSerialPort(const char *DeviceName){

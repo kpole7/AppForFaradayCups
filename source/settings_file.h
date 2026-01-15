@@ -3,6 +3,13 @@
 #ifndef SOURCE_SETTINGS_FILE_H_
 #define SOURCE_SETTINGS_FILE_H_
 
+#include <string>
+
+//.................................................................................................
+// Global variables
+//.................................................................................................
+
+extern std::string * SerialPortRequestedNamePtr;
 
 //.................................................................................................
 // Global function prototypes
@@ -10,7 +17,7 @@
 
 int determineApplicationPath( char* Argv0 );
 
-bool configurationFileParsing(void);
+int configurationFileParsing(void);
 
 
 #endif // SOURCE_SETTINGS_FILE_H_

@@ -18,6 +18,7 @@
 #include "shared_data.h"
 #include "serial_communication.h"
 #include "settings_file.h"
+#include "uart_ports.h"
 
 
 //.................................................................................................
@@ -50,6 +51,7 @@ bool VerboseMode;
 /// This variable points to the main application window
 WindowEscProof* ApplicationWindow;
 
+static Fl_Box * FailureMessagePtr;
 
 //.................................................................................................
 // Local function prototypes
@@ -70,8 +72,7 @@ static void onMainWindowCloseCallback(Fl_Widget *Widget, void *Data);
 int main(int argc, char** argv) {
 	setupCriticalSignalHandler();
 
-	std::cout << "Hello world!" << std::endl;
-
+	int FailureCode = NO_FAILURE;
 	for (int J = 1; J < argc; J++) {
         std::string Argument = argv[J];
         if (Argument == "-v" || Argument == "--verbose") {
@@ -80,14 +81,19 @@ int main(int argc, char** argv) {
         }
         else {
             std::cout << "Nieznany argument: " << Argument << std::endl;
-            return -1;
+            FailureCode = FAILURE_COMMAND_SYNTAX;
         }
     }
 
-	if (0 != determineApplicationPath( argv[0] )){
-		return -1;
+	if (NO_FAILURE == FailureCode){
+		FailureCode = determineApplicationPath( argv[0] );
 	}
-	configurationFileParsing();
+	if (NO_FAILURE == FailureCode){
+		FailureCode = configurationFileParsing();
+	}
+	if (NO_FAILURE == FailureCode){
+		FailureCode = openModbusPort();
+	}
 
     // Main window of the application
 	ApplicationWindow = new WindowEscProof(MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT, "Pomiar Wiązki w Linii Iniekcyjnej" );
@@ -95,27 +101,38 @@ int main(int argc, char** argv) {
 	ApplicationWindow->color( COLOR_BACKGROUND );
     ApplicationWindow->callback(onMainWindowCloseCallback);	// Window close event is handled
 
+	if (NO_FAILURE == FailureCode){
 
 #if 1 // debugging
-    for (int Cup = 0; Cup < CUPS_NUMBER; Cup++){
-    	for (int J=0; J < VALUES_PER_DISC; J++){
-    		int TemporaryRegisterIndex = Cup*VALUES_PER_DISC + J;
-    		assert( TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER );
-    		atomic_store_explicit( &ModbusInputRegisters[TemporaryRegisterIndex], Cup*12345.6 + 7.8*J, std::memory_order_release );
-    	}
-    }
+		for (int Cup = 0; Cup < CUPS_NUMBER; Cup++){
+			for (int J=0; J < VALUES_PER_DISC; J++){
+				int TemporaryRegisterIndex = Cup*VALUES_PER_DISC + J;
+				assert( TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER );
+				atomic_store_explicit( &ModbusInputRegisters[TemporaryRegisterIndex], Cup*12345.6 + 7.8*J, std::memory_order_release );
+			}
+		}
 #endif
 
-    // the main graphic objects
-    initializeDisc( 0, 0, 0 );
-    initializeDisc( 1, 350, 0 );
-    initializeDisc( 2, 700, 0 );
+		// the main graphic objects
+		initializeDisc( 0, 0, 0 );
+		initializeDisc( 1, 350, 0 );
+		initializeDisc( 2, 700, 0 );
+
+	}
+	else{
+		FailureMessagePtr = new Fl_Box( (MAIN_WINDOW_WIDTH*1)/16, (MAIN_WINDOW_HEIGHT*1)/16, (MAIN_WINDOW_WIDTH*14)/16, (MAIN_WINDOW_HEIGHT*14)/16,
+				"Błędy podczas startu aplikacji\nUruchom aplikację z parametrem -v w konsoli" );
+	}
 
     ApplicationWindow->end();
     ApplicationWindow->show();
 
     Fl::lock();  // Enable multi-threading support in FLTK; register a callback function for Fl::awake()
-    std::thread(peripheralThread).detach();
+
+	if (NO_FAILURE == FailureCode){
+		std::thread(peripheralThread).detach();
+	}
+
     return Fl::run();
 }
 
@@ -190,6 +207,4 @@ static void onMainWindowCloseCallback(Fl_Widget *Widget, void *Data) {
 //	exitProcedure();
 	exit(0); // exit from the application
 }
-
-
 

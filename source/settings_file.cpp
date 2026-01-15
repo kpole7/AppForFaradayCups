@@ -2,7 +2,6 @@
 
 #include <fstream>
 #include <iostream>
-#include <string>
 #include <limits.h>  // for PATH_MAX
 #include <libgen.h>  // for dirname
 #include <cstdlib>   // for realpath
@@ -11,17 +10,28 @@
 #include "config.h"
 #include "settings_file.h"
 
+//.................................................................................................
+// Global variables
+//.................................................................................................
+
+/// This variable points to the serial port name defined in the settings text file (CONFIGURATION_FILE_NAME) or nullptr if there is no definition
+std::string * SerialPortRequestedNamePtr;
 
 //.................................................................................................
 // Local variables
 //.................................................................................................
 
 /// This variable is used to locate the configuration file
-std::string* ConfigurationFilePathPtr;
+static std::string* ConfigurationFilePathPtr;
 
+static std::string SerialPortRequestedName;
 
+//........................................................................................................
+// Function definitions
+//........................................................................................................
 
 /// The function searches for the directory where the executable file is located
+/// @return code defined in FailureCodes
 int determineApplicationPath( char* Argv0 ){
     char Path[PATH_MAX];
     ConfigurationFilePathPtr = nullptr;
@@ -37,14 +47,16 @@ int determineApplicationPath( char* Argv0 ){
     	}
     } else {
         std::cerr << "Nie udało się uzyskać ścieżki do programu." << std::endl;
-        return -1;
+        return FAILURE_SETTINGS_PATH;
     }
-    return 0;
+    return NO_FAILURE;
 }
 
 /// This function loads the configuration file and allocates an array of objects of type TransmissionChannel
-/// It returns 1 on success, and 0 on failure
-bool configurationFileParsing(void) {
+/// @return code defined in FailureCodes
+int configurationFileParsing(void) {
+	SerialPortRequestedNamePtr = nullptr;
+
     int LineNumber = 1;
     std::string Line;
     std::smatch Matches;
@@ -57,13 +69,13 @@ bool configurationFileParsing(void) {
 	std::ifstream File( ConfigurationFilePathPtr->c_str() ); // open file
     if (!File.is_open()) {
         std::cout << "Nie można otworzyć pliku: " << CONFIGURATION_FILE_NAME << std::endl;
-        return 0;
+        return FAILURE_SETTINGS_OPENING_FILE;
     }
     if (VerboseMode){
     	std::cout << "Plik: " << CONFIGURATION_FILE_NAME << std::endl;
     }
 
-    std::regex PatternSerialPort(R"(^\s*Port\s+Szeregowy\s*:\s*([^\s]+)\s*$)");
+    std::regex PatternSerialPort(R"(\s*(?!#)Port Szeregowy:\s*([^\s]+)\s*$)");
     bool MatchesSerialPortPattern;
     while (std::getline(File, Line)) {
         if (VerboseMode){
@@ -74,25 +86,27 @@ bool configurationFileParsing(void) {
 
         if (MatchesSerialPortPattern) {
 			// matches[0] includes all matching text
-            // matches[1] includes value of 'port'
-            // matches[2] includes value of 'id'
+            // matches[1] includes value of 'Port Szeregowy'
 
-        	std::string TemporaryPortName = Matches[1];
-            if (VerboseMode){
-            	std::cout << " Opis portu szeregowego: [" << TemporaryPortName << "]" << std::endl;
-            }
-        }
-        else {
-            if (VerboseMode){
-            	std::cout << " Nie znaleziono opisu portu szeregowego w linii: [" << Line << "]" << std::endl;
-            }
+        	if (nullptr == SerialPortRequestedNamePtr){
+            	SerialPortRequestedName = Matches[1];
+            	SerialPortRequestedNamePtr = &SerialPortRequestedName;
+                if (VerboseMode){
+                	std::cout << " Opis portu szeregowego: [" << SerialPortRequestedName << "] w linii: [" << Line << "]" << std::endl;
+                }
+        	}
+        	else{
+            	std::cout << " Nadmiarowy opis portu szeregowego w linii: [" << Line << "]" << std::endl;
+                return FAILURE_SETTINGS_EXCESSIVE_PORT_NAME;
+        	}
         }
         LineNumber++;
     }
 
+    if (nullptr == SerialPortRequestedNamePtr){
+       	std::cout << " Nie znaleziono opisu portu szeregowego" << std::endl;
+        return FAILURE_SETTINGS_PORT_NAME;
+    }
 
-
-    return true;
+    return NO_FAILURE;
 }
-
-

@@ -33,10 +33,13 @@ static int64_t PeripheralThreadTimeInMilliseconds;
 /// The peripheral thread supports Modbus communication and sends signals to FLTK to refresh graphics.
 void peripheralThread(void) {
 
+	usleep(100000UL); // 100 ms
+
 	PeripheralThreadTimeInMilliseconds = 0;
 	PeripheralThreadLoopStart = std::chrono::high_resolution_clock::now();
 	while(1){
-		{ // measure fixed time intervals
+		{
+			// measure fixed time intervals
 			std::chrono::high_resolution_clock::time_point TimeNow;
 			std::chrono::milliseconds DurationTime;
 			PeripheralThreadTimeInMilliseconds += PERIPHERAL_THREAD_LOOP_DURATION;
