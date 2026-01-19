@@ -5,11 +5,10 @@
 #include <iostream>
 #include <cassert>
 #include <unistd.h>
-#include <FL/Fl.H>
 
 #include "serial_communication.h"
 #include "shared_data.h"
-#include "uart_ports.h"
+#include "modbus_rtu_master.h"
 #include "gui_widgets.h"
 
 //.................................................................................................
@@ -18,12 +17,14 @@
 
 #define PERIPHERAL_THREAD_LOOP_DURATION		5	// milliseconds
 
+
 //...............................................................................................
 // Local variables
 //...............................................................................................
 
 static std::chrono::high_resolution_clock::time_point PeripheralThreadLoopStart;
 static int64_t PeripheralThreadTimeInMilliseconds;
+
 
 //.................................................................................................
 // Function definitions
@@ -81,40 +82,6 @@ void peripheralThread(void) {
 			    Fl::awake( refreshDisc, (void*)&StaticArguments[2] );
 			}
 		}
-
-
-
-
-
-
 	}
 }
-
-// This function calculates crc16 of Modbus type for a given frame
-static uint16_t crc16( const uint8_t *Buffer, uint8_t Length ){
-	uint16_t crc;
-	uint8_t i;
-	uint8_t bit;
-
-	crc = 0xFFFFu;
-	for( i = 0; i < Length; i++ ){
-		crc ^= (uint16_t)Buffer[i];
-		for( bit = 0; bit < 8; bit++ ){
-			if((crc & 0x0001u) != 0u){
-				crc >>= 1;
-				crc ^= 0xA001u;
-			}
-			else{
-				crc >>= 1;
-			}
-		}
-	}
-	return crc;
-}
-
-
-
-
-
-
 

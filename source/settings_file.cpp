@@ -47,7 +47,7 @@ int determineApplicationPath( char* Argv0 ){
     	}
     } else {
         std::cerr << "Nie udało się uzyskać ścieżki do programu." << std::endl;
-        return FAILURE_SETTINGS_PATH;
+        return ERROR_SETTINGS_PATH;
     }
     return NO_FAILURE;
 }
@@ -69,7 +69,7 @@ int configurationFileParsing(void) {
 	std::ifstream File( ConfigurationFilePathPtr->c_str() ); // open file
     if (!File.is_open()) {
         std::cout << "Nie można otworzyć pliku: " << CONFIGURATION_FILE_NAME << std::endl;
-        return FAILURE_SETTINGS_OPENING_FILE;
+        return ERROR_SETTINGS_OPENING_FILE;
     }
     if (VerboseMode){
     	std::cout << "Plik: " << CONFIGURATION_FILE_NAME << std::endl;
@@ -97,7 +97,7 @@ int configurationFileParsing(void) {
         	}
         	else{
             	std::cout << " Nadmiarowy opis portu szeregowego w linii: [" << Line << "]" << std::endl;
-                return FAILURE_SETTINGS_EXCESSIVE_PORT_NAME;
+                return ERROR_SETTINGS_EXCESSIVE_PORT_NAME;
         	}
         }
         LineNumber++;
@@ -105,7 +105,7 @@ int configurationFileParsing(void) {
 
     if (nullptr == SerialPortRequestedNamePtr){
        	std::cout << " Nie znaleziono opisu portu szeregowego" << std::endl;
-        return FAILURE_SETTINGS_PORT_NAME;
+        return ERROR_SETTINGS_PORT_NAME;
     }
 
     return NO_FAILURE;

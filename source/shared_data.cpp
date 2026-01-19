@@ -8,5 +8,3 @@ std::atomic<bool> ModbusCoilsReadout[MODBUS_COILS_NUMBER];
 
 std::atomic<bool> ModbusCoilsRequired[MODBUS_COILS_NUMBER];
 
-
-

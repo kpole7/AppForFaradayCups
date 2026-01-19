@@ -1,9 +1,9 @@
 CXX	        = g++
 OBJCOPY	    = objcopy
 
-CCFLAGS	    =  -g -rdynamic -Wall -Wextra -Iinclude -MMD -MP
+CCFLAGS	    =  -g -rdynamic -Wall -Wextra -Iinclude -I/usr/include/modbus -MMD -MP
 
-LDFLAGS     =  -g -rdynamic -lfltk -lX11 -lpthread
+LDFLAGS     =  -g -rdynamic -lfltk -lX11 -lpthread -lmodbus
 
 BUILD_DIR   = build
 
@@ -15,7 +15,7 @@ NAME_CFG   = PomiarWiązki.cfg
 CCSRC       = source/main.cpp \
               source/serial_communication.cpp \
               source/shared_data.cpp \
-              source/uart_ports.cpp \
+              source/modbus_rtu_master.cpp \
               source/gui_widgets.cpp \
               source/settings_file.cpp
 

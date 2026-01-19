@@ -18,7 +18,7 @@
 #include "shared_data.h"
 #include "serial_communication.h"
 #include "settings_file.h"
-#include "uart_ports.h"
+#include "modbus_rtu_master.h"
 
 
 //.................................................................................................
@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
         }
         else {
             std::cout << "Nieznany argument: " << Argument << std::endl;
-            FailureCode = FAILURE_COMMAND_SYNTAX;
+            FailureCode = ERROR_COMMAND_SYNTAX;
         }
     }
 
@@ -96,7 +96,7 @@ int main(int argc, char** argv) {
 		FailureCode = configurationFileParsing();
 	}
 	if (NO_FAILURE == FailureCode){
-		FailureCode = openModbusPort();
+		FailureCode = initializeModbus();
 	}
 
     // Main window of the application
@@ -125,7 +125,7 @@ int main(int argc, char** argv) {
 	}
 	else{
 		FailureMessagePtr = new Fl_Box( (MAIN_WINDOW_WIDTH*1)/16, (MAIN_WINDOW_HEIGHT*1)/16, (MAIN_WINDOW_WIDTH*14)/16, (MAIN_WINDOW_HEIGHT*14)/16,
-				"Błędy podczas startu aplikacji\nUruchom aplikację z parametrem -v w konsoli" );
+				"Błędy podczas startu aplikacji\nUruchom aplikację z parametrem -v w konsoli\nInformacje o błędach wyświetlą się w konsoli" );
 	}
 
     ApplicationWindow->end();
