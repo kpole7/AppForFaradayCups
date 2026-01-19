@@ -11,5 +11,6 @@
 
 void peripheralThread(void);
 
+void serialCommunicationExit(void);
 
 #endif // SOURCE_SERIAL_COMMUNICATION_H_

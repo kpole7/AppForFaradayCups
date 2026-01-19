@@ -24,7 +24,7 @@ typedef enum
 	ERROR_MODBUS_INITIALIZATION_2,
 	ERROR_MODBUS_OPENING,
 	ERROR_MODBUS_READING,
-	ERROR_MODBUS_READING_FRAME,
+	ERROR_MODBUS_FRAME_READ,
 } FailureCodes;
 
 //.................................................................................................

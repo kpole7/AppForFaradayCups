@@ -70,6 +70,10 @@ void peripheralThread(void) {
 			    }
 
 #if 1 // debugging
+
+
+			    readInputRegisters();
+
 			    std::cout << "Peripheral thread " << PeripheralThreadTimeInMilliseconds << " " << TemporaryDrift << std::endl;
 #endif
 
@@ -85,3 +89,6 @@ void peripheralThread(void) {
 	}
 }
 
+void serialCommunicationExit(void){
+	closeModbus();
+}

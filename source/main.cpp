@@ -25,8 +25,8 @@
 // Preprocessor directives
 //.................................................................................................
 
-#define MAIN_WINDOW_WIDTH			1020
-#define MAIN_WINDOW_HEIGHT			400
+#define MAIN_WINDOW_WIDTH			510
+#define MAIN_WINDOW_HEIGHT			920
 
 
 //.................................................................................................
@@ -118,9 +118,9 @@ int main(int argc, char** argv) {
 #endif
 
 		// the main graphic objects
-		initializeDisc( 0, 0, 0 );
-		initializeDisc( 1, 350, 0 );
-		initializeDisc( 2, 700, 0 );
+		initializeDisc( 0, 30, 0 );
+		initializeDisc( 1, 30, 300 );
+		initializeDisc( 2, 30, 600 );
 
 	}
 	else{
@@ -208,7 +208,11 @@ static void onMainWindowCloseCallback(Fl_Widget *Widget, void *Data) {
 	(void)Widget; // intentionally unused
 	(void)Data; // intentionally unused
 
-//	exitProcedure();
+    if (VerboseMode){
+    	std::cout << "zamykanie aplikacji" << std::endl;
+    }
+
+	serialCommunicationExit();
 	exit(0); // exit from the application
 }
 

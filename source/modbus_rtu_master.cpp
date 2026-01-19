@@ -1,8 +1,10 @@
 /// @file modbus_rtu_master.cpp
 
+
+#include <iostream>
 #include <modbus.h>
 #include <errno.h>
-#include <FL/Fl.H>
+//#include <FL/Fl.H>
 
 #include "modbus_rtu_master.h"
 #include "config.h"
@@ -41,13 +43,13 @@ int initializeModbus(void){
 
 	Context = modbus_new_rtu(PortNameCharPtr, Baudrate, Parity, DataBits, StopBit);
     if (Context == NULL) {
-        fprintf(stderr, "Nie można utworzyć kontekstu libmodbus\n");
+        std::cout << "Nie można utworzyć kontekstu libmodbus\n" << std::endl;
         return ERROR_MODBUS_INITIALIZATION_1;
     }
 
     // Set slave id (Unit ID)
     if (modbus_set_slave(Context, SLAVE_ID) == -1) {
-        fprintf(stderr, "Błąd ustawienia slave id: %s\n", modbus_strerror(errno));
+    	std::cout << "Błąd ustawienia slave id: " << modbus_strerror(errno) << std::endl;
         modbus_free(Context);
         return ERROR_MODBUS_INITIALIZATION_2;
     }
@@ -59,7 +61,7 @@ int initializeModbus(void){
     modbus_set_response_timeout(Context, TimeoutValue.tv_sec, TimeoutValue.tv_usec);
 
     if (modbus_connect(Context) == -1) {
-        fprintf(stderr, "Połączenie nieudane: %s\n", modbus_strerror(errno));
+        std::cout << "Połączenie nieudane: " << modbus_strerror(errno) << std::endl;
         modbus_free(Context);
         return ERROR_MODBUS_OPENING;
     }
@@ -70,20 +72,24 @@ int readInputRegisters(void){
     int ReceivedRegisters = modbus_read_input_registers(Context, MODBUS_INPUTS_ADDRESS, REGISTERS_TO_BE_READ, RegistersTable);
     if (ReceivedRegisters == -1) {
         // Communication / protocol error (CRC, timeout, invalid response)
-        fprintf(stderr, "Błąd odczytu: %s\n", modbus_strerror(errno));
-        modbus_close(Context);
-        modbus_free(Context);
+        std::cout << "Błąd odczytu: " << modbus_strerror(errno) << std::endl;
         return ERROR_MODBUS_READING;
     }
 
     if (ReceivedRegisters != REGISTERS_TO_BE_READ) {
-        fprintf(stderr, "Nieoczekiwana liczba rejestrów: otrzymano %d, oczekiwano %d\n", ReceivedRegisters, REGISTERS_TO_BE_READ);
-        return ERROR_MODBUS_READING_FRAME;
+        std::cout << "Nieoczekiwana liczba rejestrów: otrzymano " << ReceivedRegisters << ", oczekiwano " << REGISTERS_TO_BE_READ << std::endl;
+        return ERROR_MODBUS_FRAME_READ;
     } else {
-        printf("Odczytano %d rejestrów starting at %d:\n", ReceivedRegisters, MODBUS_INPUTS_ADDRESS );
+        printf("Odczytano: " );
         for (int i = 0; i < ReceivedRegisters; ++i) {
-            printf(" reg[%d] = %u (0x%04X)\n", MODBUS_INPUTS_ADDRESS + i, RegistersTable[i], RegistersTable[i]);
+        	static char TemporaryCharacterArray[10];
+            snprintf( TemporaryCharacterArray, sizeof(TemporaryCharacterArray)-1, " %04X", RegistersTable[i]);
+            std::cout << TemporaryCharacterArray;
+            if ((i % 4) == 3){
+                std::cout << ' ';
+            }
         }
+        std::cout << std::endl;
     }
     return NO_FAILURE;
 }
