@@ -51,17 +51,20 @@ bool VerboseMode;
 /// This variable points to the main application window
 WindowEscProof* ApplicationWindow;
 
+
+//.................................................................................................
+// Local variables
+//.................................................................................................
+
 static Fl_Box * FailureMessagePtr;
 
 //.................................................................................................
 // Local function prototypes
 //.................................................................................................
 
-// This function is used to save the log file in case of SIGSEGV and so on
-void criticalHandler(int sig);
+static void criticalHandler(int sig);
 
-// this function hooks up the function criticalHandler()
-void setupCriticalSignalHandler();
+static void setupCriticalSignalHandler();
 
 static void onMainWindowCloseCallback(Fl_Widget *Widget, void *Data);
 
@@ -120,7 +123,7 @@ int WindowEscProof::handle(int event){
 }
 
 // This function is used to save the log file in case of SIGSEGV and so on
-void criticalHandler(int sig) {
+static void criticalHandler(int sig) {
     void* frames[100];
     int num_frames = backtrace(frames, 100);
 
@@ -160,7 +163,7 @@ void criticalHandler(int sig) {
 }
 
 // this function hooks up the function criticalHandler()
-void setupCriticalSignalHandler() {
+static void setupCriticalSignalHandler() {
 	signal(SIGSEGV, criticalHandler);
 	signal(SIGABRT, criticalHandler);
 	signal(SIGFPE, criticalHandler);
@@ -177,7 +180,7 @@ static void onMainWindowCloseCallback(Fl_Widget *Widget, void *Data) {
     	std::cout << "zamykanie aplikacji" << std::endl;
     }
     serialCommunicationExit();
-    ApplicationWindow->hide();
+    ApplicationWindow->hide(); // close the application
 }
 
 static int mainInitializations(int argc, char** argv){
@@ -219,5 +222,3 @@ static int mainInitializations(int argc, char** argv){
 #endif
 	return FailureCode;
 }
-
-

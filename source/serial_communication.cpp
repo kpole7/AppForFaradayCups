@@ -46,13 +46,14 @@ static void peripheralThreadHandler(void);
 // Function definitions
 //.................................................................................................
 
+/// This function initializes the module variables and launches a new thread to support peripherals
 void serialCommunicationStart(void){
 	atomic_store_explicit( &ClosePeripheralsFlag, false, std::memory_order_release );
 	atomic_store_explicit( &PeripheralsClosedFlag, false, std::memory_order_release );
 	peripheralThread = std::thread(peripheralThreadHandler);
 }
 
-/// This function is called by FLTK "onMainWindowClose" event handler
+/// This function is called by FLTK onMainWindowCloseCallback event handler
 void serialCommunicationExit(void){
 	atomic_store_explicit( &ClosePeripheralsFlag, true, std::memory_order_release );
 
