@@ -80,6 +80,8 @@ int readInputRegisters(void){
         std::cout << "Nieoczekiwana liczba rejestrów: otrzymano " << ReceivedRegisters << ", oczekiwano " << REGISTERS_TO_BE_READ << std::endl;
         return ERROR_MODBUS_FRAME_READ;
     } else {
+
+#if 1
         printf("Odczytano: " );
         for (int i = 0; i < ReceivedRegisters; ++i) {
         	static char TemporaryCharacterArray[10];
@@ -90,6 +92,11 @@ int readInputRegisters(void){
             }
         }
         std::cout << std::endl;
+#endif
+
+        for (int i = 0; i < ReceivedRegisters; ++i) {
+        	atomic_store_explicit( &ModbusInputRegisters[i], RegistersTable[i], std::memory_order_release );
+        }
     }
     return NO_FAILURE;
 }

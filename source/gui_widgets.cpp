@@ -90,10 +90,17 @@ static void recalculateValues( uint8_t Disc ){
 	for (int J=0; J < VALUES_PER_DISC; J++){
 		int TemporaryRegisterIndex = Disc*VALUES_PER_DISC + J;
 		assert( TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER );
-		double TemporaryValue = atomic_load_explicit( &ModbusInputRegisters[TemporaryRegisterIndex], std::memory_order_acquire );
-		char TemporaryBuffer[64];
-		std::snprintf(TemporaryBuffer, sizeof(TemporaryBuffer), "%.1fμA", TemporaryValue);
-		std::string TemporaryLabel = TemporaryBuffer;
+		uint16_t TemporaryValue = atomic_load_explicit( &ModbusInputRegisters[TemporaryRegisterIndex], std::memory_order_acquire );
+		std::string TemporaryLabel;
+		if (0x8000 > TemporaryValue){
+			double TemporaryFloatingPoint = (double)TemporaryValue;
+			char TemporaryBuffer[64];
+			std::snprintf(TemporaryBuffer, sizeof(TemporaryBuffer), "%.1fμA", TemporaryFloatingPoint);
+			TemporaryLabel = TemporaryBuffer;
+		}
+		else{
+			TemporaryLabel = "N/A";
+		}
 #if 0 // debugging
 		std::cout << TemporaryLabel << std::endl;
 #endif

@@ -65,6 +65,8 @@ void setupCriticalSignalHandler();
 
 static void onMainWindowCloseCallback(Fl_Widget *Widget, void *Data);
 
+static int mainInitializations(int argc, char** argv);
+
 //.................................................................................................
 // The main application
 //.................................................................................................
@@ -72,32 +74,7 @@ static void onMainWindowCloseCallback(Fl_Widget *Widget, void *Data);
 int main(int argc, char** argv) {
 	setupCriticalSignalHandler();
 
-	int FailureCode = NO_FAILURE;
-	for (int J = 1; J < argc; J++) {
-        std::string Argument = argv[J];
-        if (Argument == "-v" || Argument == "--verbose") {
-        	VerboseMode = true;
-        	std::cout << "Tryb \"verbose\"" << std::endl;
-#if 0 // debugging
-            std::string Argument0 = argv[0];
-        	std::cout << "Wywołanie programu: " << Argument0 << std::endl;
-#endif
-        }
-        else {
-            std::cout << "Nieznany argument: " << Argument << std::endl;
-            FailureCode = ERROR_COMMAND_SYNTAX;
-        }
-    }
-
-	if (NO_FAILURE == FailureCode){
-		FailureCode = determineApplicationPath( argv[0] );
-	}
-	if (NO_FAILURE == FailureCode){
-		FailureCode = configurationFileParsing();
-	}
-	if (NO_FAILURE == FailureCode){
-		FailureCode = initializeModbus();
-	}
+	int ErrorCode = mainInitializations( argc, argv);
 
     // Main window of the application
 	ApplicationWindow = new WindowEscProof(MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT, "Pomiar Wiązki w Linii Iniekcyjnej" );
@@ -105,23 +82,11 @@ int main(int argc, char** argv) {
 	ApplicationWindow->color( COLOR_BACKGROUND );
     ApplicationWindow->callback(onMainWindowCloseCallback);	// Window close event is handled
 
-	if (NO_FAILURE == FailureCode){
-
-#if 1 // debugging
-		for (int Cup = 0; Cup < CUPS_NUMBER; Cup++){
-			for (int J=0; J < VALUES_PER_DISC; J++){
-				int TemporaryRegisterIndex = Cup*VALUES_PER_DISC + J;
-				assert( TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER );
-				atomic_store_explicit( &ModbusInputRegisters[TemporaryRegisterIndex], Cup*12345.6 + 7.8*J, std::memory_order_release );
-			}
-		}
-#endif
-
+	if (NO_FAILURE == ErrorCode){
 		// the main graphic objects
 		initializeDisc( 0, 30, 0 );
 		initializeDisc( 1, 30, 300 );
 		initializeDisc( 2, 30, 600 );
-
 	}
 	else{
 		FailureMessagePtr = new Fl_Box( (MAIN_WINDOW_WIDTH*1)/16, (MAIN_WINDOW_HEIGHT*1)/16, (MAIN_WINDOW_WIDTH*14)/16, (MAIN_WINDOW_HEIGHT*14)/16,
@@ -133,8 +98,8 @@ int main(int argc, char** argv) {
 
     Fl::lock();  // Enable multi-threading support in FLTK; register a callback function for Fl::awake()
 
-	if (NO_FAILURE == FailureCode){
-		std::thread(peripheralThread).detach();
+	if (NO_FAILURE == ErrorCode){
+		serialCommunicationStart();
 	}
 
     return Fl::run();
@@ -211,8 +176,48 @@ static void onMainWindowCloseCallback(Fl_Widget *Widget, void *Data) {
     if (VerboseMode){
     	std::cout << "zamykanie aplikacji" << std::endl;
     }
-
-	serialCommunicationExit();
-	exit(0); // exit from the application
+    serialCommunicationExit();
+    ApplicationWindow->hide();
 }
+
+static int mainInitializations(int argc, char** argv){
+
+	int FailureCode = NO_FAILURE;
+	for (int J = 1; J < argc; J++) {
+        std::string Argument = argv[J];
+        if (Argument == "-v" || Argument == "--verbose") {
+        	VerboseMode = true;
+        	std::cout << "Tryb \"verbose\"" << std::endl;
+#if 0 // debugging
+            std::string Argument0 = argv[0];
+        	std::cout << "Wywołanie programu: " << Argument0 << std::endl;
+#endif
+        }
+        else {
+            std::cout << "Nieznany argument: " << Argument << std::endl;
+            FailureCode = ERROR_COMMAND_SYNTAX;
+        }
+    }
+
+	if (NO_FAILURE == FailureCode){
+		FailureCode = determineApplicationPath( argv[0] );
+	}
+	if (NO_FAILURE == FailureCode){
+		FailureCode = configurationFileParsing();
+	}
+	if (NO_FAILURE == FailureCode){
+		FailureCode = initializeModbus();
+	}
+#if 1 // debugging
+	for (int Cup = 0; Cup < CUPS_NUMBER; Cup++){
+		for (int J=0; J < VALUES_PER_DISC; J++){
+			int TemporaryRegisterIndex = Cup*VALUES_PER_DISC + J;
+			assert( TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER );
+			atomic_store_explicit( &ModbusInputRegisters[TemporaryRegisterIndex], 0xFFFF, std::memory_order_release );
+		}
+	}
+#endif
+	return FailureCode;
+}
+
 

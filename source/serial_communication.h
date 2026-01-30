@@ -5,11 +5,12 @@
 
 #include "config.h"
 
+
 //.................................................................................................
 // Function prototypes
 //.................................................................................................
 
-void peripheralThread(void);
+void serialCommunicationStart(void);
 
 void serialCommunicationExit(void);
 
