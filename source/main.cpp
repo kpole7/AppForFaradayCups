@@ -86,10 +86,7 @@ int main(int argc, char** argv) {
     ApplicationWindow->callback(onMainWindowCloseCallback);	// Window close event is handled
 
 	if (NO_FAILURE == ErrorCode){
-		// the main graphic objects
-		initializeDisc( 0, 30, 0 );
-		initializeDisc( 1, 30, 300 );
-		initializeDisc( 2, 30, 600 );
+		initializeGraphicWidgets();
 	}
 	else{
 		FailureMessagePtr = new Fl_Box( (MAIN_WINDOW_WIDTH*1)/16, (MAIN_WINDOW_HEIGHT*1)/16, (MAIN_WINDOW_WIDTH*14)/16, (MAIN_WINDOW_HEIGHT*14)/16,

@@ -4,8 +4,12 @@
 #include <string>
 #include <iostream>
 #include <assert.h>
+
+#include <FL/Fl_PNG_Image.H>
+
 #include "gui_widgets.h"
 #include "shared_data.h"
+#include "padlock_png.h"
 
 //.................................................................................................
 // Preprocessor directives
@@ -18,6 +22,17 @@
 #define DISC_VALUE2_Y		80
 #define DISC_TEXTS_SPACE	10
 
+#define ORDINARY_TEXT_FONT	FL_HELVETICA
+#define ORDINARY_TEXT_SIZE	14
+
+#define COLOR_STRONGER_BLUE	0xE5
+#define COLOR_MEDIUM_BLUE	0xEE
+#define COLOR_WEAK_BLUE		0xF7
+#define COLOR_DARK_RED		0x50
+#define COLOR_GRAY_RED		0x54
+#define NORMAL_BUTTON_COLOR	0x34	// gray
+#define ACTIVE_BUTTON_COLOR	0x46	// green
+
 //.................................................................................................
 // Definitions of types
 //.................................................................................................
@@ -29,6 +44,13 @@ public:
     void draw() override;
 };
 
+/// A disc consisting of a circle and two rings
+class PadlockWidget : public Fl_Widget {
+public:
+	PadlockWidget(int X, int Y, int W, int H, const char* L = nullptr) : Fl_Widget(X, Y, W, H, L) {}
+    void draw() override;
+};
+
 //.................................................................................................
 // Local variables
 //.................................................................................................
@@ -37,18 +59,52 @@ static TripleDiscWidget * DiscGraphics[CUPS_NUMBER];
 
 static Fl_Box * CupValueLabelPtr[CUPS_NUMBER][VALUES_PER_DISC];
 
+static PadlockWidget * PadlockGraphicPtr;
+
+static Fl_Button* AcceptButtonPtr;
+
+static bool PadlockClosed;
+
 //.................................................................................................
 // Local function prototypes
 //.................................................................................................
 
+static void initializeDisc( uint8_t DiscIndex, uint16_t X, uint16_t Y );
+
 static void recalculateValues( uint8_t Disc );
+
+static void acceptSetPointDialogCallback(Fl_Widget* Widget, void* Data);
 
 //.................................................................................................
 // Function definitions
 //.................................................................................................
 
+void initializeGraphicWidgets(void){
+
+
+
+
+	initializeDisc( 0, 30, 0 );
+	initializeDisc( 1, 30, 300 );
+	initializeDisc( 2, 30, 600 );
+
+
+
+	PadlockGraphicPtr = new PadlockWidget( 400, 60, 50, 50 );
+
+	AcceptButtonPtr = new Fl_Button( 400, 150, 90, 40, "Wsuń" );
+	AcceptButtonPtr->box(FL_BORDER_BOX);
+	AcceptButtonPtr->color(NORMAL_BUTTON_COLOR);
+	AcceptButtonPtr->labelfont( ORDINARY_TEXT_FONT );
+	AcceptButtonPtr->labelsize( ORDINARY_TEXT_SIZE );
+	AcceptButtonPtr->callback( acceptSetPointDialogCallback, nullptr );
+
+
+
+}
+
 /// This function creates a single disc with texts
-void initializeDisc( uint8_t DiscIndex, uint16_t X, uint16_t Y ){
+static void initializeDisc( uint8_t DiscIndex, uint16_t X, uint16_t Y ){
 	DiscGraphics[DiscIndex] = new TripleDiscWidget( X+20, Y+20, 256, 256 );
 
 	for (int J=0; J <VALUES_PER_DISC; J++){
@@ -85,6 +141,47 @@ void TripleDiscWidget::draw(){
 	fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
 }
 
+void PadlockWidget::draw(){
+	if (PadlockClosed){
+		fl_rectf( x(), y(), w(), h(), COLOR_BACKGROUND);
+	}
+	else{
+
+
+
+
+
+
+#if 0
+		fl_color( COLOR_GRAY_RED ); // edge
+		fl_pie( x(), y(), w(), h(), 0, 360);
+
+		fl_color( COLOR_DARK_RED ); // fill
+		fl_pie( x()+1, y()+1, w()-2, h()-2, 0, 360);
+
+		int ClampWidth = w()/15;
+		int ClampRadius = w()/5;
+		int CenterX = x()+w()/2;
+		int ClampY = y()+h()/3;
+
+		fl_color( COLOR_BACKGROUND ); // clamp
+		fl_pie( CenterX-ClampRadius, ClampY-ClampRadius, 2*ClampRadius, 2*ClampRadius, 0, 360);
+
+		fl_color( COLOR_DARK_RED ); // cutout from the clamp
+		fl_pie( CenterX-ClampRadius+ClampWidth, ClampY-ClampRadius+ClampWidth, 2*(ClampRadius-ClampWidth), 2*(ClampRadius-ClampWidth), 0, 360);
+
+		int BodyWidth = w()/2;
+		int BodyHight = h()/3;
+		int BodyY = y()+(h()*2)/3;
+		int BodyRounding = w()/20;
+
+		fl_color( COLOR_BACKGROUND ); // padlock body
+		fl_rectf( CenterX-BodyWidth/2,              BodyY-BodyHight/2+BodyRounding, BodyWidth,                BodyHight-2*BodyRounding );
+		fl_rectf( CenterX-BodyWidth/2+BodyRounding, BodyY-BodyHight/2,              BodyWidth-2*BodyRounding, BodyHight );
+#endif
+	}
+}
+
 /// This function modifies texts (displayed as graphic widgets) related to a single disk based on ModbusInputRegisters
 static void recalculateValues( uint8_t Disc ){
 	for (int J=0; J < VALUES_PER_DISC; J++){
@@ -115,5 +212,22 @@ void refreshDisc(void* Data){
 	uint8_t Disc = *((uint8_t*)Data);
 	DiscGraphics[Disc]->redraw();
 	recalculateValues(Disc);
+}
+
+static void acceptSetPointDialogCallback(Fl_Widget* Widget, void* Data){
+	(void)Widget; // intentionally unused
+	(void)Data; // intentionally unused
+
+	if (PadlockClosed){
+		PadlockClosed = false;
+		AcceptButtonPtr->label( "Wsuń" );
+		AcceptButtonPtr->color( NORMAL_BUTTON_COLOR );
+	}
+	else{
+		PadlockClosed = true;
+		AcceptButtonPtr->label( "Wysuń" );
+		AcceptButtonPtr->color( ACTIVE_BUTTON_COLOR );
+	}
+	PadlockGraphicPtr->redraw();
 }
 

@@ -20,8 +20,8 @@
 
 #define PERIPHERAL_THREAD_LOOP_DURATION		5	// milliseconds
 
-#define SHUT_DOWN_TIMEOUT					100 // milliseconds
-#define SHUT_DOWN_LOOP_DELAY				5   // milliseconds
+#define SHUT_DOWN_TIMEOUT					400 // milliseconds
+#define SHUT_DOWN_LOOP_DELAY				20   // milliseconds
 #define SHUT_DOWN_COUNT_DOWN				(SHUT_DOWN_TIMEOUT/SHUT_DOWN_LOOP_DELAY)
 
 //...............................................................................................
