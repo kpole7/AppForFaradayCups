@@ -1,0 +1,126 @@
+Notatka 4 lutego 2026
+
+1. Komunikacja aplikacji wxwidgets (master) ze sterownikiem Tiva (slave 1) połączonym z kubkiem 1 (dolnym).
+Zarejestrowano następujące komendy mastera:
+	01 04 0b b9 00 05 e3 c8			zapytanie o 5 rejestrów począwszy od adresu 3001
+	01 01 00 01 00 03 2d cb			zapytanie o 3 cewki począwszy od adresu 1
+	01 05 00 01 ff 00 dd fa			zapisanie stanu '1' do cewki o adresie 1 -> wsunięcie kubka 1
+	01 05 00 01 00 00 9c 0a			zapisanie stanu '0' do cewki o adresie 1 -> wysunięcie kubka 1
+
+2. Komunikacja między terminalem qmodbus ze slave'm 1 (kubek dolny). 
+Zarejestrowano następującą transmisję:
+	Req >> : 01 04 0b b9 00 05 e3 c8 
+	<< Resp: 01 04 0a 6e 40 00 00 00 01 00 01 00 00 ee f5 
+	Req >> : 01 01 00 01 00 03 2d cb 
+	<< Resp: 01 01 01 00 51 88 
+	Req >> : 01 05 00 01 00 00 9c 0a 
+	<< Resp: 01 05 00 01 00 00 9c 0a 
+	Req >> : 01 05 00 01 ff 00 dd fa 
+	<< Resp: 01 05 00 01 ff 00 dd fa 
+	Req >> : 01 04 0b b9 00 05 e3 c8 
+	<< Resp: 01 04 0a 6e 42 00 01 00 02 00 01 00 00 a3 55 
+	Req >> : 01 04 0b b9 00 05 e3 c8 
+	<< Resp: 01 04 0a 6e 4b 00 00 00 02 00 01 00 00 d9 c5 
+	Req >> : 01 04 0b b9 00 05 e3 c8 
+	<< Resp: 01 04 0a 6e 45 00 00 00 01 00 01 00 00 d1 a5 
+	Req >> : 01 04 0b b9 00 05 e3 c8 
+	<< Resp: 01 04 0a 6e 33 00 00 00 01 00 01 00 00 9f c7 
+	Req >> : 01 04 0b b9 00 05 e3 c8 
+	<< Resp: 01 04 0a 6e 4a 00 01 00 01 00 01 00 00 80 95 
+	Req >> : 01 01 00 01 00 03 2d cb 
+	<< Resp: 01 01 01 05 91 8b 
+	Req >> : 01 01 00 01 00 03 2d cb 
+	<< Resp: 01 01 01 05 91 8b 
+	Req >> : 01 05 00 01 00 00 9c 0a 
+	<< Resp: 01 05 00 01 00 00 9c 0a 
+	Req >> : 01 01 00 01 00 03 2d cb 
+	<< Resp: 01 01 01 00 51 88 
+	Req >> : 01 04 0b b9 00 05 e3 c8 
+	<< Resp: 01 04 0a 6e 3b 00 01 00 01 00 01 00 00 e8 c7 
+	Req >> : 01 04 0b b9 00 05 e3 c8 
+	<< Resp: 01 04 0a 6e 42 0c cd 00 01 00 01 00 00 eb 0c 
+
+3. Komunikacja między master'em a slave'm 2 (kubek górny).
+Zarejestrowano następujące komendy mastera:
+	02 04 0b b9 00 05 e3 fb			zapytanie o 5 rejestrów począwszy od adresu 3001
+	02 01 00 01 00 03 2d f8			zapytanie o 3 cewki począwszy od adresu 1
+	02 05 00 01 ff 00 dd c9			zapisanie stanu '1' do cewki o adresie 1 -> wsunięcie kubka 2
+	02 05 00 01 00 00 9c 39			zapisanie stanu '0' do cewki o adresie 1 -> wysunięcie kubka 2
+	
+4. Komunikacja między terminalem qmodbus ze slave'm 2 (kubek górny) w sytuacji, kiedy jest aktywna blokada wysunięcia kubka górnego.
+Zarejestrowano następującą transmisję:
+	Req >> : 02 04 0b b9 00 05 e3 fb 
+	<< Resp: 02 04 0a 07 96 07 94 07 94 07 94 00 00 06 1f 
+	Req >> : 02 04 0b b9 00 05 e3 fb 
+	<< Resp: 02 04 0a 07 94 07 93 07 91 07 93 00 00 14 7e 
+	Req >> : 02 04 0b b9 00 05 e3 fb 
+	<< Resp: 02 04 0a 07 94 07 94 07 94 07 94 00 00 1f 7f 
+	Req >> : 02 04 0b b9 00 05 e3 fb 
+	<< Resp: 02 04 0a 07 96 07 96 07 97 07 95 00 00 30 1f 
+	Req >> : 02 04 0b b9 00 05 e3 fb 
+	<< Resp: 02 04 0a 07 94 07 97 07 95 07 96 00 00 b0 7f 
+	Req >> : 02 04 0b b9 00 05 e3 fb 
+	<< Resp: 02 04 0a 07 95 07 95 07 93 07 99 00 00 26 2c 
+	Req >> : 02 01 00 01 00 03 2d f8 
+	<< Resp: 02 01 01 07 10 0e 
+	Req >> : 02 01 00 01 00 03 2d f8 
+	<< Resp: 02 01 01 07 10 0e 
+	Req >> : 02 01 00 01 00 03 2d f8 
+	<< Resp: 02 01 01 07 10 0e 
+	Req >> : 02 05 00 01 00 00 9c 39 							nieudana próba wysunięcia kubka
+	<< Resp: 02 05 00 01 00 00 9c 39 
+	Req >> : 02 01 00 01 00 03 2d f8 
+	<< Resp: 02 01 01 07 10 0e 
+	Req >> : 02 01 00 01 00 03 2d f8 
+	<< Resp: 02 01 01 07 10 0e 
+	Req >> : 02 04 0b b9 00 05 e3 fb 
+	<< Resp: 02 04 0a 07 94 07 93 07 94 07 94 00 00 69 bf 
+	Req >> : 02 04 0b b9 00 05 e3 fb 
+	<< Resp: 02 04 0a 07 93 07 92 07 94 07 95 00 00 0e 8f 
+	Req >> : 02 04 0b b9 00 05 e3 fb 
+	<< Resp: 02 04 0a 07 93 07 94 07 93 07 94 00 00 8c 8f 
+
+5. Komunikacja między terminalem qmodbus ze slave'm 2 (kubek górny) w sytuacji, kiedy nie ma blokady wysunięcia kubka górnego.
+Zarejestrowano następującą transmisję:
+	Req >> : 02 01 00 01 00 03 2d f8 
+	<< Resp: 02 01 01 05 91 cf 									kubek wsunięty
+	Req >> : 02 04 0b b9 00 05 e3 fb 
+	<< Resp: 02 04 0a 07 95 07 95 07 97 07 95 00 00 17 ef 
+	Req >> : 02 04 0b b9 00 05 e3 fb 
+	<< Resp: 02 04 0a 07 94 07 95 07 95 07 96 00 00 93 bf 
+	Req >> : 02 04 0b b9 00 05 e3 fb 
+	<< Resp: 02 04 0a 07 96 07 95 07 96 07 96 00 00 ce df 
+	Req >> : 02 04 0b b9 00 05 e3 fb 
+	<< Resp: 02 04 0a 07 99 07 96 07 97 07 99 00 00 b1 ec 
+	Req >> : 02 04 0b b9 00 05 e3 fb 
+	<< Resp: 02 04 0a 07 96 07 97 07 95 07 96 00 00 a9 1f 
+	Req >> : 02 01 00 01 00 03 2d f8 
+	<< Resp: 02 01 01 05 91 cf 
+	Req >> : 02 05 00 01 00 00 9c 39 							wysunięcie
+	<< Resp: 02 05 00 01 00 00 9c 39 
+	Req >> : 02 03 00 01 00 03 54 38 
+	<< Resp: 02 83 02 30 f1 
+	Req >> : 02 01 00 01 00 03 2d f8 
+	<< Resp: 02 01 01 00 51 cc 
+	Req >> : 02 04 0b b9 00 05 e3 fb 
+	<< Resp: 02 04 0a 07 9d 07 9e 07 9b 07 9c 00 00 0a ec 
+	Req >> : 02 04 0b b9 00 05 e3 fb 
+	<< Resp: 02 04 0a 07 9d 07 9d 07 9e 07 9e 00 00 54 2c 
+	Req >> : 02 04 0b b9 00 05 e3 fb 
+	<< Resp: 02 04 0a 07 9c 07 9c 07 9f 07 9d 00 00 84 bc 
+	Req >> : 02 04 0b b9 00 05 e3 fb 
+	<< Resp: 02 04 0a 07 9c 07 9e 07 9e 07 9d 00 00 9a bc 
+	Req >> : 02 05 00 01 ff 00 dd c9 							wsunięcie
+	<< Resp: 02 05 00 01 ff 00 dd c9 
+	Req >> : 02 01 00 01 00 03 2d f8 
+	<< Resp: 02 01 01 05 91 cf 
+	Req >> : 02 01 00 01 00 03 2d f8 
+	<< Resp: 02 01 01 05 91 cf 
+	Req >> : 02 04 0b b9 00 05 e3 fb 
+	<< Resp: 02 04 0a 07 95 07 96 07 93 07 95 00 00 d5 2f 
+	Req >> : 02 04 0b b9 00 05 e3 fb 
+	<< Resp: 02 04 0a 07 95 07 95 07 94 07 94 00 00 02 2f 
+	Req >> : 02 04 0b b9 00 05 e3 fb 
+	<< Resp: 02 04 0a 07 93 07 96 07 95 07 95 00 00 76 8f 
+
+
