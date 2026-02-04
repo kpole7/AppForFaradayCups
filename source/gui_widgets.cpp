@@ -4,7 +4,10 @@
 #include <string>
 #include <iostream>
 #include <assert.h>
+#include <memory>
 
+#include <FL/Fl.H>
+#include <FL/Fl_Widget.H>
 #include <FL/Fl_PNG_Image.H>
 
 #include "gui_widgets.h"
@@ -44,11 +47,43 @@ public:
     void draw() override;
 };
 
-/// A disc consisting of a circle and two rings
-class PadlockWidget : public Fl_Widget {
+class ImageWidget : public Fl_Widget {
 public:
-	PadlockWidget(int X, int Y, int W, int H, const char* L = nullptr) : Fl_Widget(X, Y, W, H, L) {}
-    void draw() override;
+    ImageWidget(int X, int Y, int W, int H,
+                const unsigned char* data, int data_len,
+                const char* label = nullptr)
+        : Fl_Widget(X, Y, W, H, label),
+          img_(nullptr)
+    {
+        if (data && data_len > 0) {
+            img_ = std::make_unique<Fl_PNG_Image>("memory", data, data_len);
+        }
+    }
+
+    ~ImageWidget() override = default;
+
+protected:
+    // Metoda rysująca widget
+    void draw() override {
+        if (!visible()) return;
+
+        fl_push_clip(x(), y(), w(), h());
+        fl_color(FL_WHITE);
+        fl_rectf(x(), y(), w(), h());
+
+        if (img_) {
+            // Rysujemy obraz skalowany do rozmiaru widgetu.
+            img_->draw(x(), y(), w(), h());
+        } else {
+            // Brak obrazu — placeholder
+            fl_color(FL_GRAY);
+            fl_rectf(x()+2, y()+2, w()-4, h()-4);
+        }
+        fl_pop_clip();
+    }
+
+private:
+    std::unique_ptr<Fl_PNG_Image> img_;
 };
 
 //.................................................................................................
@@ -59,7 +94,7 @@ static TripleDiscWidget * DiscGraphics[CUPS_NUMBER];
 
 static Fl_Box * CupValueLabelPtr[CUPS_NUMBER][VALUES_PER_DISC];
 
-static PadlockWidget * PadlockGraphicPtr;
+static ImageWidget * PadlockImagePtr;
 
 static Fl_Button* AcceptButtonPtr;
 
@@ -88,9 +123,7 @@ void initializeGraphicWidgets(void){
 	initializeDisc( 1, 30, 300 );
 	initializeDisc( 2, 30, 600 );
 
-
-
-	PadlockGraphicPtr = new PadlockWidget( 400, 60, 50, 50 );
+	PadlockImagePtr = new ImageWidget( 400, 300, 54, 54, padlock_png, padlock_png_len, nullptr );
 
 	AcceptButtonPtr = new Fl_Button( 400, 150, 90, 40, "Wsuń" );
 	AcceptButtonPtr->box(FL_BORDER_BOX);
@@ -141,47 +174,6 @@ void TripleDiscWidget::draw(){
 	fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
 }
 
-void PadlockWidget::draw(){
-	if (PadlockClosed){
-		fl_rectf( x(), y(), w(), h(), COLOR_BACKGROUND);
-	}
-	else{
-
-
-
-
-
-
-#if 0
-		fl_color( COLOR_GRAY_RED ); // edge
-		fl_pie( x(), y(), w(), h(), 0, 360);
-
-		fl_color( COLOR_DARK_RED ); // fill
-		fl_pie( x()+1, y()+1, w()-2, h()-2, 0, 360);
-
-		int ClampWidth = w()/15;
-		int ClampRadius = w()/5;
-		int CenterX = x()+w()/2;
-		int ClampY = y()+h()/3;
-
-		fl_color( COLOR_BACKGROUND ); // clamp
-		fl_pie( CenterX-ClampRadius, ClampY-ClampRadius, 2*ClampRadius, 2*ClampRadius, 0, 360);
-
-		fl_color( COLOR_DARK_RED ); // cutout from the clamp
-		fl_pie( CenterX-ClampRadius+ClampWidth, ClampY-ClampRadius+ClampWidth, 2*(ClampRadius-ClampWidth), 2*(ClampRadius-ClampWidth), 0, 360);
-
-		int BodyWidth = w()/2;
-		int BodyHight = h()/3;
-		int BodyY = y()+(h()*2)/3;
-		int BodyRounding = w()/20;
-
-		fl_color( COLOR_BACKGROUND ); // padlock body
-		fl_rectf( CenterX-BodyWidth/2,              BodyY-BodyHight/2+BodyRounding, BodyWidth,                BodyHight-2*BodyRounding );
-		fl_rectf( CenterX-BodyWidth/2+BodyRounding, BodyY-BodyHight/2,              BodyWidth-2*BodyRounding, BodyHight );
-#endif
-	}
-}
-
 /// This function modifies texts (displayed as graphic widgets) related to a single disk based on ModbusInputRegisters
 static void recalculateValues( uint8_t Disc ){
 	for (int J=0; J < VALUES_PER_DISC; J++){
@@ -222,12 +214,13 @@ static void acceptSetPointDialogCallback(Fl_Widget* Widget, void* Data){
 		PadlockClosed = false;
 		AcceptButtonPtr->label( "Wsuń" );
 		AcceptButtonPtr->color( NORMAL_BUTTON_COLOR );
+		PadlockImagePtr->show();
 	}
 	else{
 		PadlockClosed = true;
 		AcceptButtonPtr->label( "Wysuń" );
 		AcceptButtonPtr->color( ACTIVE_BUTTON_COLOR );
+		PadlockImagePtr->hide();
 	}
-	PadlockGraphicPtr->redraw();
 }
 
