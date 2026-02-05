@@ -13,6 +13,7 @@
 #include "gui_widgets.h"
 #include "shared_data.h"
 #include "padlock_png.h"
+#include "unconnected_png.h"
 
 //.................................................................................................
 // Preprocessor directives
@@ -96,6 +97,8 @@ static Fl_Box * CupValueLabelPtr[CUPS_NUMBER][VALUES_PER_DISC];
 
 static ImageWidget * PadlockImagePtr;
 
+static ImageWidget * UnconnectedImagePtr;
+
 static Fl_Button* AcceptButtonPtr;
 
 static bool PadlockClosed;
@@ -123,7 +126,10 @@ void initializeGraphicWidgets(void){
 	initializeDisc( 1, 30, 300 );
 	initializeDisc( 2, 30, 600 );
 
-	PadlockImagePtr = new ImageWidget( 400, 300, 54, 54, padlock_png, padlock_png_len, nullptr );
+	PadlockImagePtr     = new ImageWidget( 400, 300, 54, 54, padlock_png, padlock_png_len, nullptr );
+	UnconnectedImagePtr = new ImageWidget( 400, 300, 51, 51, unconnected_png, unconnected_png_len, nullptr );
+	PadlockImagePtr->hide();
+	UnconnectedImagePtr->hide();
 
 	AcceptButtonPtr = new Fl_Button( 400, 150, 90, 40, "Wsuń" );
 	AcceptButtonPtr->box(FL_BORDER_BOX);
@@ -210,17 +216,28 @@ static void acceptSetPointDialogCallback(Fl_Widget* Widget, void* Data){
 	(void)Widget; // intentionally unused
 	(void)Data; // intentionally unused
 
+	static bool DebugPictures = false;
+
 	if (PadlockClosed){
 		PadlockClosed = false;
 		AcceptButtonPtr->label( "Wsuń" );
 		AcceptButtonPtr->color( NORMAL_BUTTON_COLOR );
-		PadlockImagePtr->show();
+
+		if (DebugPictures){
+			UnconnectedImagePtr->show();
+			DebugPictures = false;
+		}
+		else{
+			PadlockImagePtr->show();
+			DebugPictures = true;
+		}
 	}
 	else{
 		PadlockClosed = true;
 		AcceptButtonPtr->label( "Wysuń" );
 		AcceptButtonPtr->color( ACTIVE_BUTTON_COLOR );
 		PadlockImagePtr->hide();
+		UnconnectedImagePtr->hide();
 	}
 }
 
