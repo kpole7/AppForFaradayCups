@@ -21,10 +21,10 @@
 
 #define DISC2_RADIUS		85	// assume disc1 radius = 128
 #define DISC3_RADIUS		40
-#define DISC_RING_GAP		1
 #define DISC_VALUE1_Y		30
 #define DISC_VALUE2_Y		80
 #define DISC_TEXTS_SPACE	10
+#define DISC_SLIT_WIDTH		8
 
 #define ORDINARY_TEXT_FONT	FL_HELVETICA
 #define ORDINARY_TEXT_SIZE	14
@@ -42,9 +42,23 @@
 //.................................................................................................
 
 /// A disc consisting of a circle and two rings
-class TripleDiscWidget : public Fl_Widget {
+class TripleDiscWidgetWithNoSlit : public Fl_Widget {
 public:
-	TripleDiscWidget(int X, int Y, int W, int H, const char* L = nullptr) : Fl_Widget(X, Y, W, H, L) {}
+	TripleDiscWidgetWithNoSlit(int X, int Y, int W, int H, const char* L = nullptr) : Fl_Widget(X, Y, W, H, L) {}
+    void draw() override;
+};
+
+/// A disc consisting of a circle and two rings; the outer ring has a vertical slit
+class TripleDiscWidgetWithVerticalSlit : public Fl_Widget {
+public:
+	TripleDiscWidgetWithVerticalSlit(int X, int Y, int W, int H, const char* L = nullptr) : Fl_Widget(X, Y, W, H, L) {}
+    void draw() override;
+};
+
+/// A disc consisting of a circle and two rings; the outer ring has a horizontal slit
+class TripleDiscWidgetWithHorizontalSlit : public Fl_Widget {
+public:
+	TripleDiscWidgetWithHorizontalSlit(int X, int Y, int W, int H, const char* L = nullptr) : Fl_Widget(X, Y, W, H, L) {}
     void draw() override;
 };
 
@@ -64,7 +78,6 @@ public:
     ~ImageWidget() override = default;
 
 protected:
-    // Metoda rysująca widget
     void draw() override {
         if (!visible()) return;
 
@@ -73,10 +86,10 @@ protected:
         fl_rectf(x(), y(), w(), h());
 
         if (img_) {
-            // Rysujemy obraz skalowany do rozmiaru widgetu.
+            // draw an image scaled to the size of the widget
             img_->draw(x(), y(), w(), h());
         } else {
-            // Brak obrazu — placeholder
+            // no image — placeholder
             fl_color(FL_GRAY);
             fl_rectf(x()+2, y()+2, w()-4, h()-4);
         }
@@ -91,7 +104,11 @@ private:
 // Local variables
 //.................................................................................................
 
-static TripleDiscWidget * DiscGraphics[CUPS_NUMBER];
+#if 1
+static TripleDiscWidgetWithNoSlit * DiscGraphics[CUPS_NUMBER];
+#else
+static TripleDiscWidgetWithVerticalSlit * DiscGraphics[CUPS_NUMBER];
+#endif
 
 static Fl_Box * CupValueLabelPtr[CUPS_NUMBER][VALUES_PER_DISC];
 
@@ -107,7 +124,7 @@ static bool PadlockClosed;
 // Local function prototypes
 //.................................................................................................
 
-static void initializeDisc( uint8_t DiscIndex, uint16_t X, uint16_t Y );
+static void initializeDiscWithNoSlit( uint8_t DiscIndex, uint16_t X, uint16_t Y );
 
 static void recalculateValues( uint8_t Disc );
 
@@ -122,9 +139,9 @@ void initializeGraphicWidgets(void){
 
 
 
-	initializeDisc( 0, 30, 0 );
-	initializeDisc( 1, 30, 300 );
-	initializeDisc( 2, 30, 600 );
+	initializeDiscWithNoSlit( 0, 30, 0 );
+	initializeDiscWithNoSlit( 1, 30, 300 );
+	initializeDiscWithNoSlit( 2, 30, 600 );
 
 	PadlockImagePtr     = new ImageWidget( 400, 300, 54, 54, padlock_png, padlock_png_len, nullptr );
 	UnconnectedImagePtr = new ImageWidget( 400, 300, 51, 51, unconnected_png, unconnected_png_len, nullptr );
@@ -143,8 +160,20 @@ void initializeGraphicWidgets(void){
 }
 
 /// This function creates a single disc with texts
-static void initializeDisc( uint8_t DiscIndex, uint16_t X, uint16_t Y ){
-	DiscGraphics[DiscIndex] = new TripleDiscWidget( X+20, Y+20, 256, 256 );
+static void initializeDiscWithNoSlit( uint8_t DiscIndex, uint16_t X, uint16_t Y ){
+#if 1
+	DiscGraphics[DiscIndex] = new TripleDiscWidgetWithNoSlit( X+20, Y+20, 256, 256 );
+
+	for (int J=0; J <VALUES_PER_DISC; J++){
+		CupValueLabelPtr[DiscIndex][J]  = new Fl_Box(X+20, Y+DISC_VALUE1_Y+J*(DISC_VALUE2_Y-DISC_VALUE1_Y), 256, 30, "?" );
+
+		CupValueLabelPtr[DiscIndex][J]->labelfont( FL_HELVETICA_BOLD );
+		CupValueLabelPtr[DiscIndex][J]->labelsize( 26 );
+	}
+
+	recalculateValues(DiscIndex);
+#else
+	DiscGraphics[DiscIndex] = new TripleDiscWidgetWithVerticalSlit( X+20, Y+20, 256, 256 );
 
 	for (int J=0; J <VALUES_PER_DISC; J++){
 		if (0 == J){
@@ -163,15 +192,39 @@ static void initializeDisc( uint8_t DiscIndex, uint16_t X, uint16_t Y ){
 	}
 
 	recalculateValues(DiscIndex);
+#endif
 }
 
 /// This function draws a single disc including rings and a circle in the middle (no texts)
-void TripleDiscWidget::draw(){
+void TripleDiscWidgetWithNoSlit::draw(){
 	fl_color( COLOR_STRONGER_BLUE );
-	fl_pie(x(), y(), w(), h(), 90+DISC_RING_GAP, 270-DISC_RING_GAP);	// outer ring, sector 1
+	fl_pie(x(), y(), w(), h(), 0, 360);	// outer ring
 
-	fl_pie(x(), y(), w(), h(), 270+DISC_RING_GAP, 360);					// outer ring, sector 2
-	fl_pie(x(), y(), w(), h(), 0, 90-DISC_RING_GAP);
+	fl_color( COLOR_MEDIUM_BLUE );	// medium ring
+	fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
+
+	fl_color( COLOR_WEAK_BLUE ); // inner circle
+	fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
+}
+
+void TripleDiscWidgetWithVerticalSlit::draw(){
+	fl_color( COLOR_STRONGER_BLUE );
+	fl_pie(x(), y(), w(), h(), 0, 360);	// outer ring
+
+    fl_color(COLOR_BACKGROUND);
+    fl_rectf(x()+(w()-DISC_SLIT_WIDTH)/2, y(), DISC_SLIT_WIDTH, h());
+
+
+	fl_color( COLOR_MEDIUM_BLUE );	// medium ring
+	fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
+
+	fl_color( COLOR_WEAK_BLUE ); // inner circle
+	fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
+}
+
+void TripleDiscWidgetWithHorizontalSlit::draw(){
+	fl_color( COLOR_STRONGER_BLUE );
+	fl_pie(x(), y(), w(), h(), 0, 360);	// outer ring
 
 	fl_color( COLOR_MEDIUM_BLUE );	// medium ring
 	fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
@@ -187,9 +240,13 @@ static void recalculateValues( uint8_t Disc ){
 		assert( TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER );
 		uint16_t TemporaryValue = atomic_load_explicit( &ModbusInputRegisters[TemporaryRegisterIndex], std::memory_order_acquire );
 		std::string TemporaryLabel;
-		if (0x8000 > TemporaryValue){
+		char TemporaryBuffer[64];
+		if (J >= 3){
+			std::snprintf(TemporaryBuffer, sizeof(TemporaryBuffer), "0x%04X", (unsigned)TemporaryValue);
+			TemporaryLabel = TemporaryBuffer;
+		}
+		else if (0x8000 > TemporaryValue){
 			double TemporaryFloatingPoint = (double)TemporaryValue;
-			char TemporaryBuffer[64];
 			std::snprintf(TemporaryBuffer, sizeof(TemporaryBuffer), "%.1fμA", TemporaryFloatingPoint);
 			TemporaryLabel = TemporaryBuffer;
 		}
@@ -225,6 +282,12 @@ static void acceptSetPointDialogCallback(Fl_Widget* Widget, void* Data){
 
 		if (DebugPictures){
 			UnconnectedImagePtr->show();
+
+			DiscGraphics[1]->hide();
+			for (int J=0; J <VALUES_PER_DISC; J++){
+				CupValueLabelPtr[1][J]->hide();
+			}
+
 			DebugPictures = false;
 		}
 		else{
@@ -238,6 +301,10 @@ static void acceptSetPointDialogCallback(Fl_Widget* Widget, void* Data){
 		AcceptButtonPtr->color( ACTIVE_BUTTON_COLOR );
 		PadlockImagePtr->hide();
 		UnconnectedImagePtr->hide();
+		DiscGraphics[1]->show();
+		for (int J=0; J <VALUES_PER_DISC; J++){
+			CupValueLabelPtr[1][J]->show();
+		}
 	}
 }
 
