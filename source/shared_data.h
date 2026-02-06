@@ -12,7 +12,7 @@
 //.................................................................................................
 
 #define MODBUS_INPUTS_NUMBER	(5*3)
-#define MODBUS_INPUTS_ADDRESS	3000
+#define MODBUS_INPUTS_ADDRESS	3001
 
 #define MODBUS_COILS_NUMBER		3
 #define MODBUS_COILS_ADDRESS	1
