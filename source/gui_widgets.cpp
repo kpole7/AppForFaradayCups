@@ -5,14 +5,17 @@
 #include <iostream>
 #include <assert.h>
 #include <memory>
+#include <string>
 
 #include <FL/Fl.H>
 #include <FL/Fl_Widget.H>
 #include <FL/Fl_PNG_Image.H>
+#include <FL/Fl_Box.H>
 
 #include "png_graphics.h"
 #include "gui_widgets.h"
 #include "shared_data.h"
+#include "settings_file.h"
 
 //.................................................................................................
 // Preprocessor directives
@@ -113,6 +116,8 @@ static ImageWidget * UnconnectedImagePtr;
 
 static Fl_Button* AcceptButtonPtr;
 
+static Fl_Box* StatusTextBoxPtr[CUPS_NUMBER];
+
 static bool PadlockClosed;
 
 //.................................................................................................
@@ -143,8 +148,11 @@ void initializeGraphicWidgets(void){
 	AcceptButtonPtr->labelsize( ORDINARY_TEXT_SIZE );
 	AcceptButtonPtr->callback( acceptSetPointDialogCallback, nullptr );
 
-
-
+	StatusTextBoxPtr[0] = new Fl_Box(290, 200, 210, 60, "tu powinny być różne dane");
+	StatusTextBoxPtr[0]->labelfont( FL_COURIER );
+	StatusTextBoxPtr[0]->labelsize( 11 );
+	StatusTextBoxPtr[0]->labelcolor( FL_BLACK );
+	StatusTextBoxPtr[0]->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP); // FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP
 }
 
 /// This function creates a single disc with texts
@@ -261,6 +269,24 @@ void refreshDisc(void* Data){
 	uint8_t Disc = *((uint8_t*)Data);
 	DiscGraphics[Disc]->redraw();
 	recalculateValues(Disc);
+
+	if (0 == Disc){
+		static char TemporaryText[400];
+		snprintf( TemporaryText, sizeof(TemporaryText)-1,
+				"Port %s\n"
+				"In: %04X %04X %04X %04X %04X\n"
+				"Coils %c %c %c",
+				SerialPortRequestedNamePtr->c_str(),
+				(uint16_t)atomic_load_explicit( &ModbusInputRegisters[0], std::memory_order_acquire ),
+				(uint16_t)atomic_load_explicit( &ModbusInputRegisters[1], std::memory_order_acquire ),
+				(uint16_t)atomic_load_explicit( &ModbusInputRegisters[2], std::memory_order_acquire ),
+				(uint16_t)atomic_load_explicit( &ModbusInputRegisters[3], std::memory_order_acquire ),
+				(uint16_t)atomic_load_explicit( &ModbusInputRegisters[4], std::memory_order_acquire ),
+				atomic_load_explicit( &ModbusCoilsReadout[0], std::memory_order_acquire )? '1' : '0',
+				atomic_load_explicit( &ModbusCoilsReadout[1], std::memory_order_acquire )? '1' : '0',
+				atomic_load_explicit( &ModbusCoilsReadout[2], std::memory_order_acquire )? '1' : '0'  );
+		StatusTextBoxPtr[0]->label( TemporaryText );
+	}
 }
 
 static void acceptSetPointDialogCallback(Fl_Widget* Widget, void* Data){
