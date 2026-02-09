@@ -10,10 +10,9 @@
 #include <FL/Fl_Widget.H>
 #include <FL/Fl_PNG_Image.H>
 
+#include "png_graphics.h"
 #include "gui_widgets.h"
 #include "shared_data.h"
-#include "padlock_png.h"
-#include "unconnected_png.h"
 
 //.................................................................................................
 // Preprocessor directives
@@ -104,11 +103,7 @@ private:
 // Local variables
 //.................................................................................................
 
-#if 1
 static TripleDiscWidgetWithNoSlit * DiscGraphics[CUPS_NUMBER];
-#else
-static TripleDiscWidgetWithVerticalSlit * DiscGraphics[CUPS_NUMBER];
-#endif
 
 static Fl_Box * CupValueLabelPtr[CUPS_NUMBER][VALUES_PER_DISC];
 
@@ -135,14 +130,7 @@ static void acceptSetPointDialogCallback(Fl_Widget* Widget, void* Data);
 //.................................................................................................
 
 void initializeGraphicWidgets(void){
-
-
-
-
 	initializeDiscWithNoSlit( 0, 30, 0 );
-	initializeDiscWithNoSlit( 1, 30, 300 );
-	initializeDiscWithNoSlit( 2, 30, 600 );
-
 	PadlockImagePtr     = new ImageWidget( 400, 300, 54, 54, padlock_png, padlock_png_len, nullptr );
 	UnconnectedImagePtr = new ImageWidget( 400, 300, 51, 51, unconnected_png, unconnected_png_len, nullptr );
 	PadlockImagePtr->hide();
@@ -161,7 +149,6 @@ void initializeGraphicWidgets(void){
 
 /// This function creates a single disc with texts
 static void initializeDiscWithNoSlit( uint8_t DiscIndex, uint16_t X, uint16_t Y ){
-#if 1
 	DiscGraphics[DiscIndex] = new TripleDiscWidgetWithNoSlit( X+20, Y+20, 256, 256 );
 
 	for (int J=0; J <VALUES_PER_DISC; J++){
@@ -169,10 +156,17 @@ static void initializeDiscWithNoSlit( uint8_t DiscIndex, uint16_t X, uint16_t Y 
 
 		CupValueLabelPtr[DiscIndex][J]->labelfont( FL_HELVETICA_BOLD );
 		CupValueLabelPtr[DiscIndex][J]->labelsize( 26 );
+
+
+		if (J > 2){
+			CupValueLabelPtr[DiscIndex][J]->hide();
+		}
+
+
 	}
 
 	recalculateValues(DiscIndex);
-#else
+#if 0
 	DiscGraphics[DiscIndex] = new TripleDiscWidgetWithVerticalSlit( X+20, Y+20, 256, 256 );
 
 	for (int J=0; J <VALUES_PER_DISC; J++){
@@ -277,33 +271,24 @@ static void acceptSetPointDialogCallback(Fl_Widget* Widget, void* Data){
 
 	if (PadlockClosed){
 		PadlockClosed = false;
+
+		AcceptButtonPtr->label( "Wysuń" );
+		AcceptButtonPtr->color( ACTIVE_BUTTON_COLOR );
+		PadlockImagePtr->hide();
+		UnconnectedImagePtr->hide();
+	}
+	else{
+		PadlockClosed = true;
+
 		AcceptButtonPtr->label( "Wsuń" );
 		AcceptButtonPtr->color( NORMAL_BUTTON_COLOR );
-
 		if (DebugPictures){
 			UnconnectedImagePtr->show();
-
-			DiscGraphics[1]->hide();
-			for (int J=0; J <VALUES_PER_DISC; J++){
-				CupValueLabelPtr[1][J]->hide();
-			}
-
 			DebugPictures = false;
 		}
 		else{
 			PadlockImagePtr->show();
 			DebugPictures = true;
-		}
-	}
-	else{
-		PadlockClosed = true;
-		AcceptButtonPtr->label( "Wysuń" );
-		AcceptButtonPtr->color( ACTIVE_BUTTON_COLOR );
-		PadlockImagePtr->hide();
-		UnconnectedImagePtr->hide();
-		DiscGraphics[1]->show();
-		for (int J=0; J <VALUES_PER_DISC; J++){
-			CupValueLabelPtr[1][J]->show();
 		}
 	}
 }

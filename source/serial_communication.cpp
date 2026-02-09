@@ -127,8 +127,10 @@ static void peripheralThreadHandler(void){
 			    	StaticArguments[J] = J;
 			    }
 			    Fl::awake( refreshDisc, (void*)&StaticArguments[0] );
+#if 0
 			    Fl::awake( refreshDisc, (void*)&StaticArguments[1] );
 			    Fl::awake( refreshDisc, (void*)&StaticArguments[2] );
+#endif
 			}
 		}
 	}
