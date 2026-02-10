@@ -174,7 +174,7 @@ static void onMainWindowCloseCallback(Fl_Widget *Widget, void *Data) {
 	(void)Data; // intentionally unused
 
     if (VerboseMode){
-    	std::cout << "zamykanie aplikacji" << std::endl;
+    	std::cout << "Zamykanie aplikacji" << std::endl;
     }
     serialCommunicationExit();
     ApplicationWindow->hide(); // close the application
