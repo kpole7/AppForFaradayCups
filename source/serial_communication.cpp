@@ -18,8 +18,6 @@
 // Preprocessor directives
 //.................................................................................................
 
-#define PERIPHERAL_THREAD_LOOP_DURATION		5	// milliseconds
-
 #define SHUT_DOWN_TIMEOUT					400 // milliseconds
 #define SHUT_DOWN_LOOP_DELAY				20   // milliseconds
 #define SHUT_DOWN_COUNT_DOWN				(SHUT_DOWN_TIMEOUT/SHUT_DOWN_LOOP_DELAY)
@@ -39,6 +37,10 @@ static std::thread peripheralThread;
 static std::chrono::high_resolution_clock::time_point PeripheralThreadLoopStart;
 static int64_t PeripheralThreadTimeInMilliseconds;
 
+
+//.................................................................................................
+// Local function prototypes
+//.................................................................................................
 
 static void peripheralThreadHandler(void);
 
@@ -81,60 +83,51 @@ void serialCommunicationExit(void){
 static void peripheralThreadHandler(void){
 	usleep(100000UL); // 100 ms
 
+	static uint8_t StaticArguments[3];
+	for (int J=0; J<3; J++){
+		StaticArguments[J] = J;
+	}
+
 	PeripheralThreadTimeInMilliseconds = 0;
 	PeripheralThreadLoopStart = std::chrono::high_resolution_clock::now();
 	while( !atomic_load_explicit( &ClosePeripheralsFlag, std::memory_order_acquire )){
-		{
-			// measure fixed time intervals
-			std::chrono::high_resolution_clock::time_point TimeNow;
-			std::chrono::milliseconds DurationTime;
-			PeripheralThreadTimeInMilliseconds += PERIPHERAL_THREAD_LOOP_DURATION;
-			do{
-				// delay so as not to overload the processor core
-				usleep(2000);
-				TimeNow = std::chrono::high_resolution_clock::now();
-				DurationTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - PeripheralThreadLoopStart);
+		// measure fixed time intervals
+		std::chrono::high_resolution_clock::time_point TimeNow;
+		std::chrono::milliseconds DurationTime;
+		PeripheralThreadTimeInMilliseconds += PERIPHERAL_THREAD_LOOP_DURATION;
+		do{
+			// delay so as not to overload the processor core
+			usleep(2000);
+			TimeNow = std::chrono::high_resolution_clock::now();
+			DurationTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - PeripheralThreadLoopStart);
 
-			}while(DurationTime.count() < PeripheralThreadTimeInMilliseconds);
+		}while(DurationTime.count() < PeripheralThreadTimeInMilliseconds);
+
+		// essential action
+		static bool ModbusReadingTurn;
+		ModbusReadingTurn = !ModbusReadingTurn;
+		if (ModbusReadingTurn){
+			readInputRegisters();
+		}
+		else{
+			readCoils();
 		}
 
-		{ // debugging: modify Modbus registers and display new values periodically
-			static unsigned TemporaryCounter;
-			static unsigned TemporaryDrift;
-			TemporaryCounter++;
-			TemporaryCounter &= 127;
-			if (0 == TemporaryCounter){
+#if 0 // debugging
+		std::chrono::high_resolution_clock::time_point TimeAfter = std::chrono::high_resolution_clock::now();
+		std::chrono::milliseconds ProcessingTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeAfter - TimeNow);
+		std::cout << "Peripheral thread " << PeripheralThreadTimeInMilliseconds << "  " << ProcessingTime.count() << std::endl;
+#endif
 
+		if (ModbusReadingTurn){
+			Fl::awake( refreshDisc, (void*)&StaticArguments[0] );
 #if 0
-			    TemporaryDrift += 56.789;
-			    for (int Cup = 0; Cup < CUPS_NUMBER; Cup++){
-			    	for (int J=0; J < VALUES_PER_DISC; J++){
-			    		int TemporaryRegisterIndex = Cup*VALUES_PER_DISC + J;
-			    		assert( TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER );
-			    		atomic_store_explicit( &ModbusInputRegisters[TemporaryRegisterIndex], (uint16_t)(Cup*12345.6 + 7.8*J + TemporaryDrift), std::memory_order_release );
-			    	}
-			    }
+			Fl::awake( refreshDisc, (void*)&StaticArguments[1] );
+			Fl::awake( refreshDisc, (void*)&StaticArguments[2] );
 #endif
-
-#if 1 // debugging
-			    readInputRegisters();
-
-			    std::cout << "Peripheral thread " << PeripheralThreadTimeInMilliseconds << " " << TemporaryDrift << std::endl;
-#endif
-
-			    static uint8_t StaticArguments[3];
-			    for (int J=0; J<3; J++){
-			    	StaticArguments[J] = J;
-			    }
-			    Fl::awake( refreshDisc, (void*)&StaticArguments[0] );
-#if 0
-			    Fl::awake( refreshDisc, (void*)&StaticArguments[1] );
-			    Fl::awake( refreshDisc, (void*)&StaticArguments[2] );
-#endif
-			}
 		}
 	}
+	// exit
 	closeModbus();
 	atomic_store_explicit( &PeripheralsClosedFlag, true, std::memory_order_release );
 }
-

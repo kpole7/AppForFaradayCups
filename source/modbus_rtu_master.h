@@ -7,6 +7,8 @@ int initializeModbus(void);
 
 int readInputRegisters(void);
 
+int readCoils(void);
+
 void closeModbus(void);
 
 #endif // SOURCE_MODBUS_RTU_MASTER_H_

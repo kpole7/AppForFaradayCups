@@ -7,10 +7,14 @@
 // Preprocessor directives
 //.................................................................................................
 
-#define CUPS_NUMBER			3
-#define VALUES_PER_DISC		5
+#define CUPS_NUMBER						3
+#define VALUES_PER_DISC					5
 
 #define CONFIGURATION_FILE_NAME			"PomiarWiązki.cfg"
+
+#define PERIPHERAL_THREAD_LOOP_DURATION	50	// milliseconds
+
+#define MODBUS_RESPONSE_TIMEOUT			40	// milliseconds
 
 typedef enum
 {

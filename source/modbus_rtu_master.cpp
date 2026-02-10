@@ -4,7 +4,6 @@
 #include <iostream>
 #include <modbus.h>
 #include <errno.h>
-//#include <FL/Fl.H>
 
 #include "modbus_rtu_master.h"
 #include "config.h"
@@ -18,14 +17,14 @@
 
 #define REGISTERS_TO_BE_READ		MODBUS_INPUTS_NUMBER
 
+#define COILS_TO_BE_READ			MODBUS_COILS_NUMBER
+
 #define SLAVE_ID					1
 
 
 //...............................................................................................
 // Local variables
 //...............................................................................................
-
-static uint16_t RegistersTable[25]; // 125 max
 
 static modbus_t *Context;
 
@@ -57,7 +56,7 @@ int initializeModbus(void){
     // Optional timeout
     struct timeval TimeoutValue;
     TimeoutValue.tv_sec = 0;
-    TimeoutValue.tv_usec = 20000; // 20ms
+    TimeoutValue.tv_usec = MODBUS_RESPONSE_TIMEOUT*1000; // microseconds
     modbus_set_response_timeout(Context, TimeoutValue.tv_sec, TimeoutValue.tv_usec);
 
     if (modbus_connect(Context) == -1) {
@@ -69,6 +68,8 @@ int initializeModbus(void){
 }
 
 int readInputRegisters(void){
+	static uint16_t RegistersTable[25]; // 125 max
+
     int ReceivedRegisters = modbus_read_input_registers(Context, MODBUS_INPUTS_ADDRESS, REGISTERS_TO_BE_READ, RegistersTable);
     if (ReceivedRegisters == -1) {
         // Communication / protocol error (CRC, timeout, invalid response)
@@ -79,9 +80,13 @@ int readInputRegisters(void){
     if (ReceivedRegisters != REGISTERS_TO_BE_READ) {
         std::cout << "Nieoczekiwana liczba rejestrów: otrzymano " << ReceivedRegisters << ", oczekiwano " << REGISTERS_TO_BE_READ << std::endl;
         return ERROR_MODBUS_FRAME_READ;
-    } else {
+    }
+    else {
+        for (int i = 0; i < ReceivedRegisters; ++i) {
+        	atomic_store_explicit( &ModbusInputRegisters[i], RegistersTable[i], std::memory_order_release );
+        }
 
-#if 1
+#if 0 // debugging
         printf("Odczytano: " );
         for (int i = 0; i < ReceivedRegisters; ++i) {
         	static char TemporaryCharacterArray[10];
@@ -91,12 +96,52 @@ int readInputRegisters(void){
                 std::cout << ' ';
             }
         }
+//        std::cout << std::endl;
+#endif
+
+    }
+    return NO_FAILURE;
+}
+
+int readCoils(void){
+	uint8_t TemporaryTable[COILS_TO_BE_READ];
+    int ReceivedBits = modbus_read_bits(Context, MODBUS_COILS_ADDRESS, COILS_TO_BE_READ, TemporaryTable);
+    if (ReceivedBits == -1) {
+        // Communication / protocol error (CRC, timeout, invalid response)
+        std::cout << "Błąd odczytu: " << modbus_strerror(errno) << std::endl;
+        return ERROR_MODBUS_READING;
+    }
+
+    if (ReceivedBits != COILS_TO_BE_READ) {
+        std::cout << "Nieoczekiwana liczba bitów: otrzymano " << ReceivedBits << ", oczekiwano " << REGISTERS_TO_BE_READ << std::endl;
+        return ERROR_MODBUS_FRAME_READ;
+    }
+    else {
+        for (int i = 0; i < ReceivedBits; ++i) {
+        	if (0 != TemporaryTable[i]){
+        		atomic_store_explicit( &ModbusCoilsReadout[i], true, std::memory_order_release );
+        	}
+        	else{
+        		atomic_store_explicit( &ModbusCoilsReadout[i], false, std::memory_order_release );
+        	}
+        }
+
+#if 0 // debugging
+        printf(" bity: " );
+        for (int i = 0; i < ReceivedBits; ++i) {
+        	if (0 != TemporaryTable[i]){
+        		std::cout << " 1";
+        	}
+        	else{
+        		std::cout << " 0";
+        	}
+            if ((i % 3) == 2){
+                std::cout << ' ';
+            }
+        }
         std::cout << std::endl;
 #endif
 
-        for (int i = 0; i < ReceivedRegisters; ++i) {
-        	atomic_store_explicit( &ModbusInputRegisters[i], RegistersTable[i], std::memory_order_release );
-        }
     }
     return NO_FAILURE;
 }
