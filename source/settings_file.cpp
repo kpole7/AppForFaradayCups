@@ -75,7 +75,7 @@ int configurationFileParsing(void) {
     	std::cout << "Plik: " << CONFIGURATION_FILE_NAME << std::endl;
     }
 
-    std::regex PatternSerialPort(R"(\s*(?!#)Port Szeregowy:\s*([^\s]+)\s*$)");
+    std::regex PatternSerialPort(R"(\s*(?!#)Port szeregowy:\s*([^\s]+)\s*$)");
     bool MatchesSerialPortPattern;
     while (std::getline(File, Line)) {
         if (VerboseMode){

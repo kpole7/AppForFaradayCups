@@ -48,6 +48,12 @@ static void peripheralThreadHandler(void);
 // Function definitions
 //.................................................................................................
 
+void initializeModuleSerialCommunication(void){
+	atomic_store_explicit( &ClosePeripheralsFlag, false, std::memory_order_release );
+	atomic_store_explicit( &PeripheralsClosedFlag, true, std::memory_order_release );
+}
+
+
 /// This function initializes the module variables and launches a new thread to support peripherals
 void serialCommunicationStart(void){
 	atomic_store_explicit( &ClosePeripheralsFlag, false, std::memory_order_release );
@@ -57,6 +63,10 @@ void serialCommunicationStart(void){
 
 /// This function is called by FLTK onMainWindowCloseCallback event handler
 void serialCommunicationExit(void){
+	if (atomic_load_explicit( &PeripheralsClosedFlag, std::memory_order_acquire )){
+		return;
+	}
+
 	atomic_store_explicit( &ClosePeripheralsFlag, true, std::memory_order_release );
 
 	int TimeoutCounter = SHUT_DOWN_COUNT_DOWN;

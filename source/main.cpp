@@ -181,6 +181,7 @@ static void onMainWindowCloseCallback(Fl_Widget *Widget, void *Data) {
 }
 
 static int mainInitializations(int argc, char** argv){
+	initializeModuleSerialCommunication();
 
 	int FailureCode = NO_FAILURE;
 	for (int J = 1; J < argc; J++) {
