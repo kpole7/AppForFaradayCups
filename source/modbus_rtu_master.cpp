@@ -33,7 +33,7 @@ static modbus_t *Context;
 // Function definitions
 //........................................................................................................
 
-int initializeModbus(void){
+FailureCodes initializeModbus(void){
 	const char* PortNameCharPtr = SerialPortRequestedNamePtr->c_str();
     int Baudrate = 19200;
     char Parity = 'E';
@@ -43,14 +43,14 @@ int initializeModbus(void){
 	Context = modbus_new_rtu(PortNameCharPtr, Baudrate, Parity, DataBits, StopBit);
     if (Context == NULL) {
         std::cout << "Nie można utworzyć kontekstu libmodbus\n" << std::endl;
-        return ERROR_MODBUS_INITIALIZATION_1;
+        return FailureCodes::ERROR_MODBUS_INITIALIZATION_1;
     }
 
     // Set slave id (Unit ID)
     if (modbus_set_slave(Context, SLAVE_ID) == -1) {
     	std::cout << "Błąd ustawienia slave id: " << modbus_strerror(errno) << std::endl;
         modbus_free(Context);
-        return ERROR_MODBUS_INITIALIZATION_2;
+        return FailureCodes::ERROR_MODBUS_INITIALIZATION_2;
     }
 
     // Optional timeout
@@ -60,26 +60,26 @@ int initializeModbus(void){
     modbus_set_response_timeout(Context, TimeoutValue.tv_sec, TimeoutValue.tv_usec);
 
     if (modbus_connect(Context) == -1) {
-        std::cout << "Połączenie nieudane: " << modbus_strerror(errno) << std::endl;
+        std::cout << "Błąd połączenia Modbus: " << modbus_strerror(errno) << std::endl;
         modbus_free(Context);
-        return ERROR_MODBUS_OPENING;
+        return FailureCodes::ERROR_MODBUS_OPENING;
     }
-    return NO_FAILURE;
+    return FailureCodes::NO_FAILURE;
 }
 
-int readInputRegisters(void){
+FailureCodes readInputRegisters(void){
 	static uint16_t RegistersTable[25]; // 125 max
 
     int ReceivedRegisters = modbus_read_input_registers(Context, MODBUS_INPUTS_ADDRESS, REGISTERS_TO_BE_READ, RegistersTable);
     if (ReceivedRegisters == -1) {
         // Communication / protocol error (CRC, timeout, invalid response)
         std::cout << "Błąd odczytu: " << modbus_strerror(errno) << std::endl;
-        return ERROR_MODBUS_READING;
+        return FailureCodes::ERROR_MODBUS_READING;
     }
 
     if (ReceivedRegisters != REGISTERS_TO_BE_READ) {
         std::cout << "Nieoczekiwana liczba rejestrów: otrzymano " << ReceivedRegisters << ", oczekiwano " << REGISTERS_TO_BE_READ << std::endl;
-        return ERROR_MODBUS_FRAME_READ;
+        return FailureCodes::ERROR_MODBUS_FRAME_READ;
     }
     else {
         for (int i = 0; i < ReceivedRegisters; ++i) {
@@ -100,21 +100,21 @@ int readInputRegisters(void){
 #endif
 
     }
-    return NO_FAILURE;
+    return FailureCodes::NO_FAILURE;
 }
 
-int readCoils(void){
+FailureCodes readCoils(void){
 	uint8_t TemporaryTable[COILS_TO_BE_READ];
     int ReceivedBits = modbus_read_bits(Context, MODBUS_COILS_ADDRESS, COILS_TO_BE_READ, TemporaryTable);
     if (ReceivedBits == -1) {
         // Communication / protocol error (CRC, timeout, invalid response)
         std::cout << "Błąd odczytu: " << modbus_strerror(errno) << std::endl;
-        return ERROR_MODBUS_READING;
+        return FailureCodes::ERROR_MODBUS_READING;
     }
 
     if (ReceivedBits != COILS_TO_BE_READ) {
         std::cout << "Nieoczekiwana liczba bitów: otrzymano " << ReceivedBits << ", oczekiwano " << REGISTERS_TO_BE_READ << std::endl;
-        return ERROR_MODBUS_FRAME_READ;
+        return FailureCodes::ERROR_MODBUS_FRAME_READ;
     }
     else {
         for (int i = 0; i < ReceivedBits; ++i) {
@@ -143,7 +143,7 @@ int readCoils(void){
 #endif
 
     }
-    return NO_FAILURE;
+    return FailureCodes::NO_FAILURE;
 }
 
 void closeModbus(void){

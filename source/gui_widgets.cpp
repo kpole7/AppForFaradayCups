@@ -110,9 +110,9 @@ static TripleDiscWidgetWithNoSlit * DiscGraphics[CUPS_NUMBER];
 
 static Fl_Box * CupValueLabelPtr[CUPS_NUMBER][VALUES_PER_DISC];
 
-static ImageWidget * PadlockImagePtr;
+static ImageWidget * PadlockImagePtr[CUPS_NUMBER];
 
-static ImageWidget * UnconnectedImagePtr;
+static ImageWidget * UnconnectedImagePtr[CUPS_NUMBER];
 
 static Fl_Button* AcceptButtonPtr;
 
@@ -136,10 +136,10 @@ static void acceptSetPointDialogCallback(Fl_Widget* Widget, void* Data);
 
 void initializeGraphicWidgets(void){
 	initializeDiscWithNoSlit( 0, 30, 0 );
-	PadlockImagePtr     = new ImageWidget( 400, 300, 54, 54, padlock_png, padlock_png_len, nullptr );
-	UnconnectedImagePtr = new ImageWidget( 400, 300, 51, 51, unconnected_png, unconnected_png_len, nullptr );
-	PadlockImagePtr->hide();
-	UnconnectedImagePtr->hide();
+	PadlockImagePtr[0]     = new ImageWidget( 360, 50, 54, 54, padlock_png, padlock_png_len, nullptr );
+	UnconnectedImagePtr[0] = new ImageWidget( 360, 50, 51, 51, unconnected_png, unconnected_png_len, nullptr );
+	PadlockImagePtr[0]->hide();
+	UnconnectedImagePtr[0]->hide();
 
 	AcceptButtonPtr = new Fl_Button( 400, 150, 90, 40, "Wsuń" );
 	AcceptButtonPtr->box(FL_BORDER_BOX);
@@ -289,7 +289,20 @@ void refreshDisc(void* Data){
 			DiscGraphics[Disc]->hide();
 		}
 	}
+
 	refreshValues(Disc);
+
+	if (ModbusCoilsReadout[COIL_OFFSET_IS_CUP_BLOCKED + Disc*MODBUS_COILS_PER_CUP]){
+		if (!PadlockImagePtr[Disc]->visible()){
+			PadlockImagePtr[Disc]->show();
+		}
+	}
+	else{
+		if (PadlockImagePtr[Disc]->visible()){
+			PadlockImagePtr[Disc]->hide();
+		}
+	}
+
 
 	if (0 == Disc){
 		static char TemporaryText[400];
@@ -314,29 +327,13 @@ static void acceptSetPointDialogCallback(Fl_Widget* Widget, void* Data){
 	(void)Widget; // intentionally unused
 	(void)Data; // intentionally unused
 
-	static bool DebugPictures = false;
-
 	if (PadlockClosed){
-		PadlockClosed = false;
-
 		AcceptButtonPtr->label( "Wysuń" );
 		AcceptButtonPtr->color( ACTIVE_BUTTON_COLOR );
-		PadlockImagePtr->hide();
-		UnconnectedImagePtr->hide();
 	}
 	else{
-		PadlockClosed = true;
-
 		AcceptButtonPtr->label( "Wsuń" );
 		AcceptButtonPtr->color( NORMAL_BUTTON_COLOR );
-		if (DebugPictures){
-			UnconnectedImagePtr->show();
-			DebugPictures = false;
-		}
-		else{
-			PadlockImagePtr->show();
-			DebugPictures = true;
-		}
 	}
 }
 

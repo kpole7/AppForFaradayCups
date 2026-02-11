@@ -68,7 +68,7 @@ static void setupCriticalSignalHandler();
 
 static void onMainWindowCloseCallback(Fl_Widget *Widget, void *Data);
 
-static int mainInitializations(int argc, char** argv);
+static FailureCodes mainInitializations(int argc, char** argv);
 
 //.................................................................................................
 // The main application
@@ -77,7 +77,7 @@ static int mainInitializations(int argc, char** argv);
 int main(int argc, char** argv) {
 	setupCriticalSignalHandler();
 
-	int ErrorCode = mainInitializations( argc, argv);
+	FailureCodes ErrorCode = mainInitializations( argc, argv);
 
     // Main window of the application
 	ApplicationWindow = new WindowEscProof(MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT, "Pomiar Wiązki w Linii Iniekcyjnej" );
@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
 	ApplicationWindow->color( COLOR_BACKGROUND );
     ApplicationWindow->callback(onMainWindowCloseCallback);	// Window close event is handled
 
-	if (NO_FAILURE == ErrorCode){
+	if (FailureCodes::NO_FAILURE == ErrorCode){
 		initializeGraphicWidgets();
 	}
 	else{
@@ -98,7 +98,7 @@ int main(int argc, char** argv) {
 
     Fl::lock();  // Enable multi-threading support in FLTK; register a callback function for Fl::awake()
 
-	if (NO_FAILURE == ErrorCode){
+	if (FailureCodes::NO_FAILURE == ErrorCode){
 		serialCommunicationStart();
 	}
 
@@ -180,10 +180,10 @@ static void onMainWindowCloseCallback(Fl_Widget *Widget, void *Data) {
     ApplicationWindow->hide(); // close the application
 }
 
-static int mainInitializations(int argc, char** argv){
+static FailureCodes mainInitializations(int argc, char** argv){
 	initializeModuleSerialCommunication();
 
-	int FailureCode = NO_FAILURE;
+	FailureCodes FailureCode = FailureCodes::NO_FAILURE;
 	for (int J = 1; J < argc; J++) {
         std::string Argument = argv[J];
         if (Argument == "-v" || Argument == "--verbose") {
@@ -196,17 +196,17 @@ static int mainInitializations(int argc, char** argv){
         }
         else {
             std::cout << "Nieznany argument: " << Argument << std::endl;
-            FailureCode = ERROR_COMMAND_SYNTAX;
+            FailureCode = FailureCodes::ERROR_COMMAND_SYNTAX;
         }
     }
 
-	if (NO_FAILURE == FailureCode){
+	if (FailureCodes::NO_FAILURE == FailureCode){
 		FailureCode = determineApplicationPath( argv[0] );
 	}
-	if (NO_FAILURE == FailureCode){
+	if (FailureCodes::NO_FAILURE == FailureCode){
 		FailureCode = configurationFileParsing();
 	}
-	if (NO_FAILURE == FailureCode){
+	if (FailureCodes::NO_FAILURE == FailureCode){
 		FailureCode = initializeModbus();
 	}
 #if 1 // debugging

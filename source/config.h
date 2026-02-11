@@ -17,7 +17,7 @@
 
 #define MODBUS_RESPONSE_TIMEOUT			40	// milliseconds
 
-typedef enum
+enum class FailureCodes
 {
     NO_FAILURE,
 	ERROR_COMMAND_SYNTAX,
@@ -31,7 +31,7 @@ typedef enum
 	ERROR_MODBUS_OPENING,
 	ERROR_MODBUS_READING,
 	ERROR_MODBUS_FRAME_READ,
-} FailureCodes;
+};
 
 //.................................................................................................
 // Global variables

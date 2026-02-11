@@ -3,11 +3,13 @@
 #ifndef SOURCE_MODBUS_RTU_MASTER_H_
 #define SOURCE_MODBUS_RTU_MASTER_H_
 
-int initializeModbus(void);
+#include "config.h"
 
-int readInputRegisters(void);
+FailureCodes initializeModbus(void);
 
-int readCoils(void);
+FailureCodes readInputRegisters(void);
+
+FailureCodes readCoils(void);
 
 void closeModbus(void);
 

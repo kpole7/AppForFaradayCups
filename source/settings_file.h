@@ -20,9 +20,9 @@ extern int OffsetForZeroCurrent[CUPS_NUMBER];
 // Global function prototypes
 //.................................................................................................
 
-int determineApplicationPath( char* Argv0 );
+FailureCodes determineApplicationPath( char* Argv0 );
 
-int configurationFileParsing(void);
+FailureCodes configurationFileParsing(void);
 
 
 #endif // SOURCE_SETTINGS_FILE_H_

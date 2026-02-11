@@ -39,7 +39,7 @@ static bool FormulaIsDefined[CUPS_NUMBER];
 
 
 
-static int parseFunctionFormula( std::regex Pattern, std::string *LinePtr, int CupIndex );
+static FailureCodes parseFunctionFormula( std::regex Pattern, std::string *LinePtr, int CupIndex );
 
 //........................................................................................................
 // Function definitions
@@ -47,7 +47,7 @@ static int parseFunctionFormula( std::regex Pattern, std::string *LinePtr, int C
 
 /// The function searches for the directory where the executable file is located
 /// @return code defined in FailureCodes
-int determineApplicationPath( char* Argv0 ){
+FailureCodes determineApplicationPath( char* Argv0 ){
     char Path[PATH_MAX];
     ConfigurationFilePathPtr = nullptr;
 
@@ -62,14 +62,14 @@ int determineApplicationPath( char* Argv0 ){
     	}
     } else {
         std::cerr << "Nie udało się uzyskać ścieżki do programu." << std::endl;
-        return ERROR_SETTINGS_PATH;
+        return FailureCodes::ERROR_SETTINGS_PATH;
     }
-    return NO_FAILURE;
+    return FailureCodes::NO_FAILURE;
 }
 
 /// This function loads the configuration file and allocates an array of objects of type TransmissionChannel
 /// @return code defined in FailureCodes
-int configurationFileParsing(void) {
+FailureCodes configurationFileParsing(void) {
 	SerialPortRequestedNamePtr = nullptr;
     for (int J=0; J<CUPS_NUMBER; J++){
     	FormulaIsDefined[J] = false;
@@ -87,7 +87,7 @@ int configurationFileParsing(void) {
 	std::ifstream File( ConfigurationFilePathPtr->c_str() ); // open file
     if (!File.is_open()) {
         std::cout << "Nie można otworzyć pliku: " << CONFIGURATION_FILE_NAME << std::endl;
-        return ERROR_SETTINGS_OPENING_FILE;
+        return FailureCodes::ERROR_SETTINGS_OPENING_FILE;
     }
     if (VerboseMode){
     	std::cout << "Plik: " << CONFIGURATION_FILE_NAME << std::endl;
@@ -113,21 +113,21 @@ int configurationFileParsing(void) {
         	}
         	else{
             	std::cout << "  Nadmiarowy opis portu szeregowego w linii: [" << Line << "]" << std::endl;
-                return ERROR_SETTINGS_EXCESSIVE_PORT_NAME;
+                return FailureCodes::ERROR_SETTINGS_EXCESSIVE_PORT_NAME;
         	}
         }
 
-        int Result;
+        FailureCodes Result;
         Result = parseFunctionFormula( PatternCup1FunctionFormula, &Line, 0 );
-        if (NO_FAILURE != Result){
+        if (FailureCodes::NO_FAILURE != Result){
         	return Result;
         }
         Result = parseFunctionFormula( PatternCup2FunctionFormula, &Line, 1 );
-        if (NO_FAILURE != Result){
+        if (FailureCodes::NO_FAILURE != Result){
         	return Result;
         }
         Result = parseFunctionFormula( PatternCup3FunctionFormula, &Line, 2 );
-        if (NO_FAILURE != Result){
+        if (FailureCodes::NO_FAILURE != Result){
         	return Result;
         }
 
@@ -136,19 +136,19 @@ int configurationFileParsing(void) {
 
     if (nullptr == SerialPortRequestedNamePtr){
        	std::cout << " Nie znaleziono opisu portu szeregowego" << std::endl;
-        return ERROR_SETTINGS_PORT_NAME;
+        return FailureCodes::ERROR_SETTINGS_PORT_NAME;
     }
     for (int J=0; J<CUPS_NUMBER; J++){
     	if (!FormulaIsDefined[J]){
            	std::cout << " Nie znaleziono formuły konwersji dla kubka " << (int)(J+1) << std::endl;
-            return ERROR_SETTINGS_CONVERTION_FORMULA;
+            return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
     	}
     }
-
-    return NO_FAILURE;
+    std::cout << " Koniec pliku konfiguracyjnego " << std::endl;
+    return FailureCodes::NO_FAILURE;
 }
 
-static int parseFunctionFormula( std::regex Pattern, std::string *LinePtr, int CupIndex ){
+static FailureCodes parseFunctionFormula( std::regex Pattern, std::string *LinePtr, int CupIndex ){
     std::smatch Matches;
     if (std::regex_match(*LinePtr, Matches, Pattern)) {
     	if (!FormulaIsDefined[CupIndex]){
@@ -163,11 +163,11 @@ static int parseFunctionFormula( std::regex Pattern, std::string *LinePtr, int C
     		}
     		catch (const std::invalid_argument&) {
     	       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
-    	       	return ERROR_SETTINGS_CONVERTION_FORMULA;
+    	       	return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
     		}
     		catch (const std::out_of_range&) {
     	       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
-    	       	return ERROR_SETTINGS_CONVERTION_FORMULA;
+    	       	return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
     		}
 
     		bool ChangeSign;
@@ -179,7 +179,7 @@ static int parseFunctionFormula( std::regex Pattern, std::string *LinePtr, int C
     		}
     		else{
     	       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
-    	       	return ERROR_SETTINGS_CONVERTION_FORMULA;
+    	       	return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
     		}
 
     		try {
@@ -187,11 +187,11 @@ static int parseFunctionFormula( std::regex Pattern, std::string *LinePtr, int C
     		}
     		catch (const std::invalid_argument&) {
     	       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
-    	       	return ERROR_SETTINGS_CONVERTION_FORMULA;
+    	       	return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
     		}
     		catch (const std::out_of_range&) {
     	       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
-    	       	return ERROR_SETTINGS_CONVERTION_FORMULA;
+    	       	return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
     		}
     		if (ChangeSign){
     			OffsetForZeroCurrent[CupIndex] = -OffsetForZeroCurrent[CupIndex];
@@ -208,8 +208,8 @@ static int parseFunctionFormula( std::regex Pattern, std::string *LinePtr, int C
     	}
     	else{
         	std::cout << "  Nadmiarowa formuła konwersji w linii: [" << *LinePtr << "]" << std::endl;
-            return ERROR_SETTINGS_CONVERTION_FORMULA;
+            return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
     	}
     }
-    return NO_FAILURE;
+    return FailureCodes::NO_FAILURE;
 }
