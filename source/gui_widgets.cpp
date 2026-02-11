@@ -248,9 +248,12 @@ static void recalculateValues( uint8_t Disc ){
 			TemporaryLabel = TemporaryBuffer;
 		}
 		else if (0x8000 > TemporaryValue){
-			double TemporaryFloatingPoint = (double)TemporaryValue;
+			double TemporaryFloatingPoint = DirectionalCoefficient[Disc] * ((double)TemporaryValue + OffsetForZeroCurrent[Disc]);
 			std::snprintf(TemporaryBuffer, sizeof(TemporaryBuffer), "%.1fμA", TemporaryFloatingPoint);
 			TemporaryLabel = TemporaryBuffer;
+			if ("-0.0μA" == TemporaryLabel){
+				TemporaryLabel = "0.0μA";
+			}
 		}
 		else{
 			TemporaryLabel = "N/A";
