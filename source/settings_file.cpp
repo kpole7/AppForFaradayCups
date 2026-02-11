@@ -8,18 +8,22 @@
 #include <regex>
 #include <stdexcept>
 
-#include "config.h"
 #include "settings_file.h"
 
 //.................................................................................................
 // Global variables
 //.................................................................................................
 
-/// This variable points to the serial port name defined in the settings text file (CONFIGURATION_FILE_NAME) or nullptr if there is no definition
+/// This variable points to the serial port name defined in the settings text file
+/// (CONFIGURATION_FILE_NAME) or nullptr if there is no definition
 std::string * SerialPortRequestedNamePtr;
 
+/// The value of the Modbus register is converted to current in uA using a linear
+/// function I=DirectionalCoefficient[.]*x+OffsetForZeroCurrent[.]; here we have directional coefficients
 double DirectionalCoefficient[CUPS_NUMBER];
 
+/// The value of the Modbus register is converted to current in uA using a linear
+/// function I=DirectionalCoefficient[.]*x+OffsetForZeroCurrent[.]; here we have offsets
 int OffsetForZeroCurrent[CUPS_NUMBER];
 
 //.................................................................................................
@@ -149,9 +153,13 @@ static int parseFunctionFormula( std::regex Pattern, std::string *LinePtr, int C
     if (std::regex_match(*LinePtr, Matches, Pattern)) {
     	if (!FormulaIsDefined[CupIndex]){
     		FormulaIsDefined[CupIndex] = true;
-    		static std::string TemporaryText = Matches[1];
+
+    		std::string CoefficientText  = Matches[1]; // floating point
+    		std::string SignText         = Matches[2]; // '+' or '-'
+    		std::string OffsetText       = Matches[3]; // decimal or hexadecimal 0x...
+
     		try {
-    			DirectionalCoefficient[CupIndex] = std::stod(TemporaryText);
+    			DirectionalCoefficient[CupIndex] = std::stod(CoefficientText);
     		}
     		catch (const std::invalid_argument&) {
     	       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
@@ -161,12 +169,12 @@ static int parseFunctionFormula( std::regex Pattern, std::string *LinePtr, int C
     	       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
     	       	return ERROR_SETTINGS_CONVERTION_FORMULA;
     		}
+
     		bool ChangeSign;
-    		TemporaryText = Matches[2];
-    		if (TemporaryText == "+"){
+    		if (SignText == "+"){
     			ChangeSign = false;
     		}
-    		else if (TemporaryText == "-"){
+    		else if (SignText == "-"){
     			ChangeSign = true;
     		}
     		else{
@@ -174,9 +182,8 @@ static int parseFunctionFormula( std::regex Pattern, std::string *LinePtr, int C
     	       	return ERROR_SETTINGS_CONVERTION_FORMULA;
     		}
 
-    		TemporaryText = Matches[3];
     		try {
-    			OffsetForZeroCurrent[CupIndex] = std::stoi(TemporaryText);
+    			OffsetForZeroCurrent[CupIndex] = std::stoi(OffsetText, nullptr, 0);
     		}
     		catch (const std::invalid_argument&) {
     	       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
