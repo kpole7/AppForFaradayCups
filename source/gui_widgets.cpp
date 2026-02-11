@@ -126,7 +126,7 @@ static bool PadlockClosed;
 
 static void initializeDiscWithNoSlit( uint8_t DiscIndex, uint16_t X, uint16_t Y );
 
-static void recalculateValues( uint8_t Disc );
+static void refreshValues( uint8_t Disc );
 
 static void acceptSetPointDialogCallback(Fl_Widget* Widget, void* Data);
 
@@ -173,7 +173,7 @@ static void initializeDiscWithNoSlit( uint8_t DiscIndex, uint16_t X, uint16_t Y 
 
 	}
 
-	recalculateValues(DiscIndex);
+	refreshValues(DiscIndex);
 #if 0
 	DiscGraphics[DiscIndex] = new TripleDiscWidgetWithVerticalSlit( X+20, Y+20, 256, 256 );
 
@@ -193,7 +193,7 @@ static void initializeDiscWithNoSlit( uint8_t DiscIndex, uint16_t X, uint16_t Y 
 		CupValueLabelPtr[DiscIndex][J]->labelsize( 26 );
 	}
 
-	recalculateValues(DiscIndex);
+	refreshValues(DiscIndex);
 #endif
 }
 
@@ -236,33 +236,38 @@ void TripleDiscWidgetWithHorizontalSlit::draw(){
 }
 
 /// This function modifies texts (displayed as graphic widgets) related to a single disk based on ModbusInputRegisters
-static void recalculateValues( uint8_t Disc ){
-	for (int J=0; J < VALUES_PER_DISC; J++){
-		int TemporaryRegisterIndex = Disc*VALUES_PER_DISC + J;
-		assert( TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER );
-		uint16_t TemporaryValue = atomic_load_explicit( &ModbusInputRegisters[TemporaryRegisterIndex], std::memory_order_acquire );
-		std::string TemporaryLabel;
-		char TemporaryBuffer[64];
-		if (J >= 3){
-			std::snprintf(TemporaryBuffer, sizeof(TemporaryBuffer), "0x%04X", (unsigned)TemporaryValue);
-			TemporaryLabel = TemporaryBuffer;
-		}
-		else if (0x8000 > TemporaryValue){
-			double TemporaryFloatingPoint = DirectionalCoefficient[Disc] * ((double)TemporaryValue + OffsetForZeroCurrent[Disc]);
-			std::snprintf(TemporaryBuffer, sizeof(TemporaryBuffer), "%.1fμA", TemporaryFloatingPoint);
-			TemporaryLabel = TemporaryBuffer;
-			if ("-0.0μA" == TemporaryLabel){
-				TemporaryLabel = "0.0μA";
+static void refreshValues( uint8_t Disc ){
+	if (0 != DiscGraphics[Disc]->visible()){
+		for (int J=0; J < VISIBLE_VALUES_PER_DISC; J++){
+			int TemporaryRegisterIndex = Disc*VALUES_PER_DISC + J;
+			assert( TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER );
+			uint16_t TemporaryValue = atomic_load_explicit( &ModbusInputRegisters[TemporaryRegisterIndex], std::memory_order_acquire );
+			std::string TemporaryLabel;
+			char TemporaryBuffer[64];
+			if (J >= 3){
+				std::snprintf(TemporaryBuffer, sizeof(TemporaryBuffer), "0x%04X", (unsigned)TemporaryValue);
+				TemporaryLabel = TemporaryBuffer;
 			}
+			else if (0x8000 > TemporaryValue){
+				double TemporaryFloatingPoint = DirectionalCoefficient[Disc] * ((double)TemporaryValue + OffsetForZeroCurrent[Disc]);
+				std::snprintf(TemporaryBuffer, sizeof(TemporaryBuffer), "%.1fμA", TemporaryFloatingPoint);
+				TemporaryLabel = TemporaryBuffer;
+				if ("-0.0μA" == TemporaryLabel){
+					TemporaryLabel = "0.0μA";
+				}
+			}
+			else{
+				TemporaryLabel = "N/A";
+			}
+			CupValueLabelPtr[Disc][J]->show();
+			CupValueLabelPtr[Disc][J]->copy_label( TemporaryLabel.c_str() );
+			CupValueLabelPtr[Disc][J]->redraw();
 		}
-		else{
-			TemporaryLabel = "N/A";
+	}
+	else{
+		for (int J=0; J < VALUES_PER_DISC; J++){
+			CupValueLabelPtr[Disc][J]->hide();
 		}
-#if 0 // debugging
-		std::cout << TemporaryLabel << std::endl;
-#endif
-		CupValueLabelPtr[Disc][J]->copy_label( TemporaryLabel.c_str() );
-		CupValueLabelPtr[Disc][J]->redraw();
 	}
 }
 
@@ -270,8 +275,21 @@ static void recalculateValues( uint8_t Disc ){
 /// and refreshes the entire single disc
 void refreshDisc(void* Data){
 	uint8_t Disc = *((uint8_t*)Data);
-	DiscGraphics[Disc]->redraw();
-	recalculateValues(Disc);
+
+	if (ModbusCoilsReadout[COIL_OFFSET_IS_CUP_INSERTED + Disc*MODBUS_COILS_PER_CUP]){
+		if (!DiscGraphics[Disc]->visible()){
+			DiscGraphics[Disc]->show();
+		}
+		else{
+			DiscGraphics[Disc]->redraw();
+		}
+	}
+	else{
+		if (DiscGraphics[Disc]->visible()){
+			DiscGraphics[Disc]->hide();
+		}
+	}
+	refreshValues(Disc);
 
 	if (0 == Disc){
 		static char TemporaryText[400];
