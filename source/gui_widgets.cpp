@@ -237,7 +237,7 @@ void TripleDiscWidgetWithHorizontalSlit::draw(){
 
 /// This function modifies texts (displayed as graphic widgets) related to a single disk based on ModbusInputRegisters
 static void refreshValues( uint8_t Disc ){
-	if (0 != DiscGraphics[Disc]->visible()){
+	if (ModbusCoilsReadout[COIL_OFFSET_IS_CUP_INSERTED + Disc*MODBUS_COILS_PER_CUP]){
 		for (int J=0; J < VISIBLE_VALUES_PER_DISC; J++){
 			int TemporaryRegisterIndex = Disc*VALUES_PER_DISC + J;
 			assert( TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER );
