@@ -20,7 +20,7 @@ std::string * SerialPortRequestedNamePtr;
 
 double DirectionalCoefficient[CUPS_NUMBER];
 
-double OffsetForZeroCurrent[CUPS_NUMBER];
+int OffsetForZeroCurrent[CUPS_NUMBER];
 
 //.................................................................................................
 // Local variables
@@ -32,6 +32,10 @@ static std::string* ConfigurationFilePathPtr;
 static std::string SerialPortRequestedName;
 
 static bool FormulaIsDefined[CUPS_NUMBER];
+
+
+
+static int parseFunctionFormula( std::regex Pattern, std::string *LinePtr, int CupIndex );
 
 //........................................................................................................
 // Function definitions
@@ -86,9 +90,9 @@ int configurationFileParsing(void) {
     }
 
     std::regex PatternSerialPort(R"(\s*(?!#)Port szeregowy:\s*([^\s]+)\s*$)");
-    std::regex PatternCup1FunctionFormula(R"(\s*(?!#)Wzór na prądy w pierwszym kubku:\s*I\s*=\s*([0-9]*\.?[0-9]+(?:[eE][+-]?[0-9]+)?)\s*\*\s*\(\s*x\s*-\s*(0x[0-9A-Fa-f]+|\d+)\s*\)\s*$)");
-    std::regex PatternCup2FunctionFormula(R"(\s*(?!#)Wzór na prądy w drugim kubku:\s*I\s*=\s*([0-9]*\.?[0-9]+(?:[eE][+-]?[0-9]+)?)\s*\*\s*\(\s*x\s*-\s*(0x[0-9A-Fa-f]+|\d+)\s*\)\s*$)");
-    std::regex PatternCup3FunctionFormula(R"(\s*(?!#)Wzór na prądy w trzecim kubku:\s*I\s*=\s*([0-9]*\.?[0-9]+(?:[eE][+-]?[0-9]+)?)\s*\*\s*\(\s*x\s*-\s*(0x[0-9A-Fa-f]+|\d+)\s*\)\s*$)");
+    std::regex PatternCup1FunctionFormula(R"(\s*(?!#)Wzór na prądy w pierwszym kubku:\s*I\s*=\s*([0-9]*\.?[0-9]+(?:[eE][+\-]?\d+)?)\s*\*\s*\(\s*x\s*([+-])\s*(0x[0-9A-Fa-f]+|\d+)\s*\)\s*$)");
+    std::regex PatternCup2FunctionFormula(R"(\s*(?!#)Wzór na prądy w drugim kubku:\s*I\s*=\s*([0-9]*\.?[0-9]+(?:[eE][+\-]?\d+)?)\s*\*\s*\(\s*x\s*([+-])\s*(0x[0-9A-Fa-f]+|\d+)\s*\)\s*$)");
+    std::regex PatternCup3FunctionFormula(R"(\s*(?!#)Wzór na prądy w trzecim kubku:\s*I\s*=\s*([0-9]*\.?[0-9]+(?:[eE][+\-]?\d+)?)\s*\*\s*\(\s*x\s*([+-])\s*(0x[0-9A-Fa-f]+|\d+)\s*\)\s*$)");
 
     while (std::getline(File, Line)) {
         if (VerboseMode){
@@ -109,115 +113,18 @@ int configurationFileParsing(void) {
         	}
         }
 
-        if (std::regex_match(Line, Matches, PatternCup1FunctionFormula)) {
-        	if (!FormulaIsDefined[0]){
-        		FormulaIsDefined[0] = true;
-        		static std::string TemporaryText = Matches[1];
-        		try {
-        			DirectionalCoefficient[0] = std::stod(TemporaryText);
-        		}
-        		catch (const std::invalid_argument&) {
-        	       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
-        	       	return ERROR_SETTINGS_CONVERTION_FORMULA;
-        		}
-        		catch (const std::out_of_range&) {
-        	       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
-        	       	return ERROR_SETTINGS_CONVERTION_FORMULA;
-        		}
-        		TemporaryText = Matches[2];
-        		try {
-        			OffsetForZeroCurrent[0] = std::stod(TemporaryText);
-        		}
-        		catch (const std::invalid_argument&) {
-        	       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
-        	       	return ERROR_SETTINGS_CONVERTION_FORMULA;
-        		}
-        		catch (const std::out_of_range&) {
-        	       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
-        	       	return ERROR_SETTINGS_CONVERTION_FORMULA;
-        		}
-        		if (VerboseMode){
-                	std::cout << "  Formuła konwersji: I = " << DirectionalCoefficient[0] << " *(x - " << OffsetForZeroCurrent[0] << ")  w linii: [" << Line << "]" << std::endl;
-                }
-        	}
-        	else{
-            	std::cout << "  Nadmiarowa formuła konwersji w linii: [" << Line << "]" << std::endl;
-                return ERROR_SETTINGS_CONVERTION_FORMULA;
-        	}
+        int Result;
+        Result = parseFunctionFormula( PatternCup1FunctionFormula, &Line, 0 );
+        if (NO_FAILURE != Result){
+        	return Result;
         }
-
-        if (std::regex_match(Line, Matches, PatternCup2FunctionFormula)) {
-        	if (!FormulaIsDefined[1]){
-        		FormulaIsDefined[1] = true;
-        		static std::string TemporaryText = Matches[1];
-        		try {
-        			DirectionalCoefficient[1] = std::stod(TemporaryText);
-        		}
-        		catch (const std::invalid_argument&) {
-        	       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
-        	       	return ERROR_SETTINGS_CONVERTION_FORMULA;
-        		}
-        		catch (const std::out_of_range&) {
-        	       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
-        	       	return ERROR_SETTINGS_CONVERTION_FORMULA;
-        		}
-        		TemporaryText = Matches[2];
-        		try {
-        			OffsetForZeroCurrent[1] = std::stod(TemporaryText);
-        		}
-        		catch (const std::invalid_argument&) {
-        	       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
-        	       	return ERROR_SETTINGS_CONVERTION_FORMULA;
-        		}
-        		catch (const std::out_of_range&) {
-        	       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
-        	       	return ERROR_SETTINGS_CONVERTION_FORMULA;
-        		}
-        		if (VerboseMode){
-                	std::cout << "  Formuła konwersji: I = " << DirectionalCoefficient[1] << " *(x - " << OffsetForZeroCurrent[1] << ")  w linii: [" << Line << "]" << std::endl;
-                }
-        	}
-        	else{
-            	std::cout << "  Nadmiarowa formuła konwersji w linii: [" << Line << "]" << std::endl;
-                return ERROR_SETTINGS_CONVERTION_FORMULA;
-        	}
+        Result = parseFunctionFormula( PatternCup2FunctionFormula, &Line, 1 );
+        if (NO_FAILURE != Result){
+        	return Result;
         }
-
-        if (std::regex_match(Line, Matches, PatternCup3FunctionFormula)) {
-        	if (!FormulaIsDefined[2]){
-        		FormulaIsDefined[2] = true;
-        		static std::string TemporaryText = Matches[1];
-        		try {
-        			DirectionalCoefficient[2] = std::stod(TemporaryText);
-        		}
-        		catch (const std::invalid_argument&) {
-        	       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
-        	       	return ERROR_SETTINGS_CONVERTION_FORMULA;
-        		}
-        		catch (const std::out_of_range&) {
-        	       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
-        	       	return ERROR_SETTINGS_CONVERTION_FORMULA;
-        		}
-        		TemporaryText = Matches[2];
-        		try {
-        			OffsetForZeroCurrent[2] = std::stod(TemporaryText);
-        		}
-        		catch (const std::invalid_argument&) {
-        	       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
-        	       	return ERROR_SETTINGS_CONVERTION_FORMULA;
-        		}
-        		catch (const std::out_of_range&) {
-        	       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
-        	       	return ERROR_SETTINGS_CONVERTION_FORMULA;
-        		}
-        		if (VerboseMode){
-                	std::cout << "  Formuła konwersji: I = " << DirectionalCoefficient[2] << " *(x - " << OffsetForZeroCurrent[2] << ")  w linii: [" << Line << "]" << std::endl;
-                }
-        	}
-        	else{
-            	std::cout << "  Nadmiarowa formuła konwersji w linii: [" << Line << "]" << std::endl;
-                return ERROR_SETTINGS_CONVERTION_FORMULA;
-        	}
+        Result = parseFunctionFormula( PatternCup3FunctionFormula, &Line, 2 );
+        if (NO_FAILURE != Result){
+        	return Result;
         }
 
         LineNumber++;
@@ -234,5 +141,68 @@ int configurationFileParsing(void) {
     	}
     }
 
+    return NO_FAILURE;
+}
+
+static int parseFunctionFormula( std::regex Pattern, std::string *LinePtr, int CupIndex ){
+    std::smatch Matches;
+    if (std::regex_match(*LinePtr, Matches, Pattern)) {
+    	if (!FormulaIsDefined[CupIndex]){
+    		FormulaIsDefined[CupIndex] = true;
+    		static std::string TemporaryText = Matches[1];
+    		try {
+    			DirectionalCoefficient[CupIndex] = std::stod(TemporaryText);
+    		}
+    		catch (const std::invalid_argument&) {
+    	       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
+    	       	return ERROR_SETTINGS_CONVERTION_FORMULA;
+    		}
+    		catch (const std::out_of_range&) {
+    	       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
+    	       	return ERROR_SETTINGS_CONVERTION_FORMULA;
+    		}
+    		bool ChangeSign;
+    		TemporaryText = Matches[2];
+    		if (TemporaryText == "+"){
+    			ChangeSign = false;
+    		}
+    		else if (TemporaryText == "-"){
+    			ChangeSign = true;
+    		}
+    		else{
+    	       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
+    	       	return ERROR_SETTINGS_CONVERTION_FORMULA;
+    		}
+
+    		TemporaryText = Matches[3];
+    		try {
+    			OffsetForZeroCurrent[CupIndex] = std::stoi(TemporaryText);
+    		}
+    		catch (const std::invalid_argument&) {
+    	       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
+    	       	return ERROR_SETTINGS_CONVERTION_FORMULA;
+    		}
+    		catch (const std::out_of_range&) {
+    	       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
+    	       	return ERROR_SETTINGS_CONVERTION_FORMULA;
+    		}
+    		if (ChangeSign){
+    			OffsetForZeroCurrent[CupIndex] = -OffsetForZeroCurrent[CupIndex];
+    		}
+
+    		if (VerboseMode){
+    			if (OffsetForZeroCurrent[CupIndex] >= 0){
+    				std::cout << "  Formuła konwersji: I = " << DirectionalCoefficient[CupIndex] << " *(x" << "+" << OffsetForZeroCurrent[CupIndex] << ")  w linii: [" << *LinePtr << "]" << std::endl;
+    			}
+    			else{
+    				std::cout << "  Formuła konwersji: I = " << DirectionalCoefficient[CupIndex] << " *(x"        << OffsetForZeroCurrent[CupIndex] << ")  w linii: [" << *LinePtr << "]" << std::endl;
+    			}
+            }
+    	}
+    	else{
+        	std::cout << "  Nadmiarowa formuła konwersji w linii: [" << *LinePtr << "]" << std::endl;
+            return ERROR_SETTINGS_CONVERTION_FORMULA;
+    	}
+    }
     return NO_FAILURE;
 }
