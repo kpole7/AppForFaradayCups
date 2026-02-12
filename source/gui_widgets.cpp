@@ -234,7 +234,8 @@ void TripleDiscWidgetWithHorizontalSlit::draw(){
 
 /// This function modifies texts (displayed as graphic widgets) related to a single disk based on ModbusInputRegisters
 static void refreshValues( uint8_t Disc ){
-	if (atomic_load_explicit( &ModbusCoilsReadout[COIL_OFFSET_IS_CUP_INSERTED + Disc*MODBUS_COILS_PER_CUP], std::memory_order_acquire )){
+	bool IsTransmissionCorrect = isTransmissionCorrect();
+	if (IsTransmissionCorrect && atomic_load_explicit( &ModbusCoilsReadout[COIL_OFFSET_IS_CUP_INSERTED + Disc*MODBUS_COILS_PER_CUP], std::memory_order_acquire )){
 		for (int J=0; J < VISIBLE_VALUES_PER_DISC; J++){
 			int TemporaryRegisterIndex = Disc*VALUES_PER_DISC + J;
 			assert( TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER );
@@ -273,7 +274,9 @@ static void refreshValues( uint8_t Disc ){
 void refreshDisc(void* Data){
 	uint8_t Disc = *((uint8_t*)Data);
 
-	if (atomic_load_explicit( &ModbusCoilsReadout[COIL_OFFSET_IS_CUP_INSERTED + Disc*MODBUS_COILS_PER_CUP], std::memory_order_acquire )){
+	bool IsTransmissionCorrect = isTransmissionCorrect();
+
+	if (IsTransmissionCorrect && atomic_load_explicit( &ModbusCoilsReadout[COIL_OFFSET_IS_CUP_INSERTED + Disc*MODBUS_COILS_PER_CUP], std::memory_order_acquire )){
 		if (!DiscGraphics[Disc]->visible()){
 			DiscGraphics[Disc]->show();
 		}
@@ -289,7 +292,7 @@ void refreshDisc(void* Data){
 
 	refreshValues(Disc);
 
-	if (atomic_load_explicit( &ModbusCoilsReadout[COIL_OFFSET_IS_CUP_BLOCKED + Disc*MODBUS_COILS_PER_CUP], std::memory_order_acquire )){
+	if (IsTransmissionCorrect && atomic_load_explicit( &ModbusCoilsReadout[COIL_OFFSET_IS_CUP_BLOCKED + Disc*MODBUS_COILS_PER_CUP], std::memory_order_acquire )){
 		if (!PadlockImagePtr[Disc]->visible()){
 			PadlockImagePtr[Disc]->show();
 		}
@@ -300,6 +303,12 @@ void refreshDisc(void* Data){
 		}
 	}
 
+	if (IsTransmissionCorrect){
+		UnconnectedImagePtr[0]->hide();
+	}
+	else{
+		UnconnectedImagePtr[0]->show();
+	}
 
 	if (0 == Disc){
 		static char TemporaryText[400];

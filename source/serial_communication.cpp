@@ -26,6 +26,8 @@
 #define LOW_LEVEL_MODBUS_RESET_LIMIT		22	// condition for attempting low level reset of Modbus
 #define LOW_LEVEL_CONTINUOUS_COUNTING_MAX	(LOW_LEVEL_CONTINUOUS_ERRORS_LIMIT * 5)
 
+#define TRANSMISSION_CORRECTNESS_LIMIT		((LOW_LEVEL_CONTINUOUS_COUNTING_MAX * 3) / 4)
+
 //...............................................................................................
 // Types definitions
 //...............................................................................................
@@ -231,6 +233,10 @@ static void peripheralThreadHandler(void){
 	FsmState = ModbusFsmStates::STOPPED;
 	closeModbus();
 	atomic_store_explicit( &PeripheralsClosedFlag, true, std::memory_order_release );
+}
+
+bool isTransmissionCorrect(void){
+	return atomic_load_explicit( &TransmissionQualityLowLevelIndicator, std::memory_order_acquire ) > TRANSMISSION_CORRECTNESS_LIMIT;
 }
 
 char * getTransmissionQualityIndicatorTextForGui(void){

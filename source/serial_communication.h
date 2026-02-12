@@ -20,4 +20,6 @@ char * getTransmissionQualityIndicatorTextForGui(void);
 
 char * getTransmissionQualityIndicatorTextForDebugging(void);
 
+bool isTransmissionCorrect(void);
+
 #endif // SOURCE_SERIAL_COMMUNICATION_H_
