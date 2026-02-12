@@ -31,12 +31,11 @@
 //...............................................................................................
 
 enum class ModbusFsmStates{
-	STOPPED,
-	CLOSED,
 	OPEN,
 	READING_COILS,
 	READING_INPUT_REGISTERS,
 	WRITING_COIL,
+	STOPPED,
 };
 
 //...............................................................................................
@@ -151,7 +150,8 @@ static void peripheralThreadHandler(void){
 		case ModbusFsmStates::READING_COILS:
 		case ModbusFsmStates::READING_INPUT_REGISTERS:
 		case ModbusFsmStates::WRITING_COIL:
-		{	//normal mode of operation
+		{
+			//normal mode of operation
 			FailureCodes Result;
 			if (ModbusFsmStates::READING_COILS != FsmState) {
 				FsmState = ModbusFsmStates::READING_COILS;
@@ -203,11 +203,32 @@ static void peripheralThreadHandler(void){
 			}
 		}
 			break;
+
+		case ModbusFsmStates::STOPPED:
+			// illegal state here
+			break;
+
 		default:
 			break;
 		}
-	}
+
+#if 1 // debugging
+		static int DebugFsmStatesPrintoutCounter;
+		std::cout << "[" << (int)FsmState  << "] ";
+		if (((ModbusFsmStates::READING_COILS != FsmState) && (ModbusFsmStates::READING_INPUT_REGISTERS != FsmState)) ||
+				(DebugFsmStatesPrintoutCounter > 40))
+		{
+			std::cout << std::endl;
+			DebugFsmStatesPrintoutCounter = 0;
+		}
+		else{
+			DebugFsmStatesPrintoutCounter++;
+		}
+#endif
+
+	} // while (...)
 	// exit
+	FsmState = ModbusFsmStates::STOPPED;
 	closeModbus();
 	atomic_store_explicit( &PeripheralsClosedFlag, true, std::memory_order_release );
 }
