@@ -7,15 +7,16 @@
 // Preprocessor directives
 //.................................................................................................
 
-#define CUPS_NUMBER						3
-#define VALUES_PER_DISC					5
-#define VISIBLE_VALUES_PER_DISC			3
+#define CUPS_NUMBER							3
+#define VALUES_PER_DISC						5
+#define VISIBLE_VALUES_PER_DISC				3
 
-#define CONFIGURATION_FILE_NAME			"PomiarWiązki.cfg"
+#define CONFIGURATION_FILE_NAME				"PomiarWiązki.cfg"
 
-#define PERIPHERAL_THREAD_LOOP_DURATION	50	// milliseconds
+#define PERIPHERAL_THREAD_LOOP_DURATION		50	// milliseconds
+#define DELAY_MULTIPLIER_ON_ERROR			10
 
-#define MODBUS_RESPONSE_TIMEOUT			40	// milliseconds
+#define MODBUS_RESPONSE_TIMEOUT				40	// milliseconds
 
 enum class FailureCodes
 {

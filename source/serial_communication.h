@@ -16,4 +16,8 @@ void serialCommunicationStart(void);
 
 void serialCommunicationExit(void);
 
+char * getTransmissionQualityIndicatorTextForGui(void);
+
+char * getTransmissionQualityIndicatorTextForDebugging(void);
+
 #endif // SOURCE_SERIAL_COMMUNICATION_H_

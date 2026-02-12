@@ -16,6 +16,7 @@
 #include "gui_widgets.h"
 #include "shared_data.h"
 #include "settings_file.h"
+#include "serial_communication.h"
 
 //.................................................................................................
 // Preprocessor directives
@@ -309,7 +310,8 @@ void refreshDisc(void* Data){
 		snprintf( TemporaryText, sizeof(TemporaryText)-1,
 				"Port %s\n"
 				"In: %04X %04X %04X %04X %04X\n"
-				"Coils %c %c %c",
+				"Coils %c %c %c\n"
+				"Modbus %s",
 				SerialPortRequestedNamePtr->c_str(),
 				(uint16_t)atomic_load_explicit( &ModbusInputRegisters[0], std::memory_order_acquire ),
 				(uint16_t)atomic_load_explicit( &ModbusInputRegisters[1], std::memory_order_acquire ),
@@ -318,7 +320,8 @@ void refreshDisc(void* Data){
 				(uint16_t)atomic_load_explicit( &ModbusInputRegisters[4], std::memory_order_acquire ),
 				atomic_load_explicit( &ModbusCoilsReadout[0], std::memory_order_acquire )? '1' : '0',
 				atomic_load_explicit( &ModbusCoilsReadout[1], std::memory_order_acquire )? '1' : '0',
-				atomic_load_explicit( &ModbusCoilsReadout[2], std::memory_order_acquire )? '1' : '0'  );
+				atomic_load_explicit( &ModbusCoilsReadout[2], std::memory_order_acquire )? '1' : '0',
+				getTransmissionQualityIndicatorTextForGui() );
 		StatusTextBoxPtr[0]->label( TemporaryText );
 	}
 }

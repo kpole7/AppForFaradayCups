@@ -18,25 +18,31 @@
 // Preprocessor directives
 //.................................................................................................
 
-#define SHUT_DOWN_TIMEOUT					400 // milliseconds
+#define SHUT_DOWN_TIMEOUT					1000 // milliseconds
 #define SHUT_DOWN_LOOP_DELAY				20   // milliseconds
 #define SHUT_DOWN_COUNT_DOWN				(SHUT_DOWN_TIMEOUT/SHUT_DOWN_LOOP_DELAY)
+
+#define LOW_LEVEL_CONTINUOUS_ERRORS_LIMIT	20
+#define LOW_LEVEL_CONTINUOUS_COUNTING_MAX	(LOW_LEVEL_CONTINUOUS_ERRORS_LIMIT * 5)
 
 //...............................................................................................
 // Local variables
 //...............................................................................................
 
 /// This flag is set when the application is being closed
-std::atomic<bool> ClosePeripheralsFlag;
+static std::atomic<bool> ClosePeripheralsFlag;
 
 /// This flag is set when the peripherals are closed
-std::atomic<bool> PeripheralsClosedFlag;
+static std::atomic<bool> PeripheralsClosedFlag;
 
 static std::thread peripheralThread;
 
 static std::chrono::high_resolution_clock::time_point PeripheralThreadLoopStart;
 static int64_t PeripheralThreadTimeInMilliseconds;
 
+static uint16_t LowLevelContinuousErrors, LowLevelSuccessfulTransmission;
+
+static std::atomic<int> TransmissionQualityLowLevelIndicator;
 
 //.................................................................................................
 // Local function prototypes
@@ -51,6 +57,8 @@ static void peripheralThreadHandler(void);
 void initializeModuleSerialCommunication(void){
 	atomic_store_explicit( &ClosePeripheralsFlag, false, std::memory_order_release );
 	atomic_store_explicit( &PeripheralsClosedFlag, true, std::memory_order_release );
+	LowLevelContinuousErrors = 0;
+	LowLevelSuccessfulTransmission = LOW_LEVEL_CONTINUOUS_COUNTING_MAX;
 }
 
 
@@ -100,11 +108,19 @@ static void peripheralThreadHandler(void){
 
 	PeripheralThreadTimeInMilliseconds = 0;
 	PeripheralThreadLoopStart = std::chrono::high_resolution_clock::now();
+	int DelayMultiplierOnError;
 	while( !atomic_load_explicit( &ClosePeripheralsFlag, std::memory_order_acquire )){
 		// measure fixed time intervals
 		std::chrono::high_resolution_clock::time_point TimeNow;
 		std::chrono::milliseconds DurationTime;
-		PeripheralThreadTimeInMilliseconds += PERIPHERAL_THREAD_LOOP_DURATION;
+		if (LOW_LEVEL_CONTINUOUS_ERRORS_LIMIT <= LowLevelContinuousErrors){
+			PeripheralThreadTimeInMilliseconds += DELAY_MULTIPLIER_ON_ERROR * PERIPHERAL_THREAD_LOOP_DURATION;
+			DelayMultiplierOnError = DELAY_MULTIPLIER_ON_ERROR;
+		}
+		else{
+			PeripheralThreadTimeInMilliseconds += PERIPHERAL_THREAD_LOOP_DURATION;
+			DelayMultiplierOnError = 1;
+		}
 		do{
 			// delay so as not to overload the processor core
 			usleep(2000);
@@ -114,14 +130,36 @@ static void peripheralThreadHandler(void){
 		}while(DurationTime.count() < PeripheralThreadTimeInMilliseconds);
 
 		// essential action
+		FailureCodes Result;
 		static bool ModbusReadingTurn;
 		ModbusReadingTurn = !ModbusReadingTurn;
 		if (ModbusReadingTurn){
-			readInputRegisters();
+			Result = readInputRegisters();
 		}
 		else{
-			readCoils();
+			Result = readCoils();
 		}
+		if (FailureCodes::NO_FAILURE == Result){
+			if (LOW_LEVEL_CONTINUOUS_COUNTING_MAX > LowLevelSuccessfulTransmission){
+				LowLevelSuccessfulTransmission += DelayMultiplierOnError;
+				if (LowLevelSuccessfulTransmission > LOW_LEVEL_CONTINUOUS_COUNTING_MAX){
+					LowLevelSuccessfulTransmission = LOW_LEVEL_CONTINUOUS_COUNTING_MAX;
+				}
+			}
+			LowLevelContinuousErrors = 0;
+		}
+		else{
+			if (LOW_LEVEL_CONTINUOUS_COUNTING_MAX > LowLevelContinuousErrors){
+				LowLevelContinuousErrors++;
+			}
+			if (LowLevelSuccessfulTransmission > DelayMultiplierOnError){
+				LowLevelSuccessfulTransmission -= DelayMultiplierOnError;
+			}
+			else{
+				LowLevelSuccessfulTransmission = 0;
+			}
+		}
+		atomic_store_explicit( &TransmissionQualityLowLevelIndicator, LowLevelSuccessfulTransmission, std::memory_order_release );
 
 #if 0 // debugging
 		std::chrono::high_resolution_clock::time_point TimeAfter = std::chrono::high_resolution_clock::now();
@@ -141,3 +179,20 @@ static void peripheralThreadHandler(void){
 	closeModbus();
 	atomic_store_explicit( &PeripheralsClosedFlag, true, std::memory_order_release );
 }
+
+char * getTransmissionQualityIndicatorTextForGui(void){
+	static char TransmissionQualityIndicatorText[10];
+	double TransmissionQualityIndicatorFactor =
+			(100.0 * atomic_load_explicit( &TransmissionQualityLowLevelIndicator, std::memory_order_acquire )) / (double)LOW_LEVEL_CONTINUOUS_COUNTING_MAX;
+	snprintf( TransmissionQualityIndicatorText, sizeof(TransmissionQualityIndicatorText)-1, "%5.1f%%", TransmissionQualityIndicatorFactor );
+	return TransmissionQualityIndicatorText;
+}
+
+char * getTransmissionQualityIndicatorTextForDebugging(void){
+	static char TransmissionQualityIndicatorText[10];
+	double TransmissionQualityIndicatorFactor =
+			(100.0 * atomic_load_explicit( &TransmissionQualityLowLevelIndicator, std::memory_order_acquire )) / (double)LOW_LEVEL_CONTINUOUS_COUNTING_MAX;
+	snprintf( TransmissionQualityIndicatorText, sizeof(TransmissionQualityIndicatorText)-1, "%5.1f%%", TransmissionQualityIndicatorFactor );
+	return TransmissionQualityIndicatorText;
+}
+
