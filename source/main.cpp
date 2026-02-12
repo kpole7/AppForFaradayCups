@@ -1,5 +1,10 @@
 /// @file main.cpp
 ///
+/// Abbreviations:
+///		uA = micro amperes
+/// 	FSM = finite state machine
+
+
 
 #include <iostream>
 #include <string>

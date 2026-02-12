@@ -22,8 +22,22 @@
 #define SHUT_DOWN_LOOP_DELAY				20   // milliseconds
 #define SHUT_DOWN_COUNT_DOWN				(SHUT_DOWN_TIMEOUT/SHUT_DOWN_LOOP_DELAY)
 
-#define LOW_LEVEL_CONTINUOUS_ERRORS_LIMIT	20
+#define LOW_LEVEL_CONTINUOUS_ERRORS_LIMIT	20	// condition for attempting recovery
+#define LOW_LEVEL_MODBUS_RESET_LIMIT		22	// condition for attempting low level reset of Modbus
 #define LOW_LEVEL_CONTINUOUS_COUNTING_MAX	(LOW_LEVEL_CONTINUOUS_ERRORS_LIMIT * 5)
+
+//...............................................................................................
+// Types definitions
+//...............................................................................................
+
+enum class ModbusFsmStates{
+	STOPPED,
+	CLOSED,
+	OPEN,
+	READING_COILS,
+	READING_INPUT_REGISTERS,
+	WRITING_COIL,
+};
 
 //...............................................................................................
 // Local variables
@@ -60,7 +74,6 @@ void initializeModuleSerialCommunication(void){
 	LowLevelContinuousErrors = 0;
 	LowLevelSuccessfulTransmission = LOW_LEVEL_CONTINUOUS_COUNTING_MAX;
 }
-
 
 /// This function initializes the module variables and launches a new thread to support peripherals
 void serialCommunicationStart(void){
@@ -109,8 +122,11 @@ static void peripheralThreadHandler(void){
 	PeripheralThreadTimeInMilliseconds = 0;
 	PeripheralThreadLoopStart = std::chrono::high_resolution_clock::now();
 	int DelayMultiplierOnError;
+	ModbusFsmStates FsmState = ModbusFsmStates::OPEN;
+
 	while( !atomic_load_explicit( &ClosePeripheralsFlag, std::memory_order_acquire )){
-		// measure fixed time intervals
+
+		// timing
 		std::chrono::high_resolution_clock::time_point TimeNow;
 		std::chrono::milliseconds DurationTime;
 		if (LOW_LEVEL_CONTINUOUS_ERRORS_LIMIT <= LowLevelContinuousErrors){
@@ -130,49 +146,65 @@ static void peripheralThreadHandler(void){
 		}while(DurationTime.count() < PeripheralThreadTimeInMilliseconds);
 
 		// essential action
-		FailureCodes Result;
-		static bool ModbusReadingTurn;
-		ModbusReadingTurn = !ModbusReadingTurn;
-		if (ModbusReadingTurn){
-			Result = readInputRegisters();
-		}
-		else{
-			Result = readCoils();
-		}
-		if (FailureCodes::NO_FAILURE == Result){
-			if (LOW_LEVEL_CONTINUOUS_COUNTING_MAX > LowLevelSuccessfulTransmission){
-				LowLevelSuccessfulTransmission += DelayMultiplierOnError;
-				if (LowLevelSuccessfulTransmission > LOW_LEVEL_CONTINUOUS_COUNTING_MAX){
-					LowLevelSuccessfulTransmission = LOW_LEVEL_CONTINUOUS_COUNTING_MAX;
+		switch (FsmState) {
+		case ModbusFsmStates::OPEN:
+		case ModbusFsmStates::READING_COILS:
+		case ModbusFsmStates::READING_INPUT_REGISTERS:
+		case ModbusFsmStates::WRITING_COIL:
+		{	//normal mode of operation
+			FailureCodes Result;
+			if (ModbusFsmStates::READING_COILS != FsmState) {
+				FsmState = ModbusFsmStates::READING_COILS;
+				Result = readCoils();
+			}
+			else {
+				FsmState = ModbusFsmStates::READING_INPUT_REGISTERS;
+				Result = readInputRegisters();
+			}
+			if (FailureCodes::NO_FAILURE == Result) {
+				if (LOW_LEVEL_CONTINUOUS_COUNTING_MAX
+						> LowLevelSuccessfulTransmission) {
+					LowLevelSuccessfulTransmission += DelayMultiplierOnError;
+					if (LowLevelSuccessfulTransmission
+							> LOW_LEVEL_CONTINUOUS_COUNTING_MAX) {
+						LowLevelSuccessfulTransmission =
+								LOW_LEVEL_CONTINUOUS_COUNTING_MAX;
+					}
+				}
+				LowLevelContinuousErrors = 0;
+			}
+			else {
+				if (LOW_LEVEL_CONTINUOUS_COUNTING_MAX
+						> LowLevelContinuousErrors) {
+					LowLevelContinuousErrors++;
+				}
+				if (LowLevelSuccessfulTransmission > DelayMultiplierOnError) {
+					LowLevelSuccessfulTransmission -= DelayMultiplierOnError;
+				}
+				else {
+					LowLevelSuccessfulTransmission = 0;
 				}
 			}
-			LowLevelContinuousErrors = 0;
-		}
-		else{
-			if (LOW_LEVEL_CONTINUOUS_COUNTING_MAX > LowLevelContinuousErrors){
-				LowLevelContinuousErrors++;
-			}
-			if (LowLevelSuccessfulTransmission > DelayMultiplierOnError){
-				LowLevelSuccessfulTransmission -= DelayMultiplierOnError;
-			}
-			else{
-				LowLevelSuccessfulTransmission = 0;
-			}
-		}
-		atomic_store_explicit( &TransmissionQualityLowLevelIndicator, LowLevelSuccessfulTransmission, std::memory_order_release );
+			atomic_store_explicit(&TransmissionQualityLowLevelIndicator,
+					LowLevelSuccessfulTransmission, std::memory_order_release);
 
 #if 0 // debugging
-		std::chrono::high_resolution_clock::time_point TimeAfter = std::chrono::high_resolution_clock::now();
-		std::chrono::milliseconds ProcessingTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeAfter - TimeNow);
-		std::cout << "Peripheral thread " << PeripheralThreadTimeInMilliseconds << "  " << ProcessingTime.count() << std::endl;
+			std::chrono::high_resolution_clock::time_point TimeAfter = std::chrono::high_resolution_clock::now();
+			std::chrono::milliseconds ProcessingTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeAfter - TimeNow);
+			std::cout << "Peripheral thread " << PeripheralThreadTimeInMilliseconds << "  " << ProcessingTime.count() << std::endl;
 #endif
 
-		if (ModbusReadingTurn){
-			Fl::awake( refreshDisc, (void*)&StaticArguments[0] );
+			if (ModbusFsmStates::READING_INPUT_REGISTERS == FsmState) {
+				Fl::awake(refreshDisc, (void*) &StaticArguments[0]);
 #if 0
-			Fl::awake( refreshDisc, (void*)&StaticArguments[1] );
-			Fl::awake( refreshDisc, (void*)&StaticArguments[2] );
+				Fl::awake( refreshDisc, (void*)&StaticArguments[1] );
+				Fl::awake( refreshDisc, (void*)&StaticArguments[2] );
 #endif
+			}
+		}
+			break;
+		default:
+			break;
 		}
 	}
 	// exit
