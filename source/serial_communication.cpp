@@ -212,7 +212,7 @@ static void peripheralThreadHandler(void){
 			break;
 		}
 
-#if 1 // debugging
+#if 0 // debugging
 		static int DebugFsmStatesPrintoutCounter;
 		std::cout << "[" << (int)FsmState  << "] ";
 		if (((ModbusFsmStates::READING_COILS != FsmState) && (ModbusFsmStates::READING_INPUT_REGISTERS != FsmState)) ||

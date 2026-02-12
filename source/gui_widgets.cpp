@@ -159,6 +159,7 @@ void initializeGraphicWidgets(void){
 /// This function creates a single disc with texts
 static void initializeDiscWithNoSlit( uint8_t DiscIndex, uint16_t X, uint16_t Y ){
 	DiscGraphics[DiscIndex] = new TripleDiscWidgetWithNoSlit( X+20, Y+20, 256, 256 );
+	DiscGraphics[DiscIndex]->hide();
 
 	for (int J=0; J <VALUES_PER_DISC; J++){
 		CupValueLabelPtr[DiscIndex][J]  = new Fl_Box(X+20, Y+DISC_VALUE1_Y+J*(DISC_VALUE2_Y-DISC_VALUE1_Y), 256, 30, "?" );
@@ -166,12 +167,7 @@ static void initializeDiscWithNoSlit( uint8_t DiscIndex, uint16_t X, uint16_t Y 
 		CupValueLabelPtr[DiscIndex][J]->labelfont( FL_HELVETICA_BOLD );
 		CupValueLabelPtr[DiscIndex][J]->labelsize( 26 );
 
-
-		if (J > 2){
-			CupValueLabelPtr[DiscIndex][J]->hide();
-		}
-
-
+		CupValueLabelPtr[DiscIndex][J]->hide();
 	}
 
 	refreshValues(DiscIndex);
@@ -238,7 +234,7 @@ void TripleDiscWidgetWithHorizontalSlit::draw(){
 
 /// This function modifies texts (displayed as graphic widgets) related to a single disk based on ModbusInputRegisters
 static void refreshValues( uint8_t Disc ){
-	if (ModbusCoilsReadout[COIL_OFFSET_IS_CUP_INSERTED + Disc*MODBUS_COILS_PER_CUP]){
+	if (atomic_load_explicit( &ModbusCoilsReadout[COIL_OFFSET_IS_CUP_INSERTED + Disc*MODBUS_COILS_PER_CUP], std::memory_order_acquire )){
 		for (int J=0; J < VISIBLE_VALUES_PER_DISC; J++){
 			int TemporaryRegisterIndex = Disc*VALUES_PER_DISC + J;
 			assert( TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER );
@@ -277,7 +273,7 @@ static void refreshValues( uint8_t Disc ){
 void refreshDisc(void* Data){
 	uint8_t Disc = *((uint8_t*)Data);
 
-	if (ModbusCoilsReadout[COIL_OFFSET_IS_CUP_INSERTED + Disc*MODBUS_COILS_PER_CUP]){
+	if (atomic_load_explicit( &ModbusCoilsReadout[COIL_OFFSET_IS_CUP_INSERTED + Disc*MODBUS_COILS_PER_CUP], std::memory_order_acquire )){
 		if (!DiscGraphics[Disc]->visible()){
 			DiscGraphics[Disc]->show();
 		}
@@ -293,7 +289,7 @@ void refreshDisc(void* Data){
 
 	refreshValues(Disc);
 
-	if (ModbusCoilsReadout[COIL_OFFSET_IS_CUP_BLOCKED + Disc*MODBUS_COILS_PER_CUP]){
+	if (atomic_load_explicit( &ModbusCoilsReadout[COIL_OFFSET_IS_CUP_BLOCKED + Disc*MODBUS_COILS_PER_CUP], std::memory_order_acquire )){
 		if (!PadlockImagePtr[Disc]->visible()){
 			PadlockImagePtr[Disc]->show();
 		}
