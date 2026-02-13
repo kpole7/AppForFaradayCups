@@ -103,6 +103,15 @@ private:
     std::unique_ptr<Fl_PNG_Image> img_;
 };
 
+
+//.................................................................................................
+// Local constants
+//.................................................................................................
+
+static const char TextCupIsInserted[] = "Kubek Wsunięty";
+static const char TextCupIsRemoved[]  = "Kubek Wysunięty";
+
+
 //.................................................................................................
 // Local variables
 //.................................................................................................
@@ -112,10 +121,14 @@ static TripleDiscWidgetWithNoSlit * DiscGraphics[CUPS_NUMBER];
 static Fl_Box * CupValueLabelPtr[CUPS_NUMBER][VALUES_PER_DISC];
 
 static ImageWidget * PadlockImagePtr[CUPS_NUMBER];
-
 static ImageWidget * UnconnectedImagePtr[CUPS_NUMBER];
 
+static Fl_Box* LockoutTextBoxPtr[CUPS_NUMBER];
+static Fl_Box* UnconnectedTextBoxPtr[CUPS_NUMBER];
+
 static Fl_Button* AcceptButtonPtr;
+
+static Fl_Box* GeneralStatusTextBoxPtr;
 
 static Fl_Box* StatusTextBoxPtr[CUPS_NUMBER];
 
@@ -137,10 +150,28 @@ static void acceptSetPointDialogCallback(Fl_Widget* Widget, void* Data);
 
 void initializeGraphicWidgets(void){
 	initializeDiscWithNoSlit( 0, 30, 40 );
-	PadlockImagePtr[0]     = new ImageWidget( 360, 90, 54, 54, padlock_png, padlock_png_len, nullptr );
-	UnconnectedImagePtr[0] = new ImageWidget( 360, 90, 51, 51, unconnected_png, unconnected_png_len, nullptr );
+	PadlockImagePtr[0]     = new ImageWidget( 360, 60, 54, 54, padlock_png, padlock_png_len, nullptr );
+	UnconnectedImagePtr[0] = new ImageWidget( 360, 60, 51, 51, unconnected_png, unconnected_png_len, nullptr );
 	PadlockImagePtr[0]->hide();
 	UnconnectedImagePtr[0]->hide();
+
+	LockoutTextBoxPtr[0] = new Fl_Box(330, 120, 150, 25, "Blokada Aktywna");
+	LockoutTextBoxPtr[0]->hide();
+	LockoutTextBoxPtr[0]->labelfont( FL_HELVETICA_BOLD );
+	LockoutTextBoxPtr[0]->labelsize( 16 );
+	LockoutTextBoxPtr[0]->labelcolor( COLOR_DARK_RED );
+	LockoutTextBoxPtr[0]->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
+
+	UnconnectedTextBoxPtr[0] = new Fl_Box(310, 112, 150, 45, "Błąd Modbus:\nBrak Połączenia");
+	UnconnectedTextBoxPtr[0]->hide();
+	UnconnectedTextBoxPtr[0]->labelfont( FL_HELVETICA_BOLD );
+	UnconnectedTextBoxPtr[0]->labelsize( 16 );
+#if 0 // background
+	UnconnectedTextBoxPtr[0]->color( COLOR_WEAK_BLUE );
+	UnconnectedTextBoxPtr[0]->box(FL_FLAT_BOX);
+#endif
+	UnconnectedTextBoxPtr[0]->labelcolor( COLOR_DARK_RED );
+	UnconnectedTextBoxPtr[0]->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
 	AcceptButtonPtr = new Fl_Button( 400, 190, 90, 40, "Wsuń" );
 	AcceptButtonPtr->box(FL_BORDER_BOX);
@@ -149,11 +180,17 @@ void initializeGraphicWidgets(void){
 	AcceptButtonPtr->labelsize( ORDINARY_TEXT_SIZE );
 	AcceptButtonPtr->callback( acceptSetPointDialogCallback, nullptr );
 
-	StatusTextBoxPtr[0] = new Fl_Box(290, 240, 210, 60, "tu powinny być różne dane");
+	GeneralStatusTextBoxPtr = new Fl_Box(10, 30, 490, 20, "Tu powinny być różne dane");
+	GeneralStatusTextBoxPtr->labelfont( FL_COURIER );
+	GeneralStatusTextBoxPtr->labelsize( 11 );
+	GeneralStatusTextBoxPtr->labelcolor( FL_BLACK );
+	GeneralStatusTextBoxPtr->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
+
+	StatusTextBoxPtr[0] = new Fl_Box(300, 260, 210, 60, "tu powinny być różne dane");
 	StatusTextBoxPtr[0]->labelfont( FL_COURIER );
 	StatusTextBoxPtr[0]->labelsize( 11 );
 	StatusTextBoxPtr[0]->labelcolor( FL_BLACK );
-	StatusTextBoxPtr[0]->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP); // FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP
+	StatusTextBoxPtr[0]->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 }
 
 /// This function creates a single disc with texts
@@ -295,39 +332,70 @@ void refreshDisc(void* Data){
 	if (IsTransmissionCorrect && atomic_load_explicit( &ModbusCoilsReadout[COIL_OFFSET_IS_CUP_BLOCKED + Disc*MODBUS_COILS_PER_CUP], std::memory_order_acquire )){
 		if (!PadlockImagePtr[Disc]->visible()){
 			PadlockImagePtr[Disc]->show();
+			LockoutTextBoxPtr[0]->show();
 		}
 	}
 	else{
 		if (PadlockImagePtr[Disc]->visible()){
 			PadlockImagePtr[Disc]->hide();
+			LockoutTextBoxPtr[0]->hide();
 		}
 	}
 
 	if (IsTransmissionCorrect){
 		UnconnectedImagePtr[0]->hide();
+		UnconnectedTextBoxPtr[0]->hide();
 	}
 	else{
 		UnconnectedImagePtr[0]->show();
+		UnconnectedTextBoxPtr[0]->show();
+	}
+
+	if (2 != StatusLevelForGui){
+		GeneralStatusTextBoxPtr->hide();
+	}
+	else{
+		static char GeneralDescriptionText[800];
+		GeneralStatusTextBoxPtr->show();
+		snprintf( GeneralDescriptionText, sizeof(GeneralDescriptionText)-1,
+				"Port %s    Modbus %s",
+				SerialPortRequestedNamePtr->c_str(),
+				getTransmissionQualityIndicatorTextForGui() );
+		GeneralStatusTextBoxPtr->label( GeneralDescriptionText );
 	}
 
 	if (0 == Disc){
-		static char TemporaryText[400];
-		snprintf( TemporaryText, sizeof(TemporaryText)-1,
-				"Port %s\n"
-				"In: %04X %04X %04X %04X %04X\n"
-				"Coils %c %c %c\n"
-				"Modbus %s",
-				SerialPortRequestedNamePtr->c_str(),
-				(uint16_t)atomic_load_explicit( &ModbusInputRegisters[0], std::memory_order_acquire ),
-				(uint16_t)atomic_load_explicit( &ModbusInputRegisters[1], std::memory_order_acquire ),
-				(uint16_t)atomic_load_explicit( &ModbusInputRegisters[2], std::memory_order_acquire ),
-				(uint16_t)atomic_load_explicit( &ModbusInputRegisters[3], std::memory_order_acquire ),
-				(uint16_t)atomic_load_explicit( &ModbusInputRegisters[4], std::memory_order_acquire ),
-				atomic_load_explicit( &ModbusCoilsReadout[0], std::memory_order_acquire )? '1' : '0',
-				atomic_load_explicit( &ModbusCoilsReadout[1], std::memory_order_acquire )? '1' : '0',
-				atomic_load_explicit( &ModbusCoilsReadout[2], std::memory_order_acquire )? '1' : '0',
-				getTransmissionQualityIndicatorTextForGui() );
-		StatusTextBoxPtr[0]->label( TemporaryText );
+		if ((0 == StatusLevelForGui) || (!IsTransmissionCorrect)){
+			StatusTextBoxPtr[0]->hide();
+		}
+		else{
+			StatusTextBoxPtr[0]->show();
+			if (1 == StatusLevelForGui){
+				if (atomic_load_explicit( &ModbusCoilsReadout[0], std::memory_order_acquire )){
+					StatusTextBoxPtr[0]->label( TextCupIsInserted );
+				}
+				else{
+					StatusTextBoxPtr[0]->label( TextCupIsRemoved );
+				}
+			}
+			else{
+				static char TemporaryText[800];
+				snprintf( TemporaryText, sizeof(TemporaryText)-1,
+						"%s\n"
+						"In: %04X %04X %04X %04X %04X\n"
+						"Coils %c %c %c",
+						atomic_load_explicit( &ModbusCoilsReadout[0], std::memory_order_acquire )? TextCupIsInserted : TextCupIsRemoved,
+						(uint16_t)atomic_load_explicit( &ModbusInputRegisters[0], std::memory_order_acquire ),
+						(uint16_t)atomic_load_explicit( &ModbusInputRegisters[1], std::memory_order_acquire ),
+						(uint16_t)atomic_load_explicit( &ModbusInputRegisters[2], std::memory_order_acquire ),
+						(uint16_t)atomic_load_explicit( &ModbusInputRegisters[3], std::memory_order_acquire ),
+						(uint16_t)atomic_load_explicit( &ModbusInputRegisters[4], std::memory_order_acquire ),
+						atomic_load_explicit( &ModbusCoilsReadout[0], std::memory_order_acquire )? '1' : '0',
+						atomic_load_explicit( &ModbusCoilsReadout[1], std::memory_order_acquire )? '1' : '0',
+						atomic_load_explicit( &ModbusCoilsReadout[2], std::memory_order_acquire )? '1' : '0' );
+				StatusTextBoxPtr[0]->label( TemporaryText );
+			}
+		}
 	}
 }
 
