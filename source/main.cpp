@@ -95,6 +95,7 @@ int main(int argc, char** argv) {
 	FailureCodes ErrorCode = mainInitializations( argc, argv);
 
     // Main window of the application
+	Fl::scheme("gtk+");
 	ApplicationWindow = new WindowEscProof(MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT, "Pomiar Wiązki w Linii Iniekcyjnej" );
 	ApplicationWindow->begin();
 	ApplicationWindow->color( COLOR_BACKGROUND );
@@ -102,6 +103,7 @@ int main(int argc, char** argv) {
 
     // Menu
     Fl_Menu_Bar MenuWidget(0, 0, 600, 30);
+    MenuWidget.box(FL_FLAT_BOX);
 
     MenuWidget.add(                 "Narzędzia/Status/Ukryty", 0, callbackForMenuItemStatus, (void*)0, FL_MENU_RADIO);
 	int indexOfMenuItemStatusNormal = MenuWidget.add("Narzędzia/Status/Normalny", 0, callbackForMenuItemStatus, (void*)1, FL_MENU_RADIO);

@@ -316,7 +316,7 @@ void refreshDisc(void* Data){
 				"Port %s\n"
 				"In: %04X %04X %04X %04X %04X\n"
 				"Coils %c %c %c\n"
-				"Modbus %s;  status: %d",
+				"Modbus %s",
 				SerialPortRequestedNamePtr->c_str(),
 				(uint16_t)atomic_load_explicit( &ModbusInputRegisters[0], std::memory_order_acquire ),
 				(uint16_t)atomic_load_explicit( &ModbusInputRegisters[1], std::memory_order_acquire ),
@@ -326,8 +326,7 @@ void refreshDisc(void* Data){
 				atomic_load_explicit( &ModbusCoilsReadout[0], std::memory_order_acquire )? '1' : '0',
 				atomic_load_explicit( &ModbusCoilsReadout[1], std::memory_order_acquire )? '1' : '0',
 				atomic_load_explicit( &ModbusCoilsReadout[2], std::memory_order_acquire )? '1' : '0',
-				getTransmissionQualityIndicatorTextForGui(),
-				StatusLevelForGui );
+				getTransmissionQualityIndicatorTextForGui() );
 		StatusTextBoxPtr[0]->label( TemporaryText );
 	}
 }
