@@ -40,5 +40,7 @@ enum class FailureCodes
 
 extern bool VerboseMode;
 
+extern int StatusLevelForGui;
+
 
 #endif // SOURCE_CONFIG_H_

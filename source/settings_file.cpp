@@ -26,6 +26,8 @@ double DirectionalCoefficient[CUPS_NUMBER];
 /// function I=DirectionalCoefficient[.]*x+OffsetForZeroCurrent[.]; here we have offsets
 int OffsetForZeroCurrent[CUPS_NUMBER];
 
+std::string ThisApplicationDirectory;
+
 //.................................................................................................
 // Local variables
 //.................................................................................................
@@ -37,7 +39,11 @@ static std::string SerialPortRequestedName;
 
 static bool FormulaIsDefined[CUPS_NUMBER];
 
+static std::string ConfigurationFilePath;
 
+//.................................................................................................
+// Local function prototypes
+//.................................................................................................
 
 static FailureCodes parseFunctionFormula( std::regex Pattern, std::string *LinePtr, int CupIndex );
 
@@ -52,13 +58,14 @@ FailureCodes determineApplicationPath( char* Argv0 ){
     ConfigurationFilePathPtr = nullptr;
 
     if (realpath( Argv0, Path)) {
-        static std::string MyDirectory = dirname(Path);
-        ConfigurationFilePathPtr = &MyDirectory;
+        ThisApplicationDirectory = dirname(Path);
+        ConfigurationFilePath = ThisApplicationDirectory;
+        ConfigurationFilePathPtr = &ConfigurationFilePath;
         if (VerboseMode){
 #if 0
         	std::cout << "PATH_MAX= " << PATH_MAX << std::endl;
 #endif
-        	std::cout << " Katalog programu: " << MyDirectory << std::endl;
+        	std::cout << " Katalog programu: " << ThisApplicationDirectory << std::endl;
     	}
     } else {
         std::cerr << "Nie udało się uzyskać ścieżki do programu." << std::endl;

@@ -13,18 +13,21 @@
 #include <execinfo.h> // backtrace
 #include <cassert>
 #include <thread>
+#include <cstdlib>
+
 #include <FL/Fl.H>
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Double_Window.H> // to eliminate flickering
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Box.H>
+#include <FL/Fl_Menu_Bar.H>
+#include <FL/fl_ask.H>
 
 #include "gui_widgets.h"
 #include "shared_data.h"
 #include "serial_communication.h"
 #include "settings_file.h"
 #include "modbus_rtu_master.h"
-
 
 //.................................................................................................
 // Preprocessor directives
@@ -33,6 +36,7 @@
 #define MAIN_WINDOW_WIDTH			510
 #define MAIN_WINDOW_HEIGHT			920
 
+#define DEFAULT_STATUS_LEVEL		1
 
 //.................................................................................................
 // Definitions of types
@@ -56,6 +60,8 @@ bool VerboseMode;
 /// This variable points to the main application window
 WindowEscProof* ApplicationWindow;
 
+int StatusLevelForGui;
+
 
 //.................................................................................................
 // Local variables
@@ -75,6 +81,10 @@ static void onMainWindowCloseCallback(Fl_Widget *Widget, void *Data);
 
 static FailureCodes mainInitializations(int argc, char** argv);
 
+static void callbackForMenuItemStatus(Fl_Widget* WidgetPtr, void*);
+
+static void callbackForMenuItemHelp(Fl_Widget*, void*);
+
 //.................................................................................................
 // The main application
 //.................................................................................................
@@ -89,6 +99,20 @@ int main(int argc, char** argv) {
 	ApplicationWindow->begin();
 	ApplicationWindow->color( COLOR_BACKGROUND );
     ApplicationWindow->callback(onMainWindowCloseCallback);	// Window close event is handled
+
+    // Menu
+    Fl_Menu_Bar MenuWidget(0, 0, 600, 30);
+
+    MenuWidget.add(                 "Narzędzia/Status/Ukryty", 0, callbackForMenuItemStatus, (void*)0, FL_MENU_RADIO);
+	int indexOfMenuItemStatusNormal = MenuWidget.add("Narzędzia/Status/Normalny", 0, callbackForMenuItemStatus, (void*)1, FL_MENU_RADIO);
+	MenuWidget.add(                 "Narzędzia/Status/Szczegółowy", 0, callbackForMenuItemStatus, (void*)2, FL_MENU_RADIO);
+	MenuWidget.add("Pomoc/Otwórz PDF", 0, callbackForMenuItemHelp);
+
+	Fl_Menu_Item* MenuItems = const_cast<Fl_Menu_Item*>(MenuWidget.menu());
+	MenuWidget.setonly(&MenuItems[indexOfMenuItemStatusNormal]);
+
+	StatusLevelForGui = DEFAULT_STATUS_LEVEL;
+
 
 	if (FailureCodes::NO_FAILURE == ErrorCode){
 		initializeGraphicWidgets();
@@ -230,3 +254,26 @@ static FailureCodes mainInitializations(int argc, char** argv){
 	}
 	return FailureCode;
 }
+
+static void callbackForMenuItemStatus(Fl_Widget* WidgetPtr, void*) {
+    auto* TemporaryMenu = static_cast<Fl_Menu_Bar*>(WidgetPtr);
+    const Fl_Menu_Item* TemporaryMenuItem = TemporaryMenu->mvalue();
+    if (!TemporaryMenuItem){
+    	return;
+    }
+
+    StatusLevelForGui = static_cast<int>(reinterpret_cast<intptr_t>(TemporaryMenuItem->user_data()));
+    std::cout << "Opcja Status ustawiona na wartość: " << StatusLevelForGui << std::endl;
+}
+
+static void callbackForMenuItemHelp(Fl_Widget*, void*) {
+    const char* PdfFileName = "Pomiar_Wiązki.pdf";
+
+    std::string DisplayPdfCommand = "xdg-open \"" + ThisApplicationDirectory + "/" + std::string(PdfFileName) + "\"";
+
+    int Result = std::system(DisplayPdfCommand.c_str());
+    if (Result != 0) {
+        fl_alert("Nie udało się otworzyć pliku PDF.");
+    }
+}
+

@@ -136,20 +136,20 @@ static void acceptSetPointDialogCallback(Fl_Widget* Widget, void* Data);
 //.................................................................................................
 
 void initializeGraphicWidgets(void){
-	initializeDiscWithNoSlit( 0, 30, 0 );
-	PadlockImagePtr[0]     = new ImageWidget( 360, 50, 54, 54, padlock_png, padlock_png_len, nullptr );
-	UnconnectedImagePtr[0] = new ImageWidget( 360, 50, 51, 51, unconnected_png, unconnected_png_len, nullptr );
+	initializeDiscWithNoSlit( 0, 30, 40 );
+	PadlockImagePtr[0]     = new ImageWidget( 360, 90, 54, 54, padlock_png, padlock_png_len, nullptr );
+	UnconnectedImagePtr[0] = new ImageWidget( 360, 90, 51, 51, unconnected_png, unconnected_png_len, nullptr );
 	PadlockImagePtr[0]->hide();
 	UnconnectedImagePtr[0]->hide();
 
-	AcceptButtonPtr = new Fl_Button( 400, 150, 90, 40, "Wsuń" );
+	AcceptButtonPtr = new Fl_Button( 400, 190, 90, 40, "Wsuń" );
 	AcceptButtonPtr->box(FL_BORDER_BOX);
 	AcceptButtonPtr->color(NORMAL_BUTTON_COLOR);
 	AcceptButtonPtr->labelfont( ORDINARY_TEXT_FONT );
 	AcceptButtonPtr->labelsize( ORDINARY_TEXT_SIZE );
 	AcceptButtonPtr->callback( acceptSetPointDialogCallback, nullptr );
 
-	StatusTextBoxPtr[0] = new Fl_Box(290, 200, 210, 60, "tu powinny być różne dane");
+	StatusTextBoxPtr[0] = new Fl_Box(290, 240, 210, 60, "tu powinny być różne dane");
 	StatusTextBoxPtr[0]->labelfont( FL_COURIER );
 	StatusTextBoxPtr[0]->labelsize( 11 );
 	StatusTextBoxPtr[0]->labelcolor( FL_BLACK );
@@ -316,7 +316,7 @@ void refreshDisc(void* Data){
 				"Port %s\n"
 				"In: %04X %04X %04X %04X %04X\n"
 				"Coils %c %c %c\n"
-				"Modbus %s",
+				"Modbus %s;  status: %d",
 				SerialPortRequestedNamePtr->c_str(),
 				(uint16_t)atomic_load_explicit( &ModbusInputRegisters[0], std::memory_order_acquire ),
 				(uint16_t)atomic_load_explicit( &ModbusInputRegisters[1], std::memory_order_acquire ),
@@ -326,7 +326,8 @@ void refreshDisc(void* Data){
 				atomic_load_explicit( &ModbusCoilsReadout[0], std::memory_order_acquire )? '1' : '0',
 				atomic_load_explicit( &ModbusCoilsReadout[1], std::memory_order_acquire )? '1' : '0',
 				atomic_load_explicit( &ModbusCoilsReadout[2], std::memory_order_acquire )? '1' : '0',
-				getTransmissionQualityIndicatorTextForGui() );
+				getTransmissionQualityIndicatorTextForGui(),
+				StatusLevelForGui );
 		StatusTextBoxPtr[0]->label( TemporaryText );
 	}
 }

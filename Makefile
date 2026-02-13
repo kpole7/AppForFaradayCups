@@ -29,6 +29,7 @@ all: $(BIN_APP)
 $(BIN_APP): $(OBJS_RSTL)
 	$(CXX) -o $@ $(OBJS_RSTL) $(LDFLAGS)
 	cp $(NAME_CFG) $(BUILD_DIR)
+	cp doc/*.pdf $(BUILD_DIR)
 
 # ---------------------------------------------------------------------------
 # rules for code generation

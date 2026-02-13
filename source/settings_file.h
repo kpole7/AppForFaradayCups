@@ -16,6 +16,8 @@ extern double DirectionalCoefficient[CUPS_NUMBER];
 
 extern int OffsetForZeroCurrent[CUPS_NUMBER];
 
+extern std::string ThisApplicationDirectory;
+
 //.................................................................................................
 // Global function prototypes
 //.................................................................................................
@@ -23,6 +25,5 @@ extern int OffsetForZeroCurrent[CUPS_NUMBER];
 FailureCodes determineApplicationPath( char* Argv0 );
 
 FailureCodes configurationFileParsing(void);
-
 
 #endif // SOURCE_SETTINGS_FILE_H_
