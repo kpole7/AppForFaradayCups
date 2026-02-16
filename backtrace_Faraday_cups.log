@@ -1,0 +1,82 @@
+
+=== Backtrace (signal SIGSEGV) at Fri Feb  6 15:06:09 2026
+
+build/appForFaradayCups(+0x5351f) [0x59f638d4f51f]
+/lib/x86_64-linux-gnu/libc.so.6(+0x45330) [0x7cc227c45330]
+/lib/x86_64-linux-gnu/libfltk.so.1.3(_ZN9Fl_Widget6damageEh+0x17) [0x7cc2284217f7]
+build/appForFaradayCups(_Z11refreshDiscPv+0x3b) [0x59f638d5247f]
+/lib/x86_64-linux-gnu/libfltk.so.1.3(+0xa9187) [0x7cc228483187]
+/lib/x86_64-linux-gnu/libfltk.so.1.3(_Z7fl_waitd+0x2c1) [0x7cc2284881a1]
+/lib/x86_64-linux-gnu/libfltk.so.1.3(_ZN2Fl4waitEd+0x139) [0x7cc228421f99]
+/lib/x86_64-linux-gnu/libfltk.so.1.3(_ZN2Fl3runEv+0x2d) [0x7cc22842205d]
+build/appForFaradayCups(main+0x132) [0x59f638d4f44c]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7cc227c2a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7cc227c2a28b]
+build/appForFaradayCups(_start+0x25) [0x59f638d4f255]
+
+=== Backtrace (signal SIGSEGV) at Mon Feb  9 08:49:26 2026
+
+build/appForFaradayCups(+0x5351f) [0x60fb6cd2d51f]
+/lib/x86_64-linux-gnu/libc.so.6(+0x45330) [0x7fb9e6445330]
+build/appForFaradayCups(+0x56676) [0x60fb6cd30676]
+/lib/x86_64-linux-gnu/libfltk.so.1.3(_ZN9Fl_Widget11do_callbackEPS_Pv+0x4a) [0x7fb9e6ba5b7a]
+/lib/x86_64-linux-gnu/libfltk.so.1.3(_ZN9Fl_Button6handleEi+0x238) [0x7fb9e6b4ffd8]
+/lib/x86_64-linux-gnu/libfltk.so.1.3(+0x465ed) [0x7fb9e6b475ed]
+/lib/x86_64-linux-gnu/libfltk.so.1.3(_ZN2Fl7handle_EiP9Fl_Window+0x20e) [0x7fb9e6b4953e]
+/lib/x86_64-linux-gnu/libfltk.so.1.3(_Z9fl_handleRK7_XEvent+0x7da) [0x7fb9e6bad76a]
+/lib/x86_64-linux-gnu/libfltk.so.1.3(+0xade4a) [0x7fb9e6baee4a]
+/lib/x86_64-linux-gnu/libfltk.so.1.3(_Z7fl_waitd+0x2c1) [0x7fb9e6baf1a1]
+/lib/x86_64-linux-gnu/libfltk.so.1.3(_ZN2Fl4waitEd+0x139) [0x7fb9e6b48f99]
+/lib/x86_64-linux-gnu/libfltk.so.1.3(_ZN2Fl3runEv+0x2d) [0x7fb9e6b4905d]
+build/appForFaradayCups(main+0x132) [0x60fb6cd2d44c]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7fb9e642a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7fb9e642a28b]
+build/appForFaradayCups(_start+0x25) [0x60fb6cd2d255]
+
+=== Backtrace (signal SIGSEGV) at Thu Feb 12 12:17:50 2026
+
+build/appForFaradayCups(+0x5453f) [0x621ce700853f]
+/lib/x86_64-linux-gnu/libc.so.6(+0x45330) [0x73d21d245330]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_free+0x25) [0x73d21d2add75]
+/lib/x86_64-linux-gnu/libmodbus.so.5(+0x3b71) [0x73d21d8e4b71]
+build/appForFaradayCups(_Z11closeModbusv+0x26) [0x621ce700ab9e]
+build/appForFaradayCups(+0x55708) [0x621ce7009708]
+build/appForFaradayCups(_ZSt13__invoke_implIvPFvvEJEET_St14__invoke_otherOT0_DpOT1_+0x21) [0x621ce700a60d]
+build/appForFaradayCups(_ZSt8__invokeIPFvvEJEENSt15__invoke_resultIT_JDpT0_EE4typeEOS3_DpOS4_+0x24) [0x621ce700a5b9]
+build/appForFaradayCups(_ZNSt6thread8_InvokerISt5tupleIJPFvvEEEE9_M_invokeIJLm0EEEEvSt12_Index_tupleIJXspT_EEE+0x2c) [0x621ce700a55a]
+build/appForFaradayCups(_ZNSt6thread8_InvokerISt5tupleIJPFvvEEEEclEv+0x1c) [0x621ce700a52a]
+build/appForFaradayCups(_ZNSt6thread11_State_implINS_8_InvokerISt5tupleIJPFvvEEEEEE6_M_runEv+0x20) [0x621ce700a50a]
+/lib/x86_64-linux-gnu/libstdc++.so.6(+0xecdb4) [0x73d21d6ecdb4]
+/lib/x86_64-linux-gnu/libc.so.6(+0x9caa4) [0x73d21d29caa4]
+/lib/x86_64-linux-gnu/libc.so.6(+0x129c6c) [0x73d21d329c6c]
+
+=== Backtrace (signal SIGSEGV) at Thu Feb 12 12:21:39 2026
+
+build/appForFaradayCups(+0x5453f) [0x5783b3ca053f]
+/lib/x86_64-linux-gnu/libc.so.6(+0x45330) [0x74d156845330]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_free+0x25) [0x74d1568add75]
+/lib/x86_64-linux-gnu/libmodbus.so.5(+0x3b71) [0x74d156f0cb71]
+build/appForFaradayCups(_Z11closeModbusv+0x26) [0x5783b3ca2b9e]
+build/appForFaradayCups(+0x55708) [0x5783b3ca1708]
+build/appForFaradayCups(_ZSt13__invoke_implIvPFvvEJEET_St14__invoke_otherOT0_DpOT1_+0x21) [0x5783b3ca260d]
+build/appForFaradayCups(_ZSt8__invokeIPFvvEJEENSt15__invoke_resultIT_JDpT0_EE4typeEOS3_DpOS4_+0x24) [0x5783b3ca25b9]
+build/appForFaradayCups(_ZNSt6thread8_InvokerISt5tupleIJPFvvEEEE9_M_invokeIJLm0EEEEvSt12_Index_tupleIJXspT_EEE+0x2c) [0x5783b3ca255a]
+build/appForFaradayCups(_ZNSt6thread8_InvokerISt5tupleIJPFvvEEEEclEv+0x1c) [0x5783b3ca252a]
+build/appForFaradayCups(_ZNSt6thread11_State_implINS_8_InvokerISt5tupleIJPFvvEEEEEE6_M_runEv+0x20) [0x5783b3ca250a]
+/lib/x86_64-linux-gnu/libstdc++.so.6(+0xecdb4) [0x74d156cecdb4]
+/lib/x86_64-linux-gnu/libc.so.6(+0x9caa4) [0x74d15689caa4]
+/lib/x86_64-linux-gnu/libc.so.6(+0x129c6c) [0x74d156929c6c]
+
+=== Backtrace (signal SIGABRT) at Fri Feb 13 12:35:53 2026
+
+build/appForFaradayCups(+0x55927) [0x57167a5f4927]
+/lib/x86_64-linux-gnu/libc.so.6(+0x45330) [0x720294045330]
+/lib/x86_64-linux-gnu/libc.so.6(read+0x48) [0x72029411bac8]
+/lib/x86_64-linux-gnu/libfltk.so.1.3(+0xa9177) [0x7202948d3177]
+/lib/x86_64-linux-gnu/libfltk.so.1.3(_Z7fl_waitd+0x2c1) [0x7202948d81a1]
+/lib/x86_64-linux-gnu/libfltk.so.1.3(_ZN2Fl4waitEd+0x139) [0x720294871f99]
+/lib/x86_64-linux-gnu/libfltk.so.1.3(_ZN2Fl3runEv+0x2d) [0x72029487205d]
+build/appForFaradayCups(main+0x2c6) [0x57167a5f47e0]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x72029402a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x72029402a28b]
+build/appForFaradayCups(_start+0x25) [0x57167a5f4455]

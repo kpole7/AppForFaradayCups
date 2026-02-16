@@ -80,7 +80,7 @@ FailureCodes readInputRegisters(void){
     int ReceivedRegisters = modbus_read_input_registers(Context, MODBUS_INPUTS_ADDRESS, REGISTERS_TO_BE_READ, RegistersTable);
     if (ReceivedRegisters == -1) {
         // Communication / protocol error (CRC, timeout, invalid response)
-        std::cout << getTokenCharacter() << getTransmissionQualityIndicatorTextForDebugging() << " Błąd odczytu: " << modbus_strerror(errno) << std::endl;
+        std::cout << getTokenCharacter() << getTransmissionQualityIndicatorTextForDebugging() << " Błąd odczytu (1): " << modbus_strerror(errno) << std::endl;
         return FailureCodes::ERROR_MODBUS_READING;
     }
 
@@ -115,7 +115,7 @@ FailureCodes readCoils(void){
     int ReceivedBits = modbus_read_bits(Context, MODBUS_COILS_ADDRESS, COILS_TO_BE_READ, TemporaryTable);
     if (ReceivedBits == -1) {
         // Communication / protocol error (CRC, timeout, invalid response)
-        std::cout << getTokenCharacter() << getTransmissionQualityIndicatorTextForDebugging() << " Błąd odczytu: " << modbus_strerror(errno) << std::endl;
+        std::cout << getTokenCharacter() << getTransmissionQualityIndicatorTextForDebugging() << " Błąd odczytu (2): " << modbus_strerror(errno) << std::endl;
         return FailureCodes::ERROR_MODBUS_READING;
     }
 

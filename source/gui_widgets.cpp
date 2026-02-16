@@ -272,30 +272,31 @@ void TripleDiscWidgetWithHorizontalSlit::draw(){
 /// This function modifies texts (displayed as graphic widgets) related to a single disk based on ModbusInputRegisters
 static void refreshValues( uint8_t Disc ){
 	bool IsTransmissionCorrect = isTransmissionCorrect();
+	static char StaticLabelBuffer[CUPS_NUMBER][VALUES_PER_DISC][64];
+	
 	if (IsTransmissionCorrect && atomic_load_explicit( &ModbusCoilsReadout[COIL_OFFSET_IS_CUP_INSERTED + Disc*MODBUS_COILS_PER_CUP], std::memory_order_acquire )){
 		for (int J=0; J < VISIBLE_VALUES_PER_DISC; J++){
 			int TemporaryRegisterIndex = Disc*VALUES_PER_DISC + J;
 			assert( TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER );
 			uint16_t TemporaryValue = atomic_load_explicit( &ModbusInputRegisters[TemporaryRegisterIndex], std::memory_order_acquire );
-			std::string TemporaryLabel;
-			char TemporaryBuffer[64];
+			
 			if (J >= 3){
-				std::snprintf(TemporaryBuffer, sizeof(TemporaryBuffer), "0x%04X", (unsigned)TemporaryValue);
-				TemporaryLabel = TemporaryBuffer;
+				std::snprintf(StaticLabelBuffer[Disc][J], sizeof(StaticLabelBuffer[Disc][J])-1, "0x%04X", (unsigned)TemporaryValue);
 			}
 			else if (0x8000 > TemporaryValue){
 				double TemporaryFloatingPoint = DirectionalCoefficient[Disc] * ((double)TemporaryValue + OffsetForZeroCurrent[Disc]);
-				std::snprintf(TemporaryBuffer, sizeof(TemporaryBuffer), "%.1fμA", TemporaryFloatingPoint);
-				TemporaryLabel = TemporaryBuffer;
-				if ("-0.0μA" == TemporaryLabel){
-					TemporaryLabel = "0.0μA";
+				std::snprintf(StaticLabelBuffer[Disc][J], sizeof(StaticLabelBuffer[Disc][J])-1, "%.1fμA", TemporaryFloatingPoint);
+				if (strcmp(StaticLabelBuffer[Disc][J], "-0.0μA") == 0){
+					std::snprintf(StaticLabelBuffer[Disc][J], sizeof(StaticLabelBuffer[Disc][J])-1, "0.0μA");
 				}
 			}
 			else{
-				TemporaryLabel = "N/A";
+				std::snprintf(StaticLabelBuffer[Disc][J], sizeof(StaticLabelBuffer[Disc][J])-1, "N/A");
 			}
+			StaticLabelBuffer[Disc][J][sizeof(StaticLabelBuffer[Disc][J])-1] = '\0';
+			
 			CupValueLabelPtr[Disc][J]->show();
-			CupValueLabelPtr[Disc][J]->copy_label( TemporaryLabel.c_str() );
+			CupValueLabelPtr[Disc][J]->label(StaticLabelBuffer[Disc][J]);
 			CupValueLabelPtr[Disc][J]->redraw();
 		}
 	}
