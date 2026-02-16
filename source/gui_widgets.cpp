@@ -38,8 +38,7 @@
 #define COLOR_WEAK_BLUE		0xF7
 #define COLOR_DARK_RED		0x50
 #define COLOR_GRAY_RED		0x54
-#define NORMAL_BUTTON_COLOR	0x34	// gray
-#define ACTIVE_BUTTON_COLOR	0x46	// green
+#define NORMAL_BUTTON_COLOR	0x75
 
 
 //.................................................................................................
@@ -110,9 +109,10 @@ private:
 // Local constants
 //.................................................................................................
 
-static const char TextCupIsInserted[] = "Kubek Wsunięty";
-static const char TextCupIsRemoved[]  = "Kubek Wysunięty";
+static const char TextCupIsInserted[] = "     Kubek Wsunięty";
+static const char TextCupIsRemoved[]  = "     Kubek Wysunięty";
 
+static const uint8_t IndexesForCallbacks[CUPS_NUMBER]  = { 0, 1, 2 };
 
 //.................................................................................................
 // Local variables
@@ -128,13 +128,11 @@ static ImageWidget * UnconnectedImagePtr[CUPS_NUMBER];
 static Fl_Box* LockoutTextBoxPtr[CUPS_NUMBER];
 static Fl_Box* UnconnectedTextBoxPtr[CUPS_NUMBER];
 
-static Fl_Button* AcceptButtonPtr;
+static Fl_Button* CupInsertionButtonPtr[CUPS_NUMBER];
 
 static Fl_Box* GeneralStatusTextBoxPtr;
 
 static Fl_Box* StatusTextBoxPtr[CUPS_NUMBER];
-
-static bool PadlockClosed;
 
 //.................................................................................................
 // Local function prototypes
@@ -175,12 +173,12 @@ void initializeGraphicWidgets(void){
 	UnconnectedTextBoxPtr[0]->labelcolor( COLOR_DARK_RED );
 	UnconnectedTextBoxPtr[0]->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
-	AcceptButtonPtr = new Fl_Button( 400, 190, 90, 40, "Wsuń" );
-	AcceptButtonPtr->box(FL_BORDER_BOX);
-	AcceptButtonPtr->color(NORMAL_BUTTON_COLOR);
-	AcceptButtonPtr->labelfont( ORDINARY_TEXT_FONT );
-	AcceptButtonPtr->labelsize( ORDINARY_TEXT_SIZE );
-	AcceptButtonPtr->callback( acceptSetPointDialogCallback, nullptr );
+	CupInsertionButtonPtr[0] = new Fl_Button( 400, 190, 90, 40, "Wsuń" );
+	CupInsertionButtonPtr[0]->box(FL_BORDER_BOX);
+	CupInsertionButtonPtr[0]->color(NORMAL_BUTTON_COLOR);
+	CupInsertionButtonPtr[0]->labelfont( ORDINARY_TEXT_FONT );
+	CupInsertionButtonPtr[0]->labelsize( ORDINARY_TEXT_SIZE );
+	CupInsertionButtonPtr[0]->callback( acceptSetPointDialogCallback, (void*)&IndexesForCallbacks[0] );
 
 	GeneralStatusTextBoxPtr = new Fl_Box(10, 30, 490, 20, "Tu powinny być różne dane");
 	GeneralStatusTextBoxPtr->labelfont( FL_COURIER );
@@ -276,7 +274,7 @@ static void refreshValues( uint8_t Disc ){
 	bool IsTransmissionCorrect = isTransmissionCorrect();
 	static char StaticLabelBuffer[CUPS_NUMBER][VALUES_PER_DISC][64];
 	
-	if (IsTransmissionCorrect && atomic_load_explicit( &ModbusCoilsReadout[COIL_OFFSET_IS_CUP_INSERTED + Disc*MODBUS_COILS_PER_CUP], std::memory_order_acquire )){
+	if (IsTransmissionCorrect && atomic_load_explicit( &ModbusCoilsReadout[COIL_OFFSET_IS_SWITCH_PRESSED + Disc*MODBUS_COILS_PER_CUP], std::memory_order_acquire )){
 		for (int J=0; J < VISIBLE_VALUES_PER_DISC; J++){
 			int TemporaryRegisterIndex = Disc*VALUES_PER_DISC + J;
 			assert( TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER );
@@ -314,9 +312,19 @@ static void refreshValues( uint8_t Disc ){
 void refreshDisc(void* Data){
 	uint8_t Disc = *((uint8_t*)Data);
 
+	assert( Disc < CUPS_NUMBER );
+	int TemporaryIndexForSwitchPressed = COIL_OFFSET_IS_SWITCH_PRESSED+MODBUS_COILS_PER_CUP*Disc;
+	if (TemporaryIndexForSwitchPressed >= MODBUS_COILS_NUMBER){
+	    std::cout << "Internal error, file " << __FILE__ << ", line " << __LINE__ << ", index " << TemporaryIndexForSwitchPressed << std::endl;
+	}
+	int TemporaryIndexForBlockage = COIL_OFFSET_IS_CUP_BLOCKED+MODBUS_COILS_PER_CUP*Disc;
+	if (TemporaryIndexForBlockage >= MODBUS_COILS_NUMBER){
+	    std::cout << "Internal error, file " << __FILE__ << ", line " << __LINE__ << ", index " << TemporaryIndexForBlockage << std::endl;
+	}
+
 	bool IsTransmissionCorrect = isTransmissionCorrect();
 
-	if (IsTransmissionCorrect && atomic_load_explicit( &ModbusCoilsReadout[COIL_OFFSET_IS_CUP_INSERTED + Disc*MODBUS_COILS_PER_CUP], std::memory_order_acquire )){
+	if (IsTransmissionCorrect && atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndexForSwitchPressed], std::memory_order_acquire )){
 		if (!DiscGraphics[Disc]->visible()){
 			DiscGraphics[Disc]->show();
 		}
@@ -332,26 +340,26 @@ void refreshDisc(void* Data){
 
 	refreshValues(Disc);
 
-	if (IsTransmissionCorrect && atomic_load_explicit( &ModbusCoilsReadout[COIL_OFFSET_IS_CUP_BLOCKED + Disc*MODBUS_COILS_PER_CUP], std::memory_order_acquire )){
+	if (IsTransmissionCorrect && atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndexForBlockage], std::memory_order_acquire )){
 		if (!PadlockImagePtr[Disc]->visible()){
 			PadlockImagePtr[Disc]->show();
-			LockoutTextBoxPtr[0]->show();
+			LockoutTextBoxPtr[Disc]->show();
 		}
 	}
 	else{
 		if (PadlockImagePtr[Disc]->visible()){
 			PadlockImagePtr[Disc]->hide();
-			LockoutTextBoxPtr[0]->hide();
+			LockoutTextBoxPtr[Disc]->hide();
 		}
 	}
 
 	if (IsTransmissionCorrect){
-		UnconnectedImagePtr[0]->hide();
-		UnconnectedTextBoxPtr[0]->hide();
+		UnconnectedImagePtr[Disc]->hide();
+		UnconnectedTextBoxPtr[Disc]->hide();
 	}
 	else{
-		UnconnectedImagePtr[0]->show();
-		UnconnectedTextBoxPtr[0]->show();
+		UnconnectedImagePtr[Disc]->show();
+		UnconnectedTextBoxPtr[Disc]->show();
 	}
 
 	if (2 != StatusLevelForGui){
@@ -369,60 +377,78 @@ void refreshDisc(void* Data){
 
 	if (0 == Disc){
 		if ((0 == StatusLevelForGui) || (!IsTransmissionCorrect)){
-			if (StatusTextBoxPtr[0]->visible()){
-				StatusTextBoxPtr[0]->hide();
+			if (StatusTextBoxPtr[Disc]->visible()){
+				StatusTextBoxPtr[Disc]->hide();
 			}
 		}
 		else{
-			if (!StatusTextBoxPtr[0]->visible()){
-				StatusTextBoxPtr[0]->show();
+			if (!StatusTextBoxPtr[Disc]->visible()){
+				StatusTextBoxPtr[Disc]->show();
 			}
 			if (1 == StatusLevelForGui){
-				if (StatusTextBoxPtr[0]->labelsize() != ORDINARY_TEXT_SIZE){
-					StatusTextBoxPtr[0]->labelsize(ORDINARY_TEXT_SIZE);
+				if (StatusTextBoxPtr[Disc]->labelsize() != ORDINARY_TEXT_SIZE){
+					StatusTextBoxPtr[Disc]->labelsize(ORDINARY_TEXT_SIZE);
 				}
-				if (atomic_load_explicit( &ModbusCoilsReadout[0], std::memory_order_acquire )){
-					StatusTextBoxPtr[0]->label( TextCupIsInserted );
+				if (atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndexForSwitchPressed], std::memory_order_acquire )){
+					StatusTextBoxPtr[Disc]->label( TextCupIsInserted );
 				}
 				else{
-					StatusTextBoxPtr[0]->label( TextCupIsRemoved );
+					StatusTextBoxPtr[Disc]->label( TextCupIsRemoved );
 				}
 			}
 			else{
-				if (StatusTextBoxPtr[0]->labelsize() != DEBUGGING_TEXT_SIZE){
-					StatusTextBoxPtr[0]->labelsize(DEBUGGING_TEXT_SIZE);
+				if (StatusTextBoxPtr[Disc]->labelsize() != DEBUGGING_TEXT_SIZE){
+					StatusTextBoxPtr[Disc]->labelsize(DEBUGGING_TEXT_SIZE);
 				}
 				static char TemporaryText[800];
 				snprintf( TemporaryText, sizeof(TemporaryText)-1,
 						"%s\n"
 						"In: %04X %04X %04X %04X %04X\n"
 						"Coils %c %c %c",
-						atomic_load_explicit( &ModbusCoilsReadout[0], std::memory_order_acquire )? TextCupIsInserted : TextCupIsRemoved,
-						(uint16_t)atomic_load_explicit( &ModbusInputRegisters[0], std::memory_order_acquire ),
-						(uint16_t)atomic_load_explicit( &ModbusInputRegisters[1], std::memory_order_acquire ),
-						(uint16_t)atomic_load_explicit( &ModbusInputRegisters[2], std::memory_order_acquire ),
-						(uint16_t)atomic_load_explicit( &ModbusInputRegisters[3], std::memory_order_acquire ),
-						(uint16_t)atomic_load_explicit( &ModbusInputRegisters[4], std::memory_order_acquire ),
-						atomic_load_explicit( &ModbusCoilsReadout[0], std::memory_order_acquire )? '1' : '0',
-						atomic_load_explicit( &ModbusCoilsReadout[1], std::memory_order_acquire )? '1' : '0',
-						atomic_load_explicit( &ModbusCoilsReadout[2], std::memory_order_acquire )? '1' : '0' );
-				StatusTextBoxPtr[0]->label( TemporaryText );
+						atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndexForSwitchPressed], std::memory_order_acquire )?
+								TextCupIsInserted : TextCupIsRemoved,
+						(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*Disc+0], std::memory_order_acquire ),
+						(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*Disc+1], std::memory_order_acquire ),
+						(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*Disc+2], std::memory_order_acquire ),
+						(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*Disc+3], std::memory_order_acquire ),
+						(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*Disc+4], std::memory_order_acquire ),
+						atomic_load_explicit( &ModbusCoilsReadout[MODBUS_COILS_PER_CUP*Disc+0], std::memory_order_acquire )? '1' : '0',
+						atomic_load_explicit( &ModbusCoilsReadout[MODBUS_COILS_PER_CUP*Disc+1], std::memory_order_acquire )? '1' : '0',
+						atomic_load_explicit( &ModbusCoilsReadout[MODBUS_COILS_PER_CUP*Disc+2], std::memory_order_acquire )? '1' : '0' );
+				StatusTextBoxPtr[Disc]->label( TemporaryText );
 			}
+		}
+
+		if (atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndexForSwitchPressed], std::memory_order_acquire )){
+			CupInsertionButtonPtr[Disc]->label( "Wysuń" );
+		}
+		else{
+			CupInsertionButtonPtr[Disc]->label( "Wsuń" );
+		}
+		if (atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndexForBlockage], std::memory_order_acquire )){
+			CupInsertionButtonPtr[Disc]->deactivate();
+		}
+		else{
+			CupInsertionButtonPtr[Disc]->activate();
 		}
 	}
 }
 
 static void acceptSetPointDialogCallback(Fl_Widget* Widget, void* Data){
 	(void)Widget; // intentionally unused
-	(void)Data; // intentionally unused
+	const int DiscIndex = (int)*((const uint8_t*)Data);
 
-	if (PadlockClosed){
-		AcceptButtonPtr->label( "Wysuń" );
-		AcceptButtonPtr->color( ACTIVE_BUTTON_COLOR );
+	int TemporaryIndex = COIL_OFFSET_IS_SWITCH_PRESSED+MODBUS_COILS_PER_CUP*DiscIndex;
+	if (TemporaryIndex < MODBUS_COILS_NUMBER){
+		if (atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndex], std::memory_order_acquire )){
+		    std::cout << "Akcja związana z naciśnięciem przycisku: wysuń" << std::endl;
+		}
+		else{
+		    std::cout << "Akcja związana z naciśnięciem przycisku: wsuń" << std::endl;
+		}
 	}
 	else{
-		AcceptButtonPtr->label( "Wsuń" );
-		AcceptButtonPtr->color( NORMAL_BUTTON_COLOR );
+	    std::cout << "Internal error, file " << __FILE__ << ", line " << __LINE__ << ", index " << DiscIndex << std::endl;
 	}
 }
 
