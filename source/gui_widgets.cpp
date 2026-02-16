@@ -28,6 +28,7 @@
 #define DISC_VALUE2_Y		80
 #define DISC_TEXTS_SPACE	10
 #define DISC_SLIT_WIDTH		8
+#define DISC_SPACE_Y		290
 
 #define ORDINARY_TEXT_FONT	FL_HELVETICA
 #define ORDINARY_TEXT_SIZE	14
@@ -39,7 +40,7 @@
 #define COLOR_DARK_RED		0x50
 #define COLOR_GRAY_RED		0x54
 #define NORMAL_BUTTON_COLOR	0x75
-
+#define SEPARATOR_COLOR		0x30
 
 //.................................................................................................
 // Definitions of types
@@ -127,6 +128,7 @@ static ImageWidget * UnconnectedImagePtr[CUPS_NUMBER];
 
 static Fl_Box* LockoutTextBoxPtr[CUPS_NUMBER];
 static Fl_Box* UnconnectedTextBoxPtr[CUPS_NUMBER];
+static Fl_Box* SwitchErrorTextBoxPtr[CUPS_NUMBER];
 
 static Fl_Button* CupInsertionButtonPtr[CUPS_NUMBER];
 
@@ -149,20 +151,37 @@ static void acceptSetPointDialogCallback(Fl_Widget* Widget, void* Data);
 //.................................................................................................
 
 void initializeGraphicWidgets(void){
+
 	initializeDiscWithNoSlit( 0, 30, 40 );
-	PadlockImagePtr[0]     = new ImageWidget( 360, 60, 54, 54, padlock_png, padlock_png_len, nullptr );
-	UnconnectedImagePtr[0] = new ImageWidget( 360, 60, 51, 51, unconnected_png, unconnected_png_len, nullptr );
+
+	Fl_Box* Separator1 = new Fl_Box(0, 40 + DISC_SPACE_Y, MAIN_WINDOW_WIDTH, 4 );
+	Separator1->box(FL_FLAT_BOX);
+	Separator1->color(SEPARATOR_COLOR);
+#if 0
+	initializeDiscWithNoSlit( 1, 30, 40+DISC_SPACE_Y );
+	DiscGraphics[1]->show();
+
+	Fl_Box* Separator2 = new Fl_Box(0, 40 + 2*DISC_SPACE_Y, MAIN_WINDOW_WIDTH, 4 );
+	Separator2->box(FL_FLAT_BOX);
+	Separator2->color(SEPARATOR_COLOR);
+
+	initializeDiscWithNoSlit( 2, 30, 40+2*DISC_SPACE_Y );
+	DiscGraphics[2]->show();
+#endif
+
+	PadlockImagePtr[0]     = new ImageWidget( 380, 60, 54, 54, padlock_png, padlock_png_len, nullptr );
+	UnconnectedImagePtr[0] = new ImageWidget( 380, 60, 51, 51, unconnected_png, unconnected_png_len, nullptr );
 	PadlockImagePtr[0]->hide();
 	UnconnectedImagePtr[0]->hide();
 
-	LockoutTextBoxPtr[0] = new Fl_Box(330, 120, 150, 25, "Blokada Aktywna");
+	LockoutTextBoxPtr[0] = new Fl_Box(340, 120, 150, 25, "Blokada Aktywna");
 	LockoutTextBoxPtr[0]->hide();
 	LockoutTextBoxPtr[0]->labelfont( FL_HELVETICA_BOLD );
 	LockoutTextBoxPtr[0]->labelsize( 16 );
 	LockoutTextBoxPtr[0]->labelcolor( COLOR_DARK_RED );
 	LockoutTextBoxPtr[0]->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
-	UnconnectedTextBoxPtr[0] = new Fl_Box(310, 112, 150, 45, "Błąd Modbus:\nBrak Połączenia");
+	UnconnectedTextBoxPtr[0] = new Fl_Box(330, 112, 150, 45, "Błąd Modbus:\nBrak Połączenia");
 	UnconnectedTextBoxPtr[0]->hide();
 	UnconnectedTextBoxPtr[0]->labelfont( FL_HELVETICA_BOLD );
 	UnconnectedTextBoxPtr[0]->labelsize( 16 );
@@ -173,7 +192,16 @@ void initializeGraphicWidgets(void){
 	UnconnectedTextBoxPtr[0]->labelcolor( COLOR_DARK_RED );
 	UnconnectedTextBoxPtr[0]->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
-	CupInsertionButtonPtr[0] = new Fl_Button( 400, 190, 90, 40, "Wsuń" );
+	SwitchErrorTextBoxPtr[0] = new Fl_Box(330, 155, 160, 45, "Błąd Krańcówki");
+	SwitchErrorTextBoxPtr[0]->hide();
+	SwitchErrorTextBoxPtr[0]->labelfont( FL_HELVETICA_BOLD );
+	SwitchErrorTextBoxPtr[0]->labelsize( 16 );
+	SwitchErrorTextBoxPtr[0]->color( FL_YELLOW );
+	SwitchErrorTextBoxPtr[0]->box(FL_FLAT_BOX);
+	SwitchErrorTextBoxPtr[0]->labelcolor( COLOR_DARK_RED );
+	SwitchErrorTextBoxPtr[0]->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
+
+	CupInsertionButtonPtr[0] = new Fl_Button( 360, 220, 90, 40, "???" );
 	CupInsertionButtonPtr[0]->box(FL_BORDER_BOX);
 	CupInsertionButtonPtr[0]->color(NORMAL_BUTTON_COLOR);
 	CupInsertionButtonPtr[0]->labelfont( ORDINARY_TEXT_FONT );
