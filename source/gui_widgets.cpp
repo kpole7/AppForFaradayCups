@@ -31,6 +31,7 @@
 
 #define ORDINARY_TEXT_FONT	FL_HELVETICA
 #define ORDINARY_TEXT_SIZE	14
+#define DEBUGGING_TEXT_SIZE	11
 
 #define COLOR_STRONGER_BLUE	0xE5
 #define COLOR_MEDIUM_BLUE	0xEE
@@ -39,6 +40,7 @@
 #define COLOR_GRAY_RED		0x54
 #define NORMAL_BUTTON_COLOR	0x34	// gray
 #define ACTIVE_BUTTON_COLOR	0x46	// green
+
 
 //.................................................................................................
 // Definitions of types
@@ -182,13 +184,13 @@ void initializeGraphicWidgets(void){
 
 	GeneralStatusTextBoxPtr = new Fl_Box(10, 30, 490, 20, "Tu powinny być różne dane");
 	GeneralStatusTextBoxPtr->labelfont( FL_COURIER );
-	GeneralStatusTextBoxPtr->labelsize( 11 );
+	GeneralStatusTextBoxPtr->labelsize( DEBUGGING_TEXT_SIZE );
 	GeneralStatusTextBoxPtr->labelcolor( FL_BLACK );
 	GeneralStatusTextBoxPtr->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
 	StatusTextBoxPtr[0] = new Fl_Box(300, 260, 210, 60, "tu powinny być różne dane");
 	StatusTextBoxPtr[0]->labelfont( FL_COURIER );
-	StatusTextBoxPtr[0]->labelsize( 11 );
+	StatusTextBoxPtr[0]->labelsize( ORDINARY_TEXT_SIZE );
 	StatusTextBoxPtr[0]->labelcolor( FL_BLACK );
 	StatusTextBoxPtr[0]->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 }
@@ -367,11 +369,18 @@ void refreshDisc(void* Data){
 
 	if (0 == Disc){
 		if ((0 == StatusLevelForGui) || (!IsTransmissionCorrect)){
-			StatusTextBoxPtr[0]->hide();
+			if (StatusTextBoxPtr[0]->visible()){
+				StatusTextBoxPtr[0]->hide();
+			}
 		}
 		else{
-			StatusTextBoxPtr[0]->show();
+			if (!StatusTextBoxPtr[0]->visible()){
+				StatusTextBoxPtr[0]->show();
+			}
 			if (1 == StatusLevelForGui){
+				if (StatusTextBoxPtr[0]->labelsize() != ORDINARY_TEXT_SIZE){
+					StatusTextBoxPtr[0]->labelsize(ORDINARY_TEXT_SIZE);
+				}
 				if (atomic_load_explicit( &ModbusCoilsReadout[0], std::memory_order_acquire )){
 					StatusTextBoxPtr[0]->label( TextCupIsInserted );
 				}
@@ -380,6 +389,9 @@ void refreshDisc(void* Data){
 				}
 			}
 			else{
+				if (StatusTextBoxPtr[0]->labelsize() != DEBUGGING_TEXT_SIZE){
+					StatusTextBoxPtr[0]->labelsize(DEBUGGING_TEXT_SIZE);
+				}
 				static char TemporaryText[800];
 				snprintf( TemporaryText, sizeof(TemporaryText)-1,
 						"%s\n"
