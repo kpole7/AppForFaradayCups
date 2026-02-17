@@ -12,11 +12,11 @@
 #include <FL/Fl_PNG_Image.H>
 #include <FL/Fl_Box.H>
 
+#include "peripheral_thread.h"
 #include "png_graphics.h"
 #include "gui_widgets.h"
 #include "shared_data.h"
 #include "settings_file.h"
-#include "serial_communication.h"
 
 //.................................................................................................
 // Preprocessor directives

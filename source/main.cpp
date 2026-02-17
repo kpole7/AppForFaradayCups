@@ -23,9 +23,9 @@
 #include <FL/Fl_Menu_Bar.H>
 #include <FL/fl_ask.H>
 
+#include "peripheral_thread.h"
 #include "gui_widgets.h"
 #include "shared_data.h"
-#include "serial_communication.h"
 #include "settings_file.h"
 #include "modbus_rtu_master.h"
 

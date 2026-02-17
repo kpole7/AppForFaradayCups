@@ -5,11 +5,11 @@
 #include <modbus.h>
 #include <errno.h>
 
+#include "peripheral_thread.h"
 #include "modbus_rtu_master.h"
 #include "config.h"
 #include "settings_file.h"
 #include "shared_data.h"
-#include "serial_communication.h"
 
 
 //.................................................................................................

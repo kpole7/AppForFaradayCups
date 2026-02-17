@@ -13,7 +13,7 @@ BIN_APP    = $(BUILD_DIR)/$(NAME_APP)
 NAME_CFG   = PomiarWiązki.cfg
 
 CCSRC       = source/main.cpp \
-              source/serial_communication.cpp \
+              source/peripheral_thread.cpp \
               source/shared_data.cpp \
               source/modbus_rtu_master.cpp \
               source/gui_widgets.cpp \

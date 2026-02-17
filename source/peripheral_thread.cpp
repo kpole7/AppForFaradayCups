@@ -1,4 +1,4 @@
-/// @file serial_communication.cpp
+/// @file peripheral_thread.cpp
 ///
 
 #include <chrono>
@@ -9,7 +9,7 @@
 #include <thread>
 #include <FL/Fl.H>
 
-#include "serial_communication.h"
+#include "peripheral_thread.h"
 #include "shared_data.h"
 #include "modbus_rtu_master.h"
 #include "gui_widgets.h"
