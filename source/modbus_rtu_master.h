@@ -11,6 +11,8 @@ FailureCodes readInputRegisters(void);
 
 FailureCodes readCoils(void);
 
+FailureCodes writeSingleCoil( uint16_t CoilAddress, bool NewValue );
+
 void closeModbus(void);
 
 #endif // SOURCE_MODBUS_RTU_MASTER_H_

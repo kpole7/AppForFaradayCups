@@ -153,6 +153,16 @@ FailureCodes readCoils(void){
     return FailureCodes::NO_FAILURE;
 }
 
+FailureCodes writeSingleCoil( uint16_t CoilAddress, bool NewValue ){
+    int WrittenBits = modbus_write_bit(Context, (int)CoilAddress, (int)NewValue);
+    if (WrittenBits != 1) {
+        // Communication / protocol error (CRC, timeout, invalid response)
+        std::cout << getTokenCharacter() << getTransmissionQualityIndicatorTextForDebugging() << " Błąd zapisu: " << modbus_strerror(errno) << std::endl;
+        return FailureCodes::ERROR_MODBUS_WRITING;
+    }
+    return FailureCodes::NO_FAILURE;
+}
+
 void closeModbus(void){
     modbus_close(Context);
     modbus_free(Context);
