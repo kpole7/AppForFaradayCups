@@ -144,7 +144,7 @@ static void initializeDiscWithNoSlit( uint8_t DiscIndex, uint16_t X, uint16_t Y 
 
 static void refreshValues( uint8_t Disc );
 
-static void acceptSetPointDialogCallback(Fl_Widget* Widget, void* Data);
+static void cupInsertionButtonCallback(Fl_Widget* Widget, void* Data);
 
 //.................................................................................................
 // Function definitions
@@ -206,7 +206,7 @@ void initializeGraphicWidgets(void){
 	CupInsertionButtonPtr[0]->color(NORMAL_BUTTON_COLOR);
 	CupInsertionButtonPtr[0]->labelfont( ORDINARY_TEXT_FONT );
 	CupInsertionButtonPtr[0]->labelsize( ORDINARY_TEXT_SIZE );
-	CupInsertionButtonPtr[0]->callback( acceptSetPointDialogCallback, (void*)&IndexesForCallbacks[0] );
+	CupInsertionButtonPtr[0]->callback( cupInsertionButtonCallback, (void*)&IndexesForCallbacks[0] );
 
 	GeneralStatusTextBoxPtr = new Fl_Box(10, 30, 490, 20, "Tu powinny być różne dane");
 	GeneralStatusTextBoxPtr->labelfont( FL_COURIER );
@@ -462,18 +462,28 @@ void refreshDisc(void* Data){
 	}
 }
 
-static void acceptSetPointDialogCallback(Fl_Widget* Widget, void* Data){
+static void cupInsertionButtonCallback(Fl_Widget* Widget, void* Data){
 	(void)Widget; // intentionally unused
 	const int DiscIndex = (int)*((const uint8_t*)Data);
+
+	assert( DiscIndex < CUPS_NUMBER );
+	if (atomic_load_explicit( &ModbusRequestProcessingTime[DiscIndex], std::memory_order_acquire ) > 0){
+	    std::cout << "Akcja związana z naciśnięciem przycisku: ODMOWA " << DiscIndex << std::endl;
+		return;
+	}
 
 	int TemporaryIndex = COIL_OFFSET_IS_SWITCH_PRESSED+MODBUS_COILS_PER_CUP*DiscIndex;
 	if (TemporaryIndex < MODBUS_COILS_NUMBER){
 		if (atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndex], std::memory_order_acquire )){
-		    std::cout << "Akcja związana z naciśnięciem przycisku: wysuń" << std::endl;
+			atomic_store_explicit( &ModbusCoilValueRequest[DiscIndex], false, std::memory_order_release );
+		    std::cout << "Akcja związana z naciśnięciem przycisku: wysuń " << DiscIndex << std::endl;
 		}
 		else{
-		    std::cout << "Akcja związana z naciśnięciem przycisku: wsuń" << std::endl;
+			atomic_store_explicit( &ModbusCoilValueRequest[DiscIndex], true, std::memory_order_release );
+		    std::cout << "Akcja związana z naciśnięciem przycisku: wsuń " << DiscIndex << std::endl;
 		}
+		atomic_store_explicit( &ModbusCoilChangeReqest[DiscIndex], true, std::memory_order_release );
+		atomic_store_explicit( &ModbusRequestProcessingTime[DiscIndex], COIL_CHANGE_PROCESSING_LIMIT, std::memory_order_release );
 	}
 	else{
 	    std::cout << "Internal error, file " << __FILE__ << ", line " << __LINE__ << ", index " << DiscIndex << std::endl;

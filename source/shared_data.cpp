@@ -8,6 +8,12 @@ std::atomic<uint16_t> ModbusInputRegisters[MODBUS_INPUTS_NUMBER];
 /// The coil values obtained from Modbus
 std::atomic<bool> ModbusCoilsReadout[MODBUS_COILS_NUMBER];
 
-/// The coil values required by the user
-std::atomic<bool> ModbusCoilsRequired[MODBUS_COILS_NUMBER];
+/// The coil values required by the user (one coil per cup)
+std::atomic<bool> ModbusCoilValueRequest[CUPS_NUMBER];
 
+/// The coil change request
+std::atomic<bool> ModbusCoilChangeReqest[CUPS_NUMBER];
+
+/// Countdown timers for sending a command to the slave, physical execution,
+/// and receiving feedback from the limit switches
+std::atomic<uint16_t> ModbusRequestProcessingTime[CUPS_NUMBER];

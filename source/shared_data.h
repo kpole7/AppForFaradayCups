@@ -16,6 +16,10 @@ extern std::atomic<uint16_t> ModbusInputRegisters[MODBUS_INPUTS_NUMBER];
 
 extern std::atomic<bool> ModbusCoilsReadout[MODBUS_COILS_NUMBER];
 
-extern std::atomic<bool> ModbusCoilsRequired[MODBUS_COILS_NUMBER];
+extern std::atomic<bool> ModbusCoilValueRequest[CUPS_NUMBER];
+
+extern std::atomic<bool> ModbusCoilChangeReqest[CUPS_NUMBER];
+
+extern std::atomic<uint16_t> ModbusRequestProcessingTime[CUPS_NUMBER];
 
 #endif // SOURCE_SHARED_DATA_H_
