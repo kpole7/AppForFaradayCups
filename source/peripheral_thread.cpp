@@ -128,8 +128,6 @@ static void peripheralThreadHandler(void){
 	while( !atomic_load_explicit( &ClosePeripheralsFlag, std::memory_order_acquire )){
 
 		// timing
-		std::chrono::high_resolution_clock::time_point TimeNow;
-		std::chrono::milliseconds DurationTime;
 		if (LOW_LEVEL_CONTINUOUS_ERRORS_LIMIT <= LowLevelContinuousErrors){
 			PeripheralThreadTimeInMilliseconds += DELAY_MULTIPLIER_ON_ERROR * PERIPHERAL_THREAD_LOOP_DURATION;
 			DelayMultiplierOnError = DELAY_MULTIPLIER_ON_ERROR;
@@ -138,13 +136,41 @@ static void peripheralThreadHandler(void){
 			PeripheralThreadTimeInMilliseconds += PERIPHERAL_THREAD_LOOP_DURATION;
 			DelayMultiplierOnError = 1;
 		}
-		do{
-			// delay so as not to overload the processor core
-			usleep(2000);
+		std::chrono::high_resolution_clock::time_point TimeNow = std::chrono::high_resolution_clock::now();
+		std::chrono::milliseconds DurationTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - PeripheralThreadLoopStart);
+		while(DurationTime.count() < PeripheralThreadTimeInMilliseconds){
+			// free time activities:  checking for inconsistencies in the status of limit switches
+			for (int J=0; J<1; J++){
+				int TemporaryCoilIndex1 = COIL_OFFSET_IS_CUP_FORCED+J*MODBUS_COILS_PER_CUP;
+				assert( TemporaryCoilIndex1 < MODBUS_COILS_NUMBER );
+				int TemporaryCoilIndex2 = COIL_OFFSET_IS_SWITCH_PRESSED+J*MODBUS_COILS_PER_CUP;
+				assert( TemporaryCoilIndex2 < MODBUS_COILS_NUMBER );
+				if (ModbusCoilsReadout[TemporaryCoilIndex1] == ModbusCoilsReadout[TemporaryCoilIndex2]){
+					atomic_store_explicit( &DisplayLimitSwitchError[J], false, std::memory_order_release );
+				}
+				else{
+					std::chrono::milliseconds CupInsertionOrRemovalDuration =
+							std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - CupInsertionOrRemovalStartTime[J]);
+					if (CupInsertionOrRemovalDuration.count() > COIL_CHANGE_PROCESSING_LIMIT){
+						atomic_store_explicit( &DisplayLimitSwitchError[J], true, std::memory_order_release );
+					}
+					else{
+						atomic_store_explicit( &DisplayLimitSwitchError[J], false, std::memory_order_release );
+					}
+				}
+			}
 			TimeNow = std::chrono::high_resolution_clock::now();
 			DurationTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - PeripheralThreadLoopStart);
+			if (DurationTime.count() >= PeripheralThreadTimeInMilliseconds){
+				break;
+			}
 
-		}while(DurationTime.count() < PeripheralThreadTimeInMilliseconds);
+			// delay so as not to overload the processor core
+			usleep(2000);
+
+			TimeNow = std::chrono::high_resolution_clock::now();
+			DurationTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - PeripheralThreadLoopStart);
+		}
 
 		// essential action
 		switch (FsmState) {

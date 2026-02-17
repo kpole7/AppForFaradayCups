@@ -84,7 +84,9 @@ public:
 
 protected:
     void draw() override {
-        if (!visible()) return;
+        if (0 == visible()){
+        	return;
+        }
 
         fl_push_clip(x(), y(), w(), h());
         fl_color(FL_WHITE);
@@ -93,7 +95,8 @@ protected:
         if (img_) {
             // draw an image scaled to the size of the widget
             img_->draw(x(), y(), w(), h());
-        } else {
+        }
+        else {
             // no image — placeholder
             fl_color(FL_GRAY);
             fl_rectf(x()+2, y()+2, w()-4, h()-4);
@@ -196,7 +199,7 @@ void initializeGraphicWidgets(void){
 	UnconnectedTextBoxPtr[0]->labelcolor( COLOR_DARK_RED );
 	UnconnectedTextBoxPtr[0]->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
-	SwitchErrorTextBoxPtr[0] = new Fl_Box(330, 155, 160, 45, "Błąd Krańcówki");
+	SwitchErrorTextBoxPtr[0] = new Fl_Box(330, 148, 160, 60, "Błąd krańcówki\nlub sterownika");
 	SwitchErrorTextBoxPtr[0]->hide();
 	SwitchErrorTextBoxPtr[0]->labelfont( FL_HELVETICA_BOLD );
 	SwitchErrorTextBoxPtr[0]->labelsize( 16 );
@@ -343,8 +346,8 @@ static void refreshValues( uint8_t Disc ){
 /// and refreshes the entire single disc
 void refreshDisc(void* Data){
 	uint8_t Disc = *((uint8_t*)Data);
-
 	assert( Disc < CUPS_NUMBER );
+
 	int TemporaryIndexForSwitchPressed = COIL_OFFSET_IS_SWITCH_PRESSED+MODBUS_COILS_PER_CUP*Disc;
 	if (TemporaryIndexForSwitchPressed >= MODBUS_COILS_NUMBER){
 	    std::cout << "Internal error, file " << __FILE__ << ", line " << __LINE__ << ", index " << TemporaryIndexForSwitchPressed << std::endl;
@@ -357,7 +360,7 @@ void refreshDisc(void* Data){
 	bool IsTransmissionCorrect = isTransmissionCorrect();
 
 	if (IsTransmissionCorrect && atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndexForSwitchPressed], std::memory_order_acquire )){
-		if (!DiscGraphics[Disc]->visible()){
+		if (0 == DiscGraphics[Disc]->visible()){
 			DiscGraphics[Disc]->show();
 		}
 		else{
@@ -365,21 +368,43 @@ void refreshDisc(void* Data){
 		}
 	}
 	else{
-		if (DiscGraphics[Disc]->visible()){
+		if (0 != DiscGraphics[Disc]->visible()){
 			DiscGraphics[Disc]->hide();
 		}
 	}
 
 	refreshValues(Disc);
 
+	if (atomic_load_explicit( &DisplayLimitSwitchError[Disc], std::memory_order_acquire )){
+		if (0 == SwitchErrorTextBoxPtr[Disc]->visible()){
+			SwitchErrorTextBoxPtr[Disc]->show();
+		}
+	}
+	else{
+		int TemporaryCoilIndex1 = COIL_OFFSET_IS_CUP_BLOCKED+Disc*MODBUS_COILS_PER_CUP;
+		assert( TemporaryCoilIndex1 < MODBUS_COILS_NUMBER );
+		int TemporaryCoilIndex2 = COIL_OFFSET_IS_SWITCH_PRESSED+Disc*MODBUS_COILS_PER_CUP;
+		assert( TemporaryCoilIndex2 < MODBUS_COILS_NUMBER );
+		if (ModbusCoilsReadout[TemporaryCoilIndex1] && !ModbusCoilsReadout[TemporaryCoilIndex2]){
+			if (0 == SwitchErrorTextBoxPtr[Disc]->visible()){
+				SwitchErrorTextBoxPtr[Disc]->show();
+			}
+		}
+		else{
+			if (0 != SwitchErrorTextBoxPtr[Disc]->visible()){
+				SwitchErrorTextBoxPtr[Disc]->hide();
+			}
+		}
+	}
+
 	if (IsTransmissionCorrect && atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndexForBlockage], std::memory_order_acquire )){
-		if (!PadlockImagePtr[Disc]->visible()){
+		if (0 == PadlockImagePtr[Disc]->visible()){
 			PadlockImagePtr[Disc]->show();
 			LockoutTextBoxPtr[Disc]->show();
 		}
 	}
 	else{
-		if (PadlockImagePtr[Disc]->visible()){
+		if (0 != PadlockImagePtr[Disc]->visible()){
 			PadlockImagePtr[Disc]->hide();
 			LockoutTextBoxPtr[Disc]->hide();
 		}
@@ -409,12 +434,12 @@ void refreshDisc(void* Data){
 
 	if (0 == Disc){
 		if ((0 == StatusLevelForGui) || (!IsTransmissionCorrect)){
-			if (StatusTextBoxPtr[Disc]->visible()){
+			if (0 != StatusTextBoxPtr[Disc]->visible()){
 				StatusTextBoxPtr[Disc]->hide();
 			}
 		}
 		else{
-			if (!StatusTextBoxPtr[Disc]->visible()){
+			if (0 == StatusTextBoxPtr[Disc]->visible()){
 				StatusTextBoxPtr[Disc]->show();
 			}
 			if (1 == StatusLevelForGui){
