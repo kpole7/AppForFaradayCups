@@ -14,6 +14,5 @@ std::atomic<bool> ModbusCoilValueRequest[CUPS_NUMBER];
 /// The coil change request
 std::atomic<bool> ModbusCoilChangeReqest[CUPS_NUMBER];
 
-/// Countdown timers for sending a command to the slave, physical execution,
-/// and receiving feedback from the limit switches
-std::atomic<uint16_t> ModbusRequestProcessingTime[CUPS_NUMBER];
+std::chrono::high_resolution_clock::time_point CupInsertionOrRemovalStartTime[CUPS_NUMBER];
+

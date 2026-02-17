@@ -151,6 +151,10 @@ static void cupInsertionButtonCallback(Fl_Widget* Widget, void* Data);
 //.................................................................................................
 
 void initializeGraphicWidgets(void){
+	std::chrono::high_resolution_clock::time_point NowTemporary = std::chrono::high_resolution_clock::now();
+	for (int J=0; J<CUPS_NUMBER; J++){
+		CupInsertionOrRemovalStartTime[J] = NowTemporary;
+	}
 
 	initializeDiscWithNoSlit( 0, 30, 40 );
 
@@ -465,10 +469,15 @@ void refreshDisc(void* Data){
 static void cupInsertionButtonCallback(Fl_Widget* Widget, void* Data){
 	(void)Widget; // intentionally unused
 	const int DiscIndex = (int)*((const uint8_t*)Data);
-
 	assert( DiscIndex < CUPS_NUMBER );
-	if (atomic_load_explicit( &ModbusRequestProcessingTime[DiscIndex], std::memory_order_acquire ) > 0){
-	    std::cout << "Akcja związana z naciśnięciem przycisku: ODMOWA " << DiscIndex << std::endl;
+
+	// protection against too frequent clicking + protection against too early display of limit switch error
+	std::chrono::high_resolution_clock::time_point TimeNow = std::chrono::high_resolution_clock::now();
+	std::chrono::milliseconds DurationTime;
+	DurationTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - CupInsertionOrRemovalStartTime[DiscIndex]);
+
+	if (DurationTime.count() < COIL_CHANGE_PROCESSING_LIMIT){
+		std::cout << "Akcja związana z naciśnięciem przycisku: ODMOWA " << DiscIndex << std::endl;
 		return;
 	}
 
@@ -483,7 +492,7 @@ static void cupInsertionButtonCallback(Fl_Widget* Widget, void* Data){
 		    std::cout << "Akcja związana z naciśnięciem przycisku: wsuń " << DiscIndex << std::endl;
 		}
 		atomic_store_explicit( &ModbusCoilChangeReqest[DiscIndex], true, std::memory_order_release );
-		atomic_store_explicit( &ModbusRequestProcessingTime[DiscIndex], COIL_CHANGE_PROCESSING_LIMIT, std::memory_order_release );
+		CupInsertionOrRemovalStartTime[DiscIndex] = std::chrono::high_resolution_clock::now();
 	}
 	else{
 	    std::cout << "Internal error, file " << __FILE__ << ", line " << __LINE__ << ", index " << DiscIndex << std::endl;
