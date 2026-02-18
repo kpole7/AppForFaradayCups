@@ -491,7 +491,9 @@ void refreshDisc(void* Data){
 		else{
 			CupInsertionButtonPtr[Disc]->label( "Wsuń" );
 		}
-		if (atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndexForBlockage], std::memory_order_acquire )){
+		if (!IsTransmissionCorrect ||
+			atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndexForBlockage], std::memory_order_acquire ))
+		{
 			CupInsertionButtonPtr[Disc]->deactivate();
 		}
 		else{
