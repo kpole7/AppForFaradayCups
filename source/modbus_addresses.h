@@ -20,6 +20,8 @@
 #define COIL_OFFSET_IS_CUP_BLOCKED		1
 #define COIL_OFFSET_IS_SWITCH_PRESSED	2
 
-#define COIL_CHANGE_PROCESSING_LIMIT	800 // milliseconds
+/// This the maximum time that may elapse from clicking the "insert / remove cup" button to receiving feedback from
+/// the limit switch
+#define COIL_CHANGE_PROCESSING_LIMIT	1200 // milliseconds
 
 #endif /* SOURCE_MODBUS_ADDRESSES_H_ */

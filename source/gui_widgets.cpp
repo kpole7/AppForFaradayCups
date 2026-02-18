@@ -192,10 +192,8 @@ void initializeGraphicWidgets(void){
 	UnconnectedTextBoxPtr[0]->hide();
 	UnconnectedTextBoxPtr[0]->labelfont( FL_HELVETICA_BOLD );
 	UnconnectedTextBoxPtr[0]->labelsize( 16 );
-#if 0 // background
-	UnconnectedTextBoxPtr[0]->color( COLOR_WEAK_BLUE );
+	UnconnectedTextBoxPtr[0]->color( FL_YELLOW );
 	UnconnectedTextBoxPtr[0]->box(FL_FLAT_BOX);
-#endif
 	UnconnectedTextBoxPtr[0]->labelcolor( COLOR_DARK_RED );
 	UnconnectedTextBoxPtr[0]->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
@@ -215,11 +213,15 @@ void initializeGraphicWidgets(void){
 	CupInsertionButtonPtr[0]->labelsize( ORDINARY_TEXT_SIZE );
 	CupInsertionButtonPtr[0]->callback( cupInsertionButtonCallback, (void*)&IndexesForCallbacks[0] );
 
-	GeneralStatusTextBoxPtr = new Fl_Box(10, 30, 490, 20, "Tu powinny być różne dane");
+	GeneralStatusTextBoxPtr = new Fl_Box(200, 10, 300, 15, "Tu powinny być różne dane");
 	GeneralStatusTextBoxPtr->labelfont( FL_COURIER );
 	GeneralStatusTextBoxPtr->labelsize( DEBUGGING_TEXT_SIZE );
 	GeneralStatusTextBoxPtr->labelcolor( FL_BLACK );
 	GeneralStatusTextBoxPtr->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
+#if 0 // debugging
+	GeneralStatusTextBoxPtr->color( FL_YELLOW );
+	GeneralStatusTextBoxPtr->box(FL_FLAT_BOX);
+#endif
 
 	StatusTextBoxPtr[0] = new Fl_Box(300, 260, 210, 60, "tu powinny być różne dane");
 	StatusTextBoxPtr[0]->labelfont( FL_COURIER );
@@ -375,25 +377,32 @@ void refreshDisc(void* Data){
 
 	refreshValues(Disc);
 
-	if (atomic_load_explicit( &DisplayLimitSwitchError[Disc], std::memory_order_acquire )){
-		if (0 == SwitchErrorTextBoxPtr[Disc]->visible()){
-			SwitchErrorTextBoxPtr[Disc]->show();
-		}
-	}
-	else{
-		int TemporaryCoilIndex1 = COIL_OFFSET_IS_CUP_BLOCKED+Disc*MODBUS_COILS_PER_CUP;
-		assert( TemporaryCoilIndex1 < MODBUS_COILS_NUMBER );
-		int TemporaryCoilIndex2 = COIL_OFFSET_IS_SWITCH_PRESSED+Disc*MODBUS_COILS_PER_CUP;
-		assert( TemporaryCoilIndex2 < MODBUS_COILS_NUMBER );
-		if (ModbusCoilsReadout[TemporaryCoilIndex1] && !ModbusCoilsReadout[TemporaryCoilIndex2]){
+	if (IsTransmissionCorrect){
+		if (atomic_load_explicit( &DisplayLimitSwitchError[Disc], std::memory_order_acquire )){
 			if (0 == SwitchErrorTextBoxPtr[Disc]->visible()){
 				SwitchErrorTextBoxPtr[Disc]->show();
 			}
 		}
 		else{
-			if (0 != SwitchErrorTextBoxPtr[Disc]->visible()){
-				SwitchErrorTextBoxPtr[Disc]->hide();
+			int TemporaryCoilIndex1 = COIL_OFFSET_IS_CUP_BLOCKED+Disc*MODBUS_COILS_PER_CUP;
+			assert( TemporaryCoilIndex1 < MODBUS_COILS_NUMBER );
+			int TemporaryCoilIndex2 = COIL_OFFSET_IS_SWITCH_PRESSED+Disc*MODBUS_COILS_PER_CUP;
+			assert( TemporaryCoilIndex2 < MODBUS_COILS_NUMBER );
+			if (ModbusCoilsReadout[TemporaryCoilIndex1] && !ModbusCoilsReadout[TemporaryCoilIndex2]){
+				if (0 == SwitchErrorTextBoxPtr[Disc]->visible()){
+					SwitchErrorTextBoxPtr[Disc]->show();
+				}
 			}
+			else{
+				if (0 != SwitchErrorTextBoxPtr[Disc]->visible()){
+					SwitchErrorTextBoxPtr[Disc]->hide();
+				}
+			}
+		}
+	}
+	else{
+		if (0 != SwitchErrorTextBoxPtr[Disc]->visible()){
+			SwitchErrorTextBoxPtr[Disc]->hide();
 		}
 	}
 
