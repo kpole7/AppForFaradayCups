@@ -9,7 +9,7 @@ std::atomic<uint16_t> ModbusInputRegisters[MODBUS_INPUTS_NUMBER];
 std::atomic<bool> ModbusCoilsReadout[MODBUS_COILS_NUMBER];
 
 /// The coil values required by the user (one coil per cup)
-std::atomic<bool> ModbusCoilValueRequest[CUPS_NUMBER];
+std::atomic<bool> ModbusCoilRequestedValue[CUPS_NUMBER];
 
 /// The coil change request
 std::atomic<bool> ModbusCoilChangeReqest[CUPS_NUMBER];

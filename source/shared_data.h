@@ -17,7 +17,7 @@ extern std::atomic<uint16_t> ModbusInputRegisters[MODBUS_INPUTS_NUMBER];
 
 extern std::atomic<bool> ModbusCoilsReadout[MODBUS_COILS_NUMBER];
 
-extern std::atomic<bool> ModbusCoilValueRequest[CUPS_NUMBER];
+extern std::atomic<bool> ModbusCoilRequestedValue[CUPS_NUMBER];
 
 extern std::atomic<bool> ModbusCoilChangeReqest[CUPS_NUMBER];
 

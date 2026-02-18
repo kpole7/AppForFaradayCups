@@ -8,6 +8,7 @@
 //.................................................................................................
 
 #define CUPS_NUMBER							3
+#define PHYSICALLY_INSTALLED_CUPS			1
 #define VALUES_PER_DISC						5
 #define VISIBLE_VALUES_PER_DISC				3
 

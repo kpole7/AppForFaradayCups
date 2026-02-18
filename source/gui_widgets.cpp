@@ -509,11 +509,11 @@ static void cupInsertionButtonCallback(Fl_Widget* Widget, void* Data){
 	int TemporaryIndex = COIL_OFFSET_IS_SWITCH_PRESSED+MODBUS_COILS_PER_CUP*DiscIndex;
 	if (TemporaryIndex < MODBUS_COILS_NUMBER){
 		if (atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndex], std::memory_order_acquire )){
-			atomic_store_explicit( &ModbusCoilValueRequest[DiscIndex], false, std::memory_order_release );
+			atomic_store_explicit( &ModbusCoilRequestedValue[DiscIndex], false, std::memory_order_release );
 		    std::cout << "Akcja związana z naciśnięciem przycisku: wysuń " << DiscIndex << std::endl;
 		}
 		else{
-			atomic_store_explicit( &ModbusCoilValueRequest[DiscIndex], true, std::memory_order_release );
+			atomic_store_explicit( &ModbusCoilRequestedValue[DiscIndex], true, std::memory_order_release );
 		    std::cout << "Akcja związana z naciśnięciem przycisku: wsuń " << DiscIndex << std::endl;
 		}
 		atomic_store_explicit( &ModbusCoilChangeReqest[DiscIndex], true, std::memory_order_release );

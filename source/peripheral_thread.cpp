@@ -34,8 +34,8 @@
 
 enum class ModbusFsmStates{
 	OPEN,
-	READING_COILS,
 	READING_INPUT_REGISTERS,
+	READING_COILS,
 	WRITING_COIL,
 	STOPPED,
 };
@@ -140,7 +140,7 @@ static void peripheralThreadHandler(void){
 		std::chrono::milliseconds DurationTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - PeripheralThreadLoopStart);
 		while(DurationTime.count() < PeripheralThreadTimeInMilliseconds){
 			// free time activities:  checking for inconsistencies in the status of limit switches
-			for (int J=0; J<1; J++){
+			for (int J=0; J<PHYSICALLY_INSTALLED_CUPS; J++){
 				int TemporaryCoilIndex1 = COIL_OFFSET_IS_CUP_FORCED+J*MODBUS_COILS_PER_CUP;
 				assert( TemporaryCoilIndex1 < MODBUS_COILS_NUMBER );
 				int TemporaryCoilIndex2 = COIL_OFFSET_IS_SWITCH_PRESSED+J*MODBUS_COILS_PER_CUP;
@@ -173,22 +173,56 @@ static void peripheralThreadHandler(void){
 		}
 
 		// essential action
-		switch (FsmState) {
-		case ModbusFsmStates::OPEN:
-		case ModbusFsmStates::READING_COILS:
-		case ModbusFsmStates::READING_INPUT_REGISTERS:
-		case ModbusFsmStates::WRITING_COIL:
-		{
+		if (FsmState == ModbusFsmStates::STOPPED){
+			// illegal state here
+		    std::cout << "Internal error, file " << __FILE__ << ", line " << __LINE__ << ", illegal state" << std::endl;
+		}
+		else{
 			//normal mode of operation
+			bool IsEssentialActionDone = false;
 			FailureCodes Result;
-			if (ModbusFsmStates::READING_COILS != FsmState) {
-				FsmState = ModbusFsmStates::READING_COILS;
-				Result = readCoils();
-			}
-			else {
+
+			if (!IsEssentialActionDone && (ModbusFsmStates::OPEN == FsmState)){
 				FsmState = ModbusFsmStates::READING_INPUT_REGISTERS;
 				Result = readInputRegisters();
+				IsEssentialActionDone = true;
 			}
+
+			if (!IsEssentialActionDone && (ModbusFsmStates::READING_INPUT_REGISTERS == FsmState)){
+				FsmState = ModbusFsmStates::READING_COILS;
+				Result = readCoils();
+				IsEssentialActionDone = true;
+			}
+
+			if (!IsEssentialActionDone && (ModbusFsmStates::READING_COILS == FsmState)){
+				for (int J=0; J<PHYSICALLY_INSTALLED_CUPS; J++){
+					if (atomic_load_explicit( &ModbusCoilChangeReqest[J], std::memory_order_acquire )){
+						FsmState = ModbusFsmStates::WRITING_COIL;
+
+						atomic_store_explicit( &ModbusCoilChangeReqest[J], false, std::memory_order_release );
+						Result = writeSingleCoil(
+							MODBUS_COILS_ADDRESS+COIL_OFFSET_IS_CUP_FORCED+J*MODBUS_COILS_PER_CUP,
+							atomic_load_explicit( &ModbusCoilRequestedValue[J], std::memory_order_acquire ) );
+
+						IsEssentialActionDone = true;
+						break;
+					}
+				}
+			}
+
+			if (!IsEssentialActionDone && (ModbusFsmStates::READING_COILS == FsmState)){
+				FsmState = ModbusFsmStates::READING_INPUT_REGISTERS;
+				Result = readInputRegisters();
+				IsEssentialActionDone = true;
+			}
+
+			if (!IsEssentialActionDone && (ModbusFsmStates::WRITING_COIL == FsmState)){
+				FsmState = ModbusFsmStates::READING_INPUT_REGISTERS;
+				Result = readInputRegisters();
+				IsEssentialActionDone = true;
+			}
+
+
 			if (FailureCodes::NO_FAILURE == Result) {
 				if (LOW_LEVEL_CONTINUOUS_COUNTING_MAX
 						> LowLevelSuccessfulTransmission) {
@@ -230,15 +264,7 @@ static void peripheralThreadHandler(void){
 #endif
 			}
 		}
-			break;
 
-		case ModbusFsmStates::STOPPED:
-			// illegal state here
-			break;
-
-		default:
-			break;
-		}
 
 #if 0 // debugging
 		static int DebugFsmStatesPrintoutCounter;
