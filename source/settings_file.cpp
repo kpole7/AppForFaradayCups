@@ -8,6 +8,7 @@
 #include <regex>
 #include <stdexcept>
 #include <cassert>
+#include <cstring>
 
 #include "settings_file.h"
 
@@ -27,7 +28,7 @@ double DirectionalCoefficient[CUPS_NUMBER];
 /// function I=DirectionalCoefficient[.]*x+OffsetForZeroCurrent[.]; here we have offsets
 int OffsetForZeroCurrent[CUPS_NUMBER];
 
-std::string * CupDescriptionPtr[CUPS_NUMBER];
+char CupDescriptionPtr[CUPS_NUMBER][101];
 
 std::string ThisApplicationDirectory;
 
@@ -43,8 +44,6 @@ static std::string SerialPortRequestedName;
 static bool FormulaIsDefined[CUPS_NUMBER];
 
 static std::string ConfigurationFilePath;
-
-static std::string CupDescription[CUPS_NUMBER];
 
 //.................................................................................................
 // Local function prototypes
@@ -86,7 +85,7 @@ FailureCodes configurationFileParsing(void) {
 	SerialPortRequestedNamePtr = nullptr;
     for (int J=0; J<CUPS_NUMBER; J++){
     	FormulaIsDefined[J] = false;
-    	CupDescriptionPtr[J] = nullptr;
+    	CupDescriptionPtr[J][0] = 0;
     }
 
     int LineNumber = 1;
@@ -175,11 +174,8 @@ FailureCodes configurationFileParsing(void) {
     	}
     }
     for (int J=0; J<CUPS_NUMBER; J++){
-    	if (nullptr == CupDescriptionPtr[J]){
-       		char TemporaryTitle[12];
-       		snprintf( TemporaryTitle, sizeof(TemporaryTitle)-1, "Kubek nr %d", (int)(J+1) );
-       		CupDescription[J] = TemporaryTitle;
-       		CupDescriptionPtr[J] = &CupDescription[J];
+    	if (0 == CupDescriptionPtr[J][0]){
+       		snprintf( CupDescriptionPtr[J], sizeof(CupDescriptionPtr[0])-1, "Kubek nr %d", (int)(J+1) );
        		if (VerboseMode){
        			std::cout << " Nie znaleziono tytułu kubka " << (int)(J+1) << "; nadano tytuł zastępczy" << std::endl;
        		}
@@ -260,11 +256,11 @@ static FailureCodes parseCupName( std::regex Pattern, std::string *LinePtr, int 
     std::smatch Matches;
     assert( CupIndex < CUPS_NUMBER );
     if (std::regex_match(*LinePtr, Matches, Pattern)) {
-    	if (nullptr == CupDescriptionPtr[CupIndex]){
-    		CupDescription[CupIndex] = Matches[1];
-    		CupDescriptionPtr[CupIndex] = &CupDescription[CupIndex];
+    	if (0 == CupDescriptionPtr[CupIndex][0]){
+   			std::string CupDescription = Matches[1];
+    		strncpy( CupDescriptionPtr[CupIndex], CupDescription.c_str(), sizeof(CupDescriptionPtr[0])-1 );
     		if (VerboseMode){
-                	std::cout << "  Tytuł kubka " << (int)(CupIndex+1) << ": [" << CupDescription[CupIndex] << "] w linii: [" << *LinePtr << "]" << std::endl;
+                	std::cout << "  Tytuł kubka " << (int)(CupIndex+1) << ": [" << CupDescriptionPtr[CupIndex] << "] w linii: [" << *LinePtr << "]" << std::endl;
             }
     	}
     	else{

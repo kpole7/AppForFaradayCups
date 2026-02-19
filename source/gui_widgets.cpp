@@ -129,6 +129,7 @@ public:
     void setGroupID( int NewValue );
     int getGroupID();
     void refreshData();
+    void setTitle();
 };
 
 //.................................................................................................
@@ -175,12 +176,15 @@ void initializeGraphicWidgets(void){
 
 	CupGroupPtr[0] = new CupGuiGroup( 0, MAIN_MENU_HEIGHT,                MAIN_WINDOW_WIDTH, 300 );
 	CupGroupPtr[0]->setGroupID(0);
+	CupGroupPtr[0]->setTitle();
 
 	CupGroupPtr[1] = new CupGuiGroup( 0, MAIN_MENU_HEIGHT+  DISC_SPACE_Y, MAIN_WINDOW_WIDTH, 300 );
 	CupGroupPtr[1]->setGroupID(1);
+	CupGroupPtr[1]->setTitle();
 
 	CupGroupPtr[2] = new CupGuiGroup( 0, MAIN_MENU_HEIGHT+2*DISC_SPACE_Y, MAIN_WINDOW_WIDTH, 300 );
 	CupGroupPtr[2]->setGroupID(0);
+	CupGroupPtr[2]->setTitle();
 }
 
 #if 0
@@ -286,9 +290,11 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char* L) : Fl_Group(X
 
 	TitleTextBoxPtr = new Fl_Box(X+0, Y, 296, 20, "Tytuł");
 	TitleTextBoxPtr->labelfont( ORDINARY_TEXT_FONT );
-	TitleTextBoxPtr->labelsize( 16 );
+	TitleTextBoxPtr->labelsize( ORDINARY_TEXT_SIZE );
+#if 0
 	TitleTextBoxPtr->color( FL_YELLOW );
 	TitleTextBoxPtr->box(FL_FLAT_BOX);
+#endif
 	TitleTextBoxPtr->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
 	TripleDisc = new TripleDiscWidgetWithNoSlit( X+20, Y+20, 256, 256 );
@@ -525,6 +531,11 @@ void CupGuiGroup::refreshData(){
 	else{
 		CupInsertionButtonPtr->activate();
 	}
+}
+
+void CupGuiGroup::setTitle(){
+	assert( GroupID < CUPS_NUMBER );
+	TitleTextBoxPtr->label( CupDescriptionPtr[GroupID] );
 }
 
 void refreshGui(void* Data){
