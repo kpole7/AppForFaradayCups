@@ -115,11 +115,6 @@ void serialCommunicationExit(void){
 static void peripheralThreadHandler(void){
 	usleep(100000UL); // 100 ms
 
-	static uint8_t StaticArguments[3];
-	for (int J=0; J<3; J++){
-		StaticArguments[J] = J;
-	}
-
 	PeripheralThreadTimeInMilliseconds = 0;
 	PeripheralThreadLoopStart = std::chrono::high_resolution_clock::now();
 	int DelayMultiplierOnError;
@@ -257,15 +252,7 @@ static void peripheralThreadHandler(void){
 #endif
 
 			if (ModbusFsmStates::READING_INPUT_REGISTERS == FsmState) {
-
 				Fl::awake(refreshGui, nullptr);
-
-
-				Fl::awake(refreshDisc, (void*) &StaticArguments[0]);
-#if 0
-				Fl::awake( refreshDisc, (void*)&StaticArguments[1] );
-				Fl::awake( refreshDisc, (void*)&StaticArguments[2] );
-#endif
 			}
 		}
 
