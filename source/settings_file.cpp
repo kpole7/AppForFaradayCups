@@ -7,6 +7,7 @@
 #include <cstdlib>   // for realpath
 #include <regex>
 #include <stdexcept>
+#include <cassert>
 
 #include "settings_file.h"
 
@@ -26,6 +27,8 @@ double DirectionalCoefficient[CUPS_NUMBER];
 /// function I=DirectionalCoefficient[.]*x+OffsetForZeroCurrent[.]; here we have offsets
 int OffsetForZeroCurrent[CUPS_NUMBER];
 
+std::string * CupDescriptionPtr[CUPS_NUMBER];
+
 std::string ThisApplicationDirectory;
 
 //.................................................................................................
@@ -41,11 +44,14 @@ static bool FormulaIsDefined[CUPS_NUMBER];
 
 static std::string ConfigurationFilePath;
 
+static std::string CupDescription[CUPS_NUMBER];
+
 //.................................................................................................
 // Local function prototypes
 //.................................................................................................
 
 static FailureCodes parseFunctionFormula( std::regex Pattern, std::string *LinePtr, int CupIndex );
+static FailureCodes parseCupName( std::regex Pattern, std::string *LinePtr, int CupIndex );
 
 //........................................................................................................
 // Function definitions
@@ -80,6 +86,7 @@ FailureCodes configurationFileParsing(void) {
 	SerialPortRequestedNamePtr = nullptr;
     for (int J=0; J<CUPS_NUMBER; J++){
     	FormulaIsDefined[J] = false;
+    	CupDescriptionPtr[J] = nullptr;
     }
 
     int LineNumber = 1;
@@ -104,6 +111,9 @@ FailureCodes configurationFileParsing(void) {
     std::regex PatternCup1FunctionFormula(R"(\s*(?!#)Wzór na prądy w pierwszym kubku:\s*I\s*=\s*([0-9]*\.?[0-9]+(?:[eE][+\-]?\d+)?)\s*\*\s*\(\s*x\s*([+-])\s*(0x[0-9A-Fa-f]+|\d+)\s*\)\s*$)");
     std::regex PatternCup2FunctionFormula(R"(\s*(?!#)Wzór na prądy w drugim kubku:\s*I\s*=\s*([0-9]*\.?[0-9]+(?:[eE][+\-]?\d+)?)\s*\*\s*\(\s*x\s*([+-])\s*(0x[0-9A-Fa-f]+|\d+)\s*\)\s*$)");
     std::regex PatternCup3FunctionFormula(R"(\s*(?!#)Wzór na prądy w trzecim kubku:\s*I\s*=\s*([0-9]*\.?[0-9]+(?:[eE][+\-]?\d+)?)\s*\*\s*\(\s*x\s*([+-])\s*(0x[0-9A-Fa-f]+|\d+)\s*\)\s*$)");
+    std::regex PatternCup1Title(R"(\s*(?!#)Tytuł pierwszego kubka:\s*(.+)\s*$)");
+    std::regex PatternCup2Title(R"(\s*(?!#)Tytuł drugiego kubka:\s*(.+)\s*$)");
+    std::regex PatternCup3Title(R"(\s*(?!#)Tytuł trzeciego kubka:\s*(.+)\s*$)");
 
     while (std::getline(File, Line)) {
         if (VerboseMode){
@@ -138,6 +148,19 @@ FailureCodes configurationFileParsing(void) {
         	return Result;
         }
 
+        Result = parseCupName( PatternCup1Title, &Line, 0 );
+        if (FailureCodes::NO_FAILURE != Result){
+        	return Result;
+        }
+        Result = parseCupName( PatternCup2Title, &Line, 1 );
+        if (FailureCodes::NO_FAILURE != Result){
+        	return Result;
+        }
+        Result = parseCupName( PatternCup3Title, &Line, 2 );
+        if (FailureCodes::NO_FAILURE != Result){
+        	return Result;
+        }
+
         LineNumber++;
     }
 
@@ -151,12 +174,24 @@ FailureCodes configurationFileParsing(void) {
             return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
     	}
     }
+    for (int J=0; J<CUPS_NUMBER; J++){
+    	if (nullptr == CupDescriptionPtr[J]){
+       		char TemporaryTitle[12];
+       		snprintf( TemporaryTitle, sizeof(TemporaryTitle)-1, "Kubek nr %d", (int)(J+1) );
+       		CupDescription[J] = TemporaryTitle;
+       		CupDescriptionPtr[J] = &CupDescription[J];
+       		if (VerboseMode){
+       			std::cout << " Nie znaleziono tytułu kubka " << (int)(J+1) << "; nadano tytuł zastępczy" << std::endl;
+       		}
+    	}
+    }
     std::cout << " Koniec pliku konfiguracyjnego " << std::endl;
     return FailureCodes::NO_FAILURE;
 }
 
 static FailureCodes parseFunctionFormula( std::regex Pattern, std::string *LinePtr, int CupIndex ){
     std::smatch Matches;
+    assert( CupIndex < CUPS_NUMBER );
     if (std::regex_match(*LinePtr, Matches, Pattern)) {
     	if (!FormulaIsDefined[CupIndex]){
     		FormulaIsDefined[CupIndex] = true;
@@ -220,3 +255,23 @@ static FailureCodes parseFunctionFormula( std::regex Pattern, std::string *LineP
     }
     return FailureCodes::NO_FAILURE;
 }
+
+static FailureCodes parseCupName( std::regex Pattern, std::string *LinePtr, int CupIndex ){
+    std::smatch Matches;
+    assert( CupIndex < CUPS_NUMBER );
+    if (std::regex_match(*LinePtr, Matches, Pattern)) {
+    	if (nullptr == CupDescriptionPtr[CupIndex]){
+    		CupDescription[CupIndex] = Matches[1];
+    		CupDescriptionPtr[CupIndex] = &CupDescription[CupIndex];
+    		if (VerboseMode){
+                	std::cout << "  Tytuł kubka " << (int)(CupIndex+1) << ": [" << CupDescription[CupIndex] << "] w linii: [" << *LinePtr << "]" << std::endl;
+            }
+    	}
+    	else{
+            	std::cout << "  Nadmiarowy tytuł kubka w linii: [" << *LinePtr << "]" << std::endl;
+                return FailureCodes::ERROR_SETTINGS_EXCESSIVE_CUP_NAME;
+    	}
+    }
+    return FailureCodes::NO_FAILURE;
+}
+

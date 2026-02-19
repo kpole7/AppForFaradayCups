@@ -16,6 +16,8 @@ extern double DirectionalCoefficient[CUPS_NUMBER];
 
 extern int OffsetForZeroCurrent[CUPS_NUMBER];
 
+extern std::string * CupDescriptionPtr[CUPS_NUMBER];
+
 extern std::string ThisApplicationDirectory;
 
 //.................................................................................................

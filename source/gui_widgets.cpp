@@ -11,6 +11,7 @@
 #include <FL/Fl_Widget.H>
 #include <FL/Fl_PNG_Image.H>
 #include <FL/Fl_Box.H>
+#include <FL/Fl_Group.H>
 
 #include "peripheral_thread.h"
 #include "png_graphics.h"
@@ -108,6 +109,25 @@ private:
     std::unique_ptr<Fl_PNG_Image> img_;
 };
 
+class CupGuiGroup : public Fl_Group {
+private:
+	int GroupID;
+	TripleDiscWidgetWithNoSlit * TripleDisc;
+	Fl_Box * CupValueLabelPtr[VALUES_PER_DISC];
+	ImageWidget * PadlockImagePtr;
+	ImageWidget * UnconnectedImagePtr;
+	Fl_Box* LockoutTextBoxPtr;
+	Fl_Box* UnconnectedTextBoxPtr;
+	Fl_Box* SwitchErrorTextBoxPtr;
+	Fl_Button* CupInsertionButtonPtr;
+	Fl_Box* StatusTextBoxPtr;
+	Fl_Box* Separator;
+public:
+	CupGuiGroup(int X, int Y, int W, int H, const char* L = nullptr);
+//	~CupGuiGroup();
+//    void setGroupID( int NewValue );
+//    int getGroupID();
+};
 
 //.................................................................................................
 // Local constants
@@ -533,5 +553,71 @@ static void cupInsertionButtonCallback(Fl_Widget* Widget, void* Data){
 	else{
 	    std::cout << "Internal error, file " << __FILE__ << ", line " << __LINE__ << ", index " << DiscIndex << std::endl;
 	}
+}
+
+CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char* L) : Fl_Group(X, Y, W, H, L) {
+	this->begin();
+	GroupID = -1;
+
+	TripleDisc = new TripleDiscWidgetWithNoSlit( X+20, Y+20, 256, 256 );
+	TripleDisc->hide();
+
+	for (int J=0; J <VALUES_PER_DISC; J++){
+		CupValueLabelPtr[J] = new Fl_Box(X+20, Y+DISC_VALUE1_Y+J*(DISC_VALUE2_Y-DISC_VALUE1_Y), 256, 30, "?" );
+		CupValueLabelPtr[J]->labelfont( FL_HELVETICA_BOLD );
+		CupValueLabelPtr[J]->labelsize( 26 );
+		CupValueLabelPtr[J]->hide();
+	}
+
+	PadlockImagePtr = new ImageWidget( 380, 60, 54, 54, padlock_png, padlock_png_len, nullptr );
+	PadlockImagePtr->hide();
+
+	UnconnectedImagePtr = new ImageWidget( 380, 60, 51, 51, unconnected_png, unconnected_png_len, nullptr );
+	UnconnectedImagePtr->hide();
+
+	LockoutTextBoxPtr = new Fl_Box(340, 120, 150, 25, "Blokada Aktywna");
+	LockoutTextBoxPtr->hide();
+	LockoutTextBoxPtr->labelfont( FL_HELVETICA_BOLD );
+	LockoutTextBoxPtr->labelsize( 16 );
+	LockoutTextBoxPtr->labelcolor( COLOR_DARK_RED );
+	LockoutTextBoxPtr->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
+
+	UnconnectedTextBoxPtr = new Fl_Box(330, 112, 150, 45, "Błąd Modbus:\nBrak Połączenia");
+	UnconnectedTextBoxPtr->hide();
+	UnconnectedTextBoxPtr->labelfont( FL_HELVETICA_BOLD );
+	UnconnectedTextBoxPtr->labelsize( 16 );
+	UnconnectedTextBoxPtr->color( FL_YELLOW );
+	UnconnectedTextBoxPtr->box(FL_FLAT_BOX);
+	UnconnectedTextBoxPtr->labelcolor( COLOR_DARK_RED );
+	UnconnectedTextBoxPtr->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
+
+	SwitchErrorTextBoxPtr = new Fl_Box(330, 148, 160, 60, "Błąd krańcówki\nlub sterownika");
+	SwitchErrorTextBoxPtr->hide();
+	SwitchErrorTextBoxPtr->labelfont( FL_HELVETICA_BOLD );
+	SwitchErrorTextBoxPtr->labelsize( 16 );
+	SwitchErrorTextBoxPtr->color( FL_YELLOW );
+	SwitchErrorTextBoxPtr->box(FL_FLAT_BOX);
+	SwitchErrorTextBoxPtr->labelcolor( COLOR_DARK_RED );
+	SwitchErrorTextBoxPtr->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
+
+	CupInsertionButtonPtr = new Fl_Button( 360, 220, 90, 40, "???" );
+	CupInsertionButtonPtr->box(FL_BORDER_BOX);
+	CupInsertionButtonPtr->color(NORMAL_BUTTON_COLOR);
+	CupInsertionButtonPtr->labelfont( ORDINARY_TEXT_FONT );
+	CupInsertionButtonPtr->labelsize( ORDINARY_TEXT_SIZE );
+	CupInsertionButtonPtr->callback( cupInsertionButtonCallback, nullptr );
+
+	StatusTextBoxPtr = new Fl_Box(300, 260, 210, 60, "tu powinny być różne dane");
+	StatusTextBoxPtr->labelfont( FL_COURIER );
+	StatusTextBoxPtr->labelsize( ORDINARY_TEXT_SIZE );
+	StatusTextBoxPtr->labelcolor( FL_BLACK );
+	StatusTextBoxPtr->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
+
+	Separator = new Fl_Box(0, 40 + DISC_SPACE_Y, MAIN_WINDOW_WIDTH, 4 );
+	Separator->box(FL_FLAT_BOX);
+	Separator->color(SEPARATOR_COLOR);
+
+    // Add widgets to group
+    this->end();
 }
 
