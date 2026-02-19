@@ -257,6 +257,10 @@ static void peripheralThreadHandler(void){
 #endif
 
 			if (ModbusFsmStates::READING_INPUT_REGISTERS == FsmState) {
+
+				Fl::awake(refreshGui, nullptr);
+
+
 				Fl::awake(refreshDisc, (void*) &StaticArguments[0]);
 #if 0
 				Fl::awake( refreshDisc, (void*)&StaticArguments[1] );

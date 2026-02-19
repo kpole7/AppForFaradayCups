@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
     ApplicationWindow->callback(onMainWindowCloseCallback);	// Window close event is handled
 
     // Menu
-    Fl_Menu_Bar MenuWidget(0, 0, 600, 30);
+    Fl_Menu_Bar MenuWidget(0, 0, MAIN_WINDOW_WIDTH, MAIN_MENU_HEIGHT);
     MenuWidget.box(FL_FLAT_BOX);
 
     MenuWidget.add(                 "Narzędzia/Status/Ukryty", 0, callbackForMenuItemStatus, (void*)0, FL_MENU_RADIO);

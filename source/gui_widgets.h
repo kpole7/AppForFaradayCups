@@ -19,7 +19,8 @@
 //.................................................................................................
 
 #define MAIN_WINDOW_WIDTH	510
-#define MAIN_WINDOW_HEIGHT	920
+#define MAIN_WINDOW_HEIGHT	900
+#define MAIN_MENU_HEIGHT	30
 
 #define COLOR_BACKGROUND	0x35
 
@@ -28,6 +29,8 @@
 //.................................................................................................
 
 void initializeGraphicWidgets(void);
+
+void refreshGui(void* Data);
 
 void refreshDisc(void* Data);
 
