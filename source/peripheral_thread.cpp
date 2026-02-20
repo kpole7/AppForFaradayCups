@@ -13,6 +13,7 @@
 #include "shared_data.h"
 #include "modbus_rtu_master.h"
 #include "gui_widgets.h"
+#include "settings_file.h"
 
 //.................................................................................................
 // Preprocessor directives
@@ -104,9 +105,9 @@ void serialCommunicationExit(void){
 	}
 	if (peripheralThread.joinable()){
 		peripheralThread.join();
-#if 1 // debugging
-	    std::cout << "Peripherals closed; delay loop ran " << (int)(SHUT_DOWN_COUNT_DOWN-TimeoutCounter) << " times" << std::endl;
-#endif
+		if (VeryVerboseMode){
+			std::cout << "Peripherals closed; delay loop ran " << (int)(SHUT_DOWN_COUNT_DOWN-TimeoutCounter) << " times" << std::endl;
+		}
 	}
 }
 
@@ -146,7 +147,7 @@ static void peripheralThreadHandler(void){
 				else{
 					std::chrono::milliseconds CupInsertionOrRemovalDuration =
 							std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - CupInsertionOrRemovalStartTime[J]);
-					if (CupInsertionOrRemovalDuration.count() > COIL_CHANGE_PROCESSING_LIMIT){
+					if (CupInsertionOrRemovalDuration.count() > MaximumPropagationTime){
 						atomic_store_explicit( &DisplayLimitSwitchError[J], true, std::memory_order_release );
 					}
 					else{

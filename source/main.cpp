@@ -54,6 +54,9 @@ public:
 /// This variable is set if there is argument "-v" or "--verbose" in command line
 bool VerboseMode;
 
+/// This variable is set if there are arguments "-v -v" or "--verbose --verbose" in command line
+bool VeryVerboseMode;
+
 /// This variable points to the main application window
 WindowEscProof* ApplicationWindow;
 
@@ -215,8 +218,13 @@ static FailureCodes mainInitializations(int argc, char** argv){
 	for (int J = 1; J < argc; J++) {
         std::string Argument = argv[J];
         if (Argument == "-v" || Argument == "--verbose") {
-        	VerboseMode = true;
-        	std::cout << "Tryb \"verbose\"" << std::endl;
+        	if (!VerboseMode){
+				VerboseMode = true;
+        	}
+        	else{
+				VeryVerboseMode = true;
+        	}
+
 #if 0 // debugging
             std::string Argument0 = argv[0];
         	std::cout << "Wywołanie programu: " << Argument0 << std::endl;
@@ -227,6 +235,14 @@ static FailureCodes mainInitializations(int argc, char** argv){
             FailureCode = FailureCodes::ERROR_COMMAND_SYNTAX;
         }
     }
+	if (VeryVerboseMode){
+		std::cout << "Tryb \"very verbose\"" << std::endl;
+	}
+	else{
+		if (VerboseMode){
+			std::cout << "Tryb \"verbose\"" << std::endl;
+		}
+	}
 
 	if (FailureCodes::NO_FAILURE == FailureCode){
 		FailureCode = determineApplicationPath( argv[0] );
@@ -262,7 +278,9 @@ static void callbackForMenuItemStatus(Fl_Widget* WidgetPtr, void*) {
     }
 
     StatusLevelForGui = static_cast<int>(reinterpret_cast<intptr_t>(TemporaryMenuItem->user_data()));
-    std::cout << "Opcja Status ustawiona na wartość: " << StatusLevelForGui << std::endl;
+	if (VerboseMode){
+		std::cout << "Opcja Status ustawiona na wartość: " << StatusLevelForGui << std::endl;
+	}
 }
 
 static void callbackForMenuItemHelp(Fl_Widget*, void*) {

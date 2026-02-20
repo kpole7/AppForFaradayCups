@@ -31,6 +31,9 @@ enum class FailureCodes
 	ERROR_SETTINGS_EXCESSIVE_PORT_NAME,
 	ERROR_SETTINGS_CONVERTION_FORMULA,
 	ERROR_SETTINGS_EXCESSIVE_CUP_NAME,
+	ERROR_SETTINGS_EXCESSIVE_PROPAGATION,
+	ERROR_SETTINGS_CONVERTION_PROPAGATION,
+	ERROR_SETTINGS_IMPROPER_PROPAGATION,
 	ERROR_MODBUS_INITIALIZATION_1,
 	ERROR_MODBUS_INITIALIZATION_2,
 	ERROR_MODBUS_OPENING,
@@ -44,6 +47,8 @@ enum class FailureCodes
 //.................................................................................................
 
 extern bool VerboseMode;
+
+extern bool VeryVerboseMode;
 
 extern int StatusLevelForGui;
 

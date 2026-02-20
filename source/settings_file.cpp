@@ -13,6 +13,13 @@
 #include "settings_file.h"
 
 //.................................................................................................
+// Preprocessor directives
+//.................................................................................................
+
+#define MAX_PROPAGATION_TIME_UPPER_LIMIT	10000	// in milliseconds
+#define MAX_PROPAGATION_TIME_LOWER_LIMIT	100		// in milliseconds
+
+//.................................................................................................
 // Global variables
 //.................................................................................................
 
@@ -31,6 +38,10 @@ int OffsetForZeroCurrent[CUPS_NUMBER];
 char CupDescriptionPtr[CUPS_NUMBER][101];
 
 std::string ThisApplicationDirectory;
+
+/// This the maximum time that may elapse from clicking the "insert / remove cup" button to receiving feedback
+/// from the limit switch; value in milliseconds
+int MaximumPropagationTime;
 
 //.................................................................................................
 // Local variables
@@ -72,7 +83,8 @@ FailureCodes determineApplicationPath( char* Argv0 ){
 #endif
         	std::cout << " Katalog programu: " << ThisApplicationDirectory << std::endl;
     	}
-    } else {
+    }
+    else {
         std::cerr << "Nie udało się uzyskać ścieżki do programu." << std::endl;
         return FailureCodes::ERROR_SETTINGS_PATH;
     }
@@ -87,6 +99,8 @@ FailureCodes configurationFileParsing(void) {
     	FormulaIsDefined[J] = false;
     	CupDescriptionPtr[J][0] = 0;
     }
+
+    MaximumPropagationTime = -1;
 
     int LineNumber = 1;
     std::string Line;
@@ -113,6 +127,7 @@ FailureCodes configurationFileParsing(void) {
     std::regex PatternCup1Title(R"(\s*(?!#)Tytuł pierwszego kubka:\s*(.+)\s*$)");
     std::regex PatternCup2Title(R"(\s*(?!#)Tytuł drugiego kubka:\s*(.+)\s*$)");
     std::regex PatternCup3Title(R"(\s*(?!#)Tytuł trzeciego kubka:\s*(.+)\s*$)");
+    std::regex PatternMaxPropagationTime(R"(\s*(?!#)Limit czasu propagacji sygnału z krańcówki:\s*(\d+)\s*$)");
 
     while (std::getline(File, Line)) {
         if (VerboseMode){
@@ -160,6 +175,36 @@ FailureCodes configurationFileParsing(void) {
         	return Result;
         }
 
+        if (std::regex_match(Line, Matches, PatternMaxPropagationTime)) {
+        if (MaximumPropagationTime < 0){
+				std::string PropagationText  = Matches[1]; // integer
+
+				try {
+						MaximumPropagationTime = std::stoi(PropagationText, nullptr, 0);
+				}
+				catch (const std::invalid_argument&) {
+					std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
+					return FailureCodes::ERROR_SETTINGS_CONVERTION_PROPAGATION;
+				}
+				catch (const std::out_of_range&) {
+					std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
+					return FailureCodes::ERROR_SETTINGS_CONVERTION_PROPAGATION;
+				}
+				if ((MaximumPropagationTime < MAX_PROPAGATION_TIME_LOWER_LIMIT) || (MaximumPropagationTime > MAX_PROPAGATION_TIME_UPPER_LIMIT)){
+					MaximumPropagationTime = -1;
+					return FailureCodes::ERROR_SETTINGS_IMPROPER_PROPAGATION;
+				}
+
+				if (VerboseMode){
+					std::cout << "  Maks. czas propagacji: " << MaximumPropagationTime << " ms, w linii: [" << Line << "]" << std::endl;
+				}
+        	}
+        	else{
+            	std::cout << "  Nadmiarowa deklaracja maks. czasu propagacji: [" << Line << "]" << std::endl;
+                return FailureCodes::ERROR_SETTINGS_EXCESSIVE_PROPAGATION;
+        	}
+        }
+
         LineNumber++;
     }
 
@@ -181,7 +226,9 @@ FailureCodes configurationFileParsing(void) {
        		}
     	}
     }
-    std::cout << " Koniec pliku konfiguracyjnego " << std::endl;
+	if (VerboseMode){
+		std::cout << " Koniec pliku konfiguracyjnego " << std::endl;
+	}
     return FailureCodes::NO_FAILURE;
 }
 

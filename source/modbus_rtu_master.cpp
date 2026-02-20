@@ -80,12 +80,18 @@ FailureCodes readInputRegisters(void){
     int ReceivedRegisters = modbus_read_input_registers(Context, MODBUS_INPUTS_ADDRESS, REGISTERS_TO_BE_READ, RegistersTable);
     if (ReceivedRegisters == -1) {
         // Communication / protocol error (CRC, timeout, invalid response)
-        std::cout << getTokenCharacter() << getTransmissionQualityIndicatorTextForDebugging() << " Błąd odczytu (1): " << modbus_strerror(errno) << std::endl;
+   		if (VerboseMode){
+   			std::cout << getTokenCharacter() << getTransmissionQualityIndicatorTextForDebugging() << " Błąd odczytu (1): "
+   					<< modbus_strerror(errno) << std::endl;
+   		}
         return FailureCodes::ERROR_MODBUS_READING;
     }
 
     if (ReceivedRegisters != REGISTERS_TO_BE_READ) {
-        std::cout << "Nieoczekiwana liczba rejestrów: otrzymano " << ReceivedRegisters << ", oczekiwano " << REGISTERS_TO_BE_READ << std::endl;
+   		if (VerboseMode){
+   			std::cout << "Nieoczekiwana liczba rejestrów: otrzymano " << ReceivedRegisters
+   					<< ", oczekiwano " << REGISTERS_TO_BE_READ << std::endl;
+   		}
         return FailureCodes::ERROR_MODBUS_FRAME_READ;
     }
     else {
@@ -115,12 +121,18 @@ FailureCodes readCoils(void){
     int ReceivedBits = modbus_read_bits(Context, MODBUS_COILS_ADDRESS, COILS_TO_BE_READ, TemporaryTable);
     if (ReceivedBits == -1) {
         // Communication / protocol error (CRC, timeout, invalid response)
-        std::cout << getTokenCharacter() << getTransmissionQualityIndicatorTextForDebugging() << " Błąd odczytu (2): " << modbus_strerror(errno) << std::endl;
+   		if (VerboseMode){
+   			std::cout << getTokenCharacter() << getTransmissionQualityIndicatorTextForDebugging() <<
+   					" Błąd odczytu (2): " << modbus_strerror(errno) << std::endl;
+   		}
         return FailureCodes::ERROR_MODBUS_READING;
     }
 
     if (ReceivedBits != COILS_TO_BE_READ) {
-        std::cout << "Nieoczekiwana liczba bitów: otrzymano " << ReceivedBits << ", oczekiwano " << REGISTERS_TO_BE_READ << std::endl;
+   		if (VerboseMode){
+   			std::cout << "Nieoczekiwana liczba bitów: otrzymano " << ReceivedBits << ", oczekiwano "
+   					<< REGISTERS_TO_BE_READ << std::endl;
+   		}
         return FailureCodes::ERROR_MODBUS_FRAME_READ;
     }
     else {
@@ -157,7 +169,10 @@ FailureCodes writeSingleCoil( uint16_t CoilAddress, bool NewValue ){
     int WrittenBits = modbus_write_bit(Context, (int)CoilAddress, (int)NewValue);
     if (WrittenBits != 1) {
         // Communication / protocol error (CRC, timeout, invalid response)
-        std::cout << getTokenCharacter() << getTransmissionQualityIndicatorTextForDebugging() << " Błąd zapisu: " << modbus_strerror(errno) << std::endl;
+   		if (VerboseMode){
+   			std::cout << getTokenCharacter() << getTransmissionQualityIndicatorTextForDebugging() <<
+   					" Błąd zapisu: " << modbus_strerror(errno) << std::endl;
+   		}
         return FailureCodes::ERROR_MODBUS_WRITING;
     }
     return FailureCodes::NO_FAILURE;
