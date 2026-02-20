@@ -111,7 +111,9 @@ private:
 
 class CupGuiGroup : public Fl_Group {
 private:
-	int GroupID;
+	int CupId;
+	char StaticLabelBuffer[CUPS_NUMBER][VALUES_PER_DISC][64];
+	char StatusText[800];
 	Fl_Box* TitleTextBoxPtr;
 	TripleDiscWidgetWithNoSlit * TripleDisc;
 	Fl_Box * CupValueLabelPtr[VALUES_PER_DISC];
@@ -125,11 +127,9 @@ private:
 	Fl_Box* SeparatorPtr;
 public:
 	CupGuiGroup(int X, int Y, int W, int H, const char* L = nullptr);
-//	~CupGuiGroup();
-    void setGroupID( int NewValue );
-    int getGroupID();
+    void configure( int IdValue );
+    int getCupId();
     void refreshData();
-    void setTitle();
 };
 
 //.................................................................................................
@@ -174,17 +174,13 @@ void initializeGraphicWidgets(void){
 	GeneralStatusTextBoxPtr->box(FL_FLAT_BOX);
 #endif
 
-	CupGroupPtr[0] = new CupGuiGroup( 0, MAIN_MENU_HEIGHT,                MAIN_WINDOW_WIDTH, 300 );
-	CupGroupPtr[0]->setGroupID(0);
-	CupGroupPtr[0]->setTitle();
-
-	CupGroupPtr[1] = new CupGuiGroup( 0, MAIN_MENU_HEIGHT+  DISC_SPACE_Y, MAIN_WINDOW_WIDTH, 300 );
-	CupGroupPtr[1]->setGroupID(1);
-	CupGroupPtr[1]->setTitle();
-
-	CupGroupPtr[2] = new CupGuiGroup( 0, MAIN_MENU_HEIGHT+2*DISC_SPACE_Y, MAIN_WINDOW_WIDTH, 300 );
-	CupGroupPtr[2]->setGroupID(0);
-	CupGroupPtr[2]->setTitle();
+	for (int J=0; J<CUPS_NUMBER; J++){
+		CupGroupPtr[J] = new CupGuiGroup( 0, MAIN_MENU_HEIGHT+J*DISC_SPACE_Y, MAIN_WINDOW_WIDTH, 300 );
+		CupGroupPtr[J]->configure(J);
+		if (J >= PHYSICALLY_INSTALLED_CUPS){
+			CupGroupPtr[J]->hide();
+		}
+	}
 }
 
 #if 0
@@ -253,7 +249,7 @@ static void cupInsertionButtonCallback(Fl_Widget* Widget, void* Data){
 
 	CupGuiGroup* MyGroup;
 	MyGroup = (CupGuiGroup*)(Widget->parent());
-	int DiscIndex = MyGroup->getGroupID();
+	int DiscIndex = MyGroup->getCupId();
 	assert( DiscIndex < CUPS_NUMBER );
 
 	// protection against too frequent clicking + protection against too early display of limit switch error
@@ -286,7 +282,7 @@ static void cupInsertionButtonCallback(Fl_Widget* Widget, void* Data){
 
 CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char* L) : Fl_Group(X, Y, W, H, L) {
 	this->begin();
-	GroupID = -1;
+	CupId = -1;
 
 	TitleTextBoxPtr = new Fl_Box(X+0, Y, 296, 20, "Tytuł");
 	TitleTextBoxPtr->labelfont( ORDINARY_TEXT_FONT );
@@ -360,23 +356,23 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char* L) : Fl_Group(X
 }
 
 // This function sets the sequence number of a group of widgets that relates to one channel
-void CupGuiGroup::setGroupID( int NewValue ){
-	GroupID = NewValue;
+void CupGuiGroup::configure( int IdValue ){
+	assert( IdValue < CUPS_NUMBER );
+	CupId = IdValue;
+	TitleTextBoxPtr->label( CupDescriptionPtr[CupId] );
 }
 
-int CupGuiGroup::getGroupID(){
-	return GroupID;
+int CupGuiGroup::getCupId(){
+	return CupId;
 }
 
 void CupGuiGroup::refreshData(){
-	static char StaticLabelBuffer[CUPS_NUMBER][VALUES_PER_DISC][64];
+	assert( CupId < CUPS_NUMBER );
 
-	assert( GroupID < CUPS_NUMBER );
-
-	int TemporaryIndexForSwitchPressed = COIL_OFFSET_IS_SWITCH_PRESSED+MODBUS_COILS_PER_CUP*GroupID;
+	int TemporaryIndexForSwitchPressed = COIL_OFFSET_IS_SWITCH_PRESSED+MODBUS_COILS_PER_CUP*CupId;
 	assert(TemporaryIndexForSwitchPressed < MODBUS_COILS_NUMBER);
 
-	int TemporaryIndexForBlockage = COIL_OFFSET_IS_CUP_BLOCKED+MODBUS_COILS_PER_CUP*GroupID;
+	int TemporaryIndexForBlockage = COIL_OFFSET_IS_CUP_BLOCKED+MODBUS_COILS_PER_CUP*CupId;
 	assert(TemporaryIndexForBlockage < MODBUS_COILS_NUMBER);
 
 	bool IsTransmissionCorrect = isTransmissionCorrect();
@@ -395,29 +391,31 @@ void CupGuiGroup::refreshData(){
 		}
 	}
 
-	if (IsTransmissionCorrect && atomic_load_explicit( &ModbusCoilsReadout[COIL_OFFSET_IS_SWITCH_PRESSED + GroupID*MODBUS_COILS_PER_CUP], std::memory_order_acquire )){
+	if (IsTransmissionCorrect &&
+			atomic_load_explicit( &ModbusCoilsReadout[COIL_OFFSET_IS_SWITCH_PRESSED + CupId*MODBUS_COILS_PER_CUP], std::memory_order_acquire ))
+		{
 		for (int J=0; J < VISIBLE_VALUES_PER_DISC; J++){
-			int TemporaryRegisterIndex = GroupID*VALUES_PER_DISC + J;
+			int TemporaryRegisterIndex = CupId*VALUES_PER_DISC + J;
 			assert( TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER );
 			uint16_t TemporaryValue = atomic_load_explicit( &ModbusInputRegisters[TemporaryRegisterIndex], std::memory_order_acquire );
 
 			if (J >= 3){
-				std::snprintf(StaticLabelBuffer[GroupID][J], sizeof(StaticLabelBuffer[GroupID][J])-1, "0x%04X", (unsigned)TemporaryValue);
+				std::snprintf(StaticLabelBuffer[CupId][J], sizeof(StaticLabelBuffer[CupId][J])-1, "0x%04X", (unsigned)TemporaryValue);
 			}
 			else if (0x8000 > TemporaryValue){
-				double TemporaryFloatingPoint = DirectionalCoefficient[GroupID] * ((double)TemporaryValue + OffsetForZeroCurrent[GroupID]);
-				std::snprintf(StaticLabelBuffer[GroupID][J], sizeof(StaticLabelBuffer[GroupID][J])-1, "%.1fμA", TemporaryFloatingPoint);
-				if (strcmp(StaticLabelBuffer[GroupID][J], "-0.0μA") == 0){
-					std::snprintf(StaticLabelBuffer[GroupID][J], sizeof(StaticLabelBuffer[GroupID][J])-1, "0.0μA");
+				double TemporaryFloatingPoint = DirectionalCoefficient[CupId] * ((double)TemporaryValue + OffsetForZeroCurrent[CupId]);
+				std::snprintf(StaticLabelBuffer[CupId][J], sizeof(StaticLabelBuffer[CupId][J])-1, "%.1fμA", TemporaryFloatingPoint);
+				if (strcmp(StaticLabelBuffer[CupId][J], "-0.0μA") == 0){
+					std::snprintf(StaticLabelBuffer[CupId][J], sizeof(StaticLabelBuffer[CupId][J])-1, "0.0μA");
 				}
 			}
 			else{
-				std::snprintf(StaticLabelBuffer[GroupID][J], sizeof(StaticLabelBuffer[GroupID][J])-1, "N/A");
+				std::snprintf(StaticLabelBuffer[CupId][J], sizeof(StaticLabelBuffer[CupId][J])-1, "N/A");
 			}
-			StaticLabelBuffer[GroupID][J][sizeof(StaticLabelBuffer[GroupID][J])-1] = '\0';
+			StaticLabelBuffer[CupId][J][sizeof(StaticLabelBuffer[CupId][J])-1] = '\0';
 
 			CupValueLabelPtr[J]->show();
-			CupValueLabelPtr[J]->label(StaticLabelBuffer[GroupID][J]);
+			CupValueLabelPtr[J]->label(StaticLabelBuffer[CupId][J]);
 			CupValueLabelPtr[J]->redraw();
 		}
 	}
@@ -428,7 +426,7 @@ void CupGuiGroup::refreshData(){
 	}
 
 	if (IsTransmissionCorrect){
-		if (atomic_load_explicit( &DisplayLimitSwitchError[GroupID], std::memory_order_acquire )){
+		if (atomic_load_explicit( &DisplayLimitSwitchError[CupId], std::memory_order_acquire )){
 			if (0 == SwitchErrorTextBoxPtr->visible()){
 				SwitchErrorTextBoxPtr->show();
 			}
@@ -498,22 +496,21 @@ void CupGuiGroup::refreshData(){
 			if (StatusTextBoxPtr->labelsize() != DEBUGGING_TEXT_SIZE){
 				StatusTextBoxPtr->labelsize(DEBUGGING_TEXT_SIZE);
 			}
-			static char TemporaryText[800];
-			snprintf( TemporaryText, sizeof(TemporaryText)-1,
+			snprintf( StatusText, sizeof(StatusText)-1,
 					"%s\n"
 					"In: %04X %04X %04X %04X %04X\n"
 					"Coils %c %c %c",
 					atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndexForSwitchPressed], std::memory_order_acquire )?
 							TextCupIsInserted : TextCupIsRemoved,
-					(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*GroupID+0], std::memory_order_acquire ),
-					(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*GroupID+1], std::memory_order_acquire ),
-					(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*GroupID+2], std::memory_order_acquire ),
-					(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*GroupID+3], std::memory_order_acquire ),
-					(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*GroupID+4], std::memory_order_acquire ),
-					atomic_load_explicit( &ModbusCoilsReadout[MODBUS_COILS_PER_CUP*GroupID+0], std::memory_order_acquire )? '1' : '0',
-					atomic_load_explicit( &ModbusCoilsReadout[MODBUS_COILS_PER_CUP*GroupID+1], std::memory_order_acquire )? '1' : '0',
-					atomic_load_explicit( &ModbusCoilsReadout[MODBUS_COILS_PER_CUP*GroupID+2], std::memory_order_acquire )? '1' : '0' );
-			StatusTextBoxPtr->label( TemporaryText );
+					(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*CupId+0], std::memory_order_acquire ),
+					(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*CupId+1], std::memory_order_acquire ),
+					(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*CupId+2], std::memory_order_acquire ),
+					(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*CupId+3], std::memory_order_acquire ),
+					(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*CupId+4], std::memory_order_acquire ),
+					atomic_load_explicit( &ModbusCoilsReadout[MODBUS_COILS_PER_CUP*CupId+0], std::memory_order_acquire )? '1' : '0',
+					atomic_load_explicit( &ModbusCoilsReadout[MODBUS_COILS_PER_CUP*CupId+1], std::memory_order_acquire )? '1' : '0',
+					atomic_load_explicit( &ModbusCoilsReadout[MODBUS_COILS_PER_CUP*CupId+2], std::memory_order_acquire )? '1' : '0' );
+			StatusTextBoxPtr->label( StatusText );
 		}
 	}
 
@@ -531,11 +528,6 @@ void CupGuiGroup::refreshData(){
 	else{
 		CupInsertionButtonPtr->activate();
 	}
-}
-
-void CupGuiGroup::setTitle(){
-	assert( GroupID < CUPS_NUMBER );
-	TitleTextBoxPtr->label( CupDescriptionPtr[GroupID] );
 }
 
 void refreshGui(void* Data){
