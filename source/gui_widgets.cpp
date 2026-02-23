@@ -174,7 +174,7 @@ void initializeGraphicWidgets(void){
 #endif
 
 	for (int J=0; J<CUPS_NUMBER; J++){
-		CupGroupPtr[J] = new CupGuiGroup( 0, MAIN_MENU_HEIGHT+J*DISC_SPACE_Y, MAIN_WINDOW_WIDTH, 300 );
+		CupGroupPtr[J] = new CupGuiGroup( 0, MAIN_MENU_HEIGHT + 10 + J*DISC_SPACE_Y, MAIN_WINDOW_WIDTH, 300 );
 		CupGroupPtr[J]->configure(J);
 		if (J >= NumberOfFaradayCupsToBeOperated){
 			CupGroupPtr[J]->hide();
