@@ -96,7 +96,8 @@ int main(int argc, char** argv) {
 
     // Main window of the application
 	Fl::scheme("gtk+");
-	ApplicationWindow = new WindowEscProof(MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT, "Pomiar Wiązki w Linii Iniekcyjnej" );
+	ApplicationWindow = new WindowEscProof(MAIN_WINDOW_WIDTH, NumberOfFaradayCupsToBeOperated*DISC_SPACE_Y+MAIN_MENU_HEIGHT,
+										   "Pomiar Wiązki w Linii Iniekcyjnej" );
 	ApplicationWindow->begin();
 	ApplicationWindow->color( COLOR_BACKGROUND );
     ApplicationWindow->callback(onMainWindowCloseCallback);	// Window close event is handled
@@ -120,7 +121,7 @@ int main(int argc, char** argv) {
 		initializeGraphicWidgets();
 	}
 	else{
-		FailureMessagePtr = new Fl_Box( (MAIN_WINDOW_WIDTH*1)/16, (MAIN_WINDOW_HEIGHT*1)/16, (MAIN_WINDOW_WIDTH*14)/16, (MAIN_WINDOW_HEIGHT*14)/16,
+		FailureMessagePtr = new Fl_Box( (MAIN_WINDOW_WIDTH*1)/16, 40, (MAIN_WINDOW_WIDTH*14)/16, DISC_SPACE_Y,
 				"Błędy podczas startu aplikacji\nUruchom aplikację z parametrem -v w konsoli\nInformacje o błędach wyświetlą się w konsoli" );
 	}
 

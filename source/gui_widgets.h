@@ -19,7 +19,7 @@
 //.................................................................................................
 
 #define MAIN_WINDOW_WIDTH	510
-#define MAIN_WINDOW_HEIGHT	900
+#define DISC_SPACE_Y		290
 #define MAIN_MENU_HEIGHT	30
 
 #define COLOR_BACKGROUND	0x35

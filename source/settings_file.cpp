@@ -189,38 +189,6 @@ FailureCodes configurationFileParsing(void) {
         	return Result;
         }
 
-#if 0
-        if (std::regex_match(Line, Matches, PatternMaxPropagationTime)) {
-        	if (MaximumPropagationTime < 0){
-				std::string PropagationText  = Matches[1]; // integer
-
-				try {
-						MaximumPropagationTime = std::stoi(PropagationText, nullptr, 0);
-				}
-				catch (const std::invalid_argument&) {
-					std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
-					return FailureCodes::ERROR_SETTINGS_CONVERTION_SINGLE_INTEGER;
-				}
-				catch (const std::out_of_range&) {
-					std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
-					return FailureCodes::ERROR_SETTINGS_CONVERTION_SINGLE_INTEGER;
-				}
-				if ((MaximumPropagationTime < MAX_PROPAGATION_TIME_LOWER_LIMIT) || (MaximumPropagationTime > MAX_PROPAGATION_TIME_UPPER_LIMIT)){
-					MaximumPropagationTime = -1;
-					return FailureCodes::ERROR_SETTINGS_IMPROPER_SINGLE_INTEGER;
-				}
-
-				if (VerboseMode){
-					std::cout << "  Maks. czas propagacji: " << MaximumPropagationTime << " ms, w linii: [" << Line << "]" << std::endl;
-				}
-        	}
-        	else{
-            	std::cout << "  Nadmiarowa deklaracja maks. czasu propagacji: [" << Line << "]" << std::endl;
-                return FailureCodes::ERROR_SETTINGS_EXCESSIVE_PARAMETER;
-        	}
-        }
-#endif
-
         Result = parseSingleInteger( PatternFaradayCupsNumber, &Line, &NumberOfFaradayCupsToBeOperated,
 									 1, CUPS_NUMBER, "Liczba kubków Faradaya do obsłużenia" );
         if (FailureCodes::NO_FAILURE != Result){
