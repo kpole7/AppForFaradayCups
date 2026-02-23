@@ -112,7 +112,7 @@ private:
 class CupGuiGroup : public Fl_Group {
 private:
 	int CupId;
-	char StaticLabelBuffer[CUPS_NUMBER][VALUES_PER_DISC][64];
+	char ValueLabelBuffer[CUPS_NUMBER][VALUES_PER_DISC][64];
 	char StatusText[800];
 	Fl_Box* TitleTextBoxPtr;
 	TripleDiscWidgetWithNoSlit * TripleDisc;
@@ -177,9 +177,11 @@ void initializeGraphicWidgets(void){
 	for (int J=0; J<CUPS_NUMBER; J++){
 		CupGroupPtr[J] = new CupGuiGroup( 0, MAIN_MENU_HEIGHT+J*DISC_SPACE_Y, MAIN_WINDOW_WIDTH, 300 );
 		CupGroupPtr[J]->configure(J);
+#if PHYSICALLY_INSTALLED_CUPS < CUPS_NUMBER
 		if (J >= PHYSICALLY_INSTALLED_CUPS){
 			CupGroupPtr[J]->hide();
 		}
+#endif
 	}
 }
 
@@ -289,6 +291,9 @@ static void cupInsertionButtonCallback(Fl_Widget* Widget, void* Data){
 CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char* L) : Fl_Group(X, Y, W, H, L) {
 	this->begin();
 	CupId = -1;
+
+	memset( ValueLabelBuffer, 0, sizeof(ValueLabelBuffer) );
+	memset( StatusText, 0, sizeof(StatusText) );
 
 	TitleTextBoxPtr = new Fl_Box(X+0, Y, 296, 20, "Tytuł");
 	TitleTextBoxPtr->labelfont( ORDINARY_TEXT_FONT );
@@ -406,22 +411,22 @@ void CupGuiGroup::refreshData(){
 			uint16_t TemporaryValue = atomic_load_explicit( &ModbusInputRegisters[TemporaryRegisterIndex], std::memory_order_acquire );
 
 			if (J >= 3){
-				std::snprintf(StaticLabelBuffer[CupId][J], sizeof(StaticLabelBuffer[CupId][J])-1, "0x%04X", (unsigned)TemporaryValue);
+				std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J])-1, "0x%04X", (unsigned)TemporaryValue);
 			}
 			else if (0x8000 > TemporaryValue){
 				double TemporaryFloatingPoint = DirectionalCoefficient[CupId] * ((double)TemporaryValue + OffsetForZeroCurrent[CupId]);
-				std::snprintf(StaticLabelBuffer[CupId][J], sizeof(StaticLabelBuffer[CupId][J])-1, "%.1fμA", TemporaryFloatingPoint);
-				if (strcmp(StaticLabelBuffer[CupId][J], "-0.0μA") == 0){
-					std::snprintf(StaticLabelBuffer[CupId][J], sizeof(StaticLabelBuffer[CupId][J])-1, "0.0μA");
+				std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J])-1, "%.1fμA", TemporaryFloatingPoint);
+				if (strcmp(ValueLabelBuffer[CupId][J], "-0.0μA") == 0){
+					std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J])-1, "0.0μA");
 				}
 			}
 			else{
-				std::snprintf(StaticLabelBuffer[CupId][J], sizeof(StaticLabelBuffer[CupId][J])-1, "N/A");
+				std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J])-1, "N/A");
 			}
-			StaticLabelBuffer[CupId][J][sizeof(StaticLabelBuffer[CupId][J])-1] = '\0';
+			ValueLabelBuffer[CupId][J][sizeof(ValueLabelBuffer[CupId][J])-1] = '\0';
 
 			CupValueLabelPtr[J]->show();
-			CupValueLabelPtr[J]->label(StaticLabelBuffer[CupId][J]);
+			CupValueLabelPtr[J]->label(ValueLabelBuffer[CupId][J]);
 			CupValueLabelPtr[J]->redraw();
 		}
 	}

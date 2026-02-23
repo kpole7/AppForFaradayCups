@@ -38,7 +38,6 @@ enum class ModbusFsmStates{
 	READING_INPUT_REGISTERS,
 	READING_COILS,
 	WRITING_COIL,
-	STOPPED,
 };
 
 //...............................................................................................
@@ -169,92 +168,86 @@ static void peripheralThreadHandler(void){
 		}
 
 		// essential action
-		if (FsmState == ModbusFsmStates::STOPPED){
-			// illegal state here
-		    std::cout << "Internal error, file " << __FILE__ << ", line " << __LINE__ << ", illegal state" << std::endl;
+		//normal mode of operation
+		bool IsEssentialActionDone = false;
+		FailureCodes Result;
+
+		if (ModbusFsmStates::OPEN == FsmState){
+			FsmState = ModbusFsmStates::READING_INPUT_REGISTERS;
+			Result = readInputRegisters();
+			IsEssentialActionDone = true;
 		}
-		else{
-			//normal mode of operation
-			bool IsEssentialActionDone = false;
-			FailureCodes Result;
 
-			if (!IsEssentialActionDone && (ModbusFsmStates::OPEN == FsmState)){
-				FsmState = ModbusFsmStates::READING_INPUT_REGISTERS;
-				Result = readInputRegisters();
-				IsEssentialActionDone = true;
-			}
+		if (!IsEssentialActionDone && (ModbusFsmStates::READING_INPUT_REGISTERS == FsmState)){
+			FsmState = ModbusFsmStates::READING_COILS;
+			Result = readCoils();
+			IsEssentialActionDone = true;
+		}
 
-			if (!IsEssentialActionDone && (ModbusFsmStates::READING_INPUT_REGISTERS == FsmState)){
-				FsmState = ModbusFsmStates::READING_COILS;
-				Result = readCoils();
-				IsEssentialActionDone = true;
-			}
+		if (!IsEssentialActionDone && (ModbusFsmStates::READING_COILS == FsmState)){
+			for (int J=0; J<PHYSICALLY_INSTALLED_CUPS; J++){
+				if (atomic_load_explicit( &ModbusCoilChangeReqest[J], std::memory_order_acquire )){
+					FsmState = ModbusFsmStates::WRITING_COIL;
 
-			if (!IsEssentialActionDone && (ModbusFsmStates::READING_COILS == FsmState)){
-				for (int J=0; J<PHYSICALLY_INSTALLED_CUPS; J++){
-					if (atomic_load_explicit( &ModbusCoilChangeReqest[J], std::memory_order_acquire )){
-						FsmState = ModbusFsmStates::WRITING_COIL;
+					atomic_store_explicit( &ModbusCoilChangeReqest[J], false, std::memory_order_release );
+					Result = writeSingleCoil(
+						MODBUS_COILS_ADDRESS+COIL_OFFSET_IS_CUP_FORCED+J*MODBUS_COILS_PER_CUP,
+						atomic_load_explicit( &ModbusCoilRequestedValue[J], std::memory_order_acquire ) );
 
-						atomic_store_explicit( &ModbusCoilChangeReqest[J], false, std::memory_order_release );
-						Result = writeSingleCoil(
-							MODBUS_COILS_ADDRESS+COIL_OFFSET_IS_CUP_FORCED+J*MODBUS_COILS_PER_CUP,
-							atomic_load_explicit( &ModbusCoilRequestedValue[J], std::memory_order_acquire ) );
-
-						IsEssentialActionDone = true;
-						break;
-					}
+					IsEssentialActionDone = true;
+					break;
 				}
 			}
+		}
 
-			if (!IsEssentialActionDone && (ModbusFsmStates::READING_COILS == FsmState)){
-				FsmState = ModbusFsmStates::READING_INPUT_REGISTERS;
-				Result = readInputRegisters();
-				IsEssentialActionDone = true;
-			}
+		if (!IsEssentialActionDone && (ModbusFsmStates::READING_COILS == FsmState)){
+			FsmState = ModbusFsmStates::READING_INPUT_REGISTERS;
+			Result = readInputRegisters();
+			IsEssentialActionDone = true;
+		}
 
-			if (!IsEssentialActionDone && (ModbusFsmStates::WRITING_COIL == FsmState)){
-				FsmState = ModbusFsmStates::READING_INPUT_REGISTERS;
-				Result = readInputRegisters();
-				IsEssentialActionDone = true;
-			}
+		if (!IsEssentialActionDone && (ModbusFsmStates::WRITING_COIL == FsmState)){
+			FsmState = ModbusFsmStates::READING_INPUT_REGISTERS;
+			Result = readInputRegisters();
+//				IsEssentialActionDone = true;
+		}
 
 
-			if (FailureCodes::NO_FAILURE == Result) {
-				if (LOW_LEVEL_CONTINUOUS_COUNTING_MAX
-						> LowLevelSuccessfulTransmission) {
-					LowLevelSuccessfulTransmission += DelayMultiplierOnError;
-					if (LowLevelSuccessfulTransmission
-							> LOW_LEVEL_CONTINUOUS_COUNTING_MAX) {
-						LowLevelSuccessfulTransmission =
-								LOW_LEVEL_CONTINUOUS_COUNTING_MAX;
-					}
+		if (FailureCodes::NO_FAILURE == Result) {
+			if (LOW_LEVEL_CONTINUOUS_COUNTING_MAX
+					> LowLevelSuccessfulTransmission) {
+				LowLevelSuccessfulTransmission += DelayMultiplierOnError;
+				if (LowLevelSuccessfulTransmission
+						> LOW_LEVEL_CONTINUOUS_COUNTING_MAX) {
+					LowLevelSuccessfulTransmission =
+							LOW_LEVEL_CONTINUOUS_COUNTING_MAX;
 				}
-				LowLevelContinuousErrors = 0;
+			}
+			LowLevelContinuousErrors = 0;
+		}
+		else {
+			if (LOW_LEVEL_CONTINUOUS_COUNTING_MAX
+					> LowLevelContinuousErrors) {
+				LowLevelContinuousErrors++;
+			}
+			if (LowLevelSuccessfulTransmission > DelayMultiplierOnError) {
+				LowLevelSuccessfulTransmission -= DelayMultiplierOnError;
 			}
 			else {
-				if (LOW_LEVEL_CONTINUOUS_COUNTING_MAX
-						> LowLevelContinuousErrors) {
-					LowLevelContinuousErrors++;
-				}
-				if (LowLevelSuccessfulTransmission > DelayMultiplierOnError) {
-					LowLevelSuccessfulTransmission -= DelayMultiplierOnError;
-				}
-				else {
-					LowLevelSuccessfulTransmission = 0;
-				}
+				LowLevelSuccessfulTransmission = 0;
 			}
-			atomic_store_explicit(&TransmissionQualityLowLevelIndicator,
-					LowLevelSuccessfulTransmission, std::memory_order_release);
+		}
+		atomic_store_explicit(&TransmissionQualityLowLevelIndicator,
+				LowLevelSuccessfulTransmission, std::memory_order_release);
 
 #if 0 // debugging
-			std::chrono::high_resolution_clock::time_point TimeAfter = std::chrono::high_resolution_clock::now();
-			std::chrono::milliseconds ProcessingTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeAfter - TimeNow);
-			std::cout << "Peripheral thread " << PeripheralThreadTimeInMilliseconds << "  " << ProcessingTime.count() << std::endl;
+		std::chrono::high_resolution_clock::time_point TimeAfter = std::chrono::high_resolution_clock::now();
+		std::chrono::milliseconds ProcessingTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeAfter - TimeNow);
+		std::cout << "Peripheral thread " << PeripheralThreadTimeInMilliseconds << "  " << ProcessingTime.count() << std::endl;
 #endif
 
-			if (ModbusFsmStates::READING_INPUT_REGISTERS == FsmState) {
-				Fl::awake(refreshGui, nullptr);
-			}
+		if (ModbusFsmStates::READING_INPUT_REGISTERS == FsmState) {
+			Fl::awake(refreshGui, nullptr);
 		}
 
 
@@ -274,7 +267,6 @@ static void peripheralThreadHandler(void){
 
 	} // while (...)
 	// exit
-	FsmState = ModbusFsmStates::STOPPED;
 	closeModbus();
 	atomic_store_explicit( &PeripheralsClosedFlag, true, std::memory_order_release );
 }
