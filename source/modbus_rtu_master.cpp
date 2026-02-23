@@ -16,10 +16,6 @@
 // Preprocessor directives
 //.................................................................................................
 
-#define REGISTERS_TO_BE_READ		MODBUS_INPUTS_NUMBER
-
-#define COILS_TO_BE_READ			MODBUS_COILS_NUMBER
-
 #define SLAVE_ID					1
 
 
@@ -77,7 +73,8 @@ FailureCodes initializeModbus(void){
 FailureCodes readInputRegisters(void){
 	static uint16_t RegistersTable[25]; // 125 max
 
-    int ReceivedRegisters = modbus_read_input_registers(Context, MODBUS_INPUTS_ADDRESS, REGISTERS_TO_BE_READ, RegistersTable);
+	int RegistersToBeRead = MODBUS_INPUTS_PER_CUP * NumberOfFaradayCupsToBeOperated;
+    int ReceivedRegisters = modbus_read_input_registers(Context, MODBUS_INPUTS_ADDRESS, RegistersToBeRead, RegistersTable);
     if (ReceivedRegisters == -1) {
         // Communication / protocol error (CRC, timeout, invalid response)
    		if (VerboseMode){
@@ -87,10 +84,10 @@ FailureCodes readInputRegisters(void){
         return FailureCodes::ERROR_MODBUS_READING;
     }
 
-    if (ReceivedRegisters != REGISTERS_TO_BE_READ) {
+    if (ReceivedRegisters != RegistersToBeRead) {
    		if (VerboseMode){
    			std::cout << "Nieoczekiwana liczba rejestrów: otrzymano " << ReceivedRegisters
-   					<< ", oczekiwano " << REGISTERS_TO_BE_READ << std::endl;
+   					<< ", oczekiwano " << RegistersToBeRead << std::endl;
    		}
         return FailureCodes::ERROR_MODBUS_FRAME_READ;
     }
@@ -117,8 +114,9 @@ FailureCodes readInputRegisters(void){
 }
 
 FailureCodes readCoils(void){
-	uint8_t TemporaryTable[COILS_TO_BE_READ];
-    int ReceivedBits = modbus_read_bits(Context, MODBUS_COILS_ADDRESS, COILS_TO_BE_READ, TemporaryTable);
+	uint8_t TemporaryTable[MODBUS_COILS_NUMBER];
+	int CoilsToBeRead = MODBUS_COILS_PER_CUP * NumberOfFaradayCupsToBeOperated;
+    int ReceivedBits = modbus_read_bits(Context, MODBUS_COILS_ADDRESS, CoilsToBeRead, TemporaryTable);
     if (ReceivedBits == -1) {
         // Communication / protocol error (CRC, timeout, invalid response)
    		if (VerboseMode){
@@ -128,10 +126,10 @@ FailureCodes readCoils(void){
         return FailureCodes::ERROR_MODBUS_READING;
     }
 
-    if (ReceivedBits != COILS_TO_BE_READ) {
+    if (ReceivedBits != CoilsToBeRead) {
    		if (VerboseMode){
    			std::cout << "Nieoczekiwana liczba bitów: otrzymano " << ReceivedBits << ", oczekiwano "
-   					<< REGISTERS_TO_BE_READ << std::endl;
+   					<< CoilsToBeRead << std::endl;
    		}
         return FailureCodes::ERROR_MODBUS_FRAME_READ;
     }

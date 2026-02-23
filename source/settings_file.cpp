@@ -43,6 +43,9 @@ std::string ThisApplicationDirectory;
 /// from the limit switch; value in milliseconds
 int MaximumPropagationTime;
 
+/// This is the number of Faraday cups that must be taken into account in Modbus communication and in the GUI
+int NumberOfFaradayCupsToBeOperated;
+
 //.................................................................................................
 // Local variables
 //.................................................................................................
@@ -62,6 +65,8 @@ static std::string ConfigurationFilePath;
 
 static FailureCodes parseFunctionFormula( std::regex Pattern, std::string *LinePtr, int CupIndex );
 static FailureCodes parseCupName( std::regex Pattern, std::string *LinePtr, int CupIndex );
+static FailureCodes parseSingleInteger( std::regex Pattern, std::string *LinePtr, int *OutputValue,
+										int LowerLimit, int UpperLimit, const char* ParameterName );
 
 //........................................................................................................
 // Function definitions
@@ -100,6 +105,7 @@ FailureCodes configurationFileParsing(void) {
     	CupDescriptionPtr[J][0] = 0;
     }
 
+    NumberOfFaradayCupsToBeOperated = -1;
     MaximumPropagationTime = -1;
 
     int LineNumber = 1;
@@ -128,6 +134,7 @@ FailureCodes configurationFileParsing(void) {
     std::regex PatternCup2Title(R"(\s*(?!#)Tytuł drugiego kubka:\s*(.+)\s*$)");
     std::regex PatternCup3Title(R"(\s*(?!#)Tytuł trzeciego kubka:\s*(.+)\s*$)");
     std::regex PatternMaxPropagationTime(R"(\s*(?!#)Limit czasu propagacji sygnału z krańcówki:\s*(\d+)\s*$)");
+    std::regex PatternFaradayCupsNumber(R"(\s*(?!#)Liczba kubków Faradaya do obsłużenia:\s*(\d+)\s*$)");
 
     while (std::getline(File, Line)) {
         if (VerboseMode){
@@ -175,8 +182,16 @@ FailureCodes configurationFileParsing(void) {
         	return Result;
         }
 
+        Result = parseSingleInteger( PatternMaxPropagationTime, &Line, &MaximumPropagationTime,
+									 MAX_PROPAGATION_TIME_LOWER_LIMIT, MAX_PROPAGATION_TIME_UPPER_LIMIT,
+									 "maks. czas propagacji" );
+        if (FailureCodes::NO_FAILURE != Result){
+        	return Result;
+        }
+
+#if 0
         if (std::regex_match(Line, Matches, PatternMaxPropagationTime)) {
-        if (MaximumPropagationTime < 0){
+        	if (MaximumPropagationTime < 0){
 				std::string PropagationText  = Matches[1]; // integer
 
 				try {
@@ -184,15 +199,15 @@ FailureCodes configurationFileParsing(void) {
 				}
 				catch (const std::invalid_argument&) {
 					std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
-					return FailureCodes::ERROR_SETTINGS_CONVERTION_PROPAGATION;
+					return FailureCodes::ERROR_SETTINGS_CONVERTION_SINGLE_INTEGER;
 				}
 				catch (const std::out_of_range&) {
 					std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << std::endl;
-					return FailureCodes::ERROR_SETTINGS_CONVERTION_PROPAGATION;
+					return FailureCodes::ERROR_SETTINGS_CONVERTION_SINGLE_INTEGER;
 				}
 				if ((MaximumPropagationTime < MAX_PROPAGATION_TIME_LOWER_LIMIT) || (MaximumPropagationTime > MAX_PROPAGATION_TIME_UPPER_LIMIT)){
 					MaximumPropagationTime = -1;
-					return FailureCodes::ERROR_SETTINGS_IMPROPER_PROPAGATION;
+					return FailureCodes::ERROR_SETTINGS_IMPROPER_SINGLE_INTEGER;
 				}
 
 				if (VerboseMode){
@@ -201,8 +216,15 @@ FailureCodes configurationFileParsing(void) {
         	}
         	else{
             	std::cout << "  Nadmiarowa deklaracja maks. czasu propagacji: [" << Line << "]" << std::endl;
-                return FailureCodes::ERROR_SETTINGS_EXCESSIVE_PROPAGATION;
+                return FailureCodes::ERROR_SETTINGS_EXCESSIVE_PARAMETER;
         	}
+        }
+#endif
+
+        Result = parseSingleInteger( PatternFaradayCupsNumber, &Line, &NumberOfFaradayCupsToBeOperated,
+									 1, CUPS_NUMBER, "Liczba kubków Faradaya do obsłużenia" );
+        if (FailureCodes::NO_FAILURE != Result){
+        	return Result;
         }
 
         LineNumber++;
@@ -229,6 +251,11 @@ FailureCodes configurationFileParsing(void) {
 	if (VerboseMode){
 		std::cout << " Koniec pliku konfiguracyjnego " << std::endl;
 	}
+
+	// redundant assertions
+	assert( NumberOfFaradayCupsToBeOperated > 0 );
+	assert( NumberOfFaradayCupsToBeOperated <= CUPS_NUMBER );
+
     return FailureCodes::NO_FAILURE;
 }
 
@@ -318,3 +345,37 @@ static FailureCodes parseCupName( std::regex Pattern, std::string *LinePtr, int 
     return FailureCodes::NO_FAILURE;
 }
 
+
+static FailureCodes parseSingleInteger( std::regex Pattern, std::string *LinePtr, int *OutputValue, int LowerLimit, int UpperLimit, const char* ParameterName ){
+    std::smatch Matches;
+    if (std::regex_match(*LinePtr, Matches, Pattern)) {
+    	if (*OutputValue < 0){
+			std::string ParameterText  = Matches[1]; // integer
+
+			try {
+					*OutputValue = std::stoi(ParameterText, nullptr, 0);
+			}
+			catch (const std::invalid_argument&) {
+				std::cout << "  Błąd konwersji na liczbę " << ParameterName << " (patrz " << __LINE__ << ")" << std::endl;
+				return FailureCodes::ERROR_SETTINGS_CONVERTION_SINGLE_INTEGER;
+			}
+			catch (const std::out_of_range&) {
+					std::cout << "  Błąd konwersji na liczbę " << ParameterName << " (patrz " << __LINE__ << ")" << std::endl;
+				return FailureCodes::ERROR_SETTINGS_CONVERTION_SINGLE_INTEGER;
+			}
+			if ((*OutputValue < LowerLimit) || (*OutputValue > UpperLimit)){
+				*OutputValue = -1;
+				return FailureCodes::ERROR_SETTINGS_IMPROPER_SINGLE_INTEGER;
+			}
+
+			if (VerboseMode){
+				std::cout << "  Odczytano parametr " << ParameterName << ": " << *OutputValue << ", w linii: [" << *LinePtr << "]" << std::endl;
+			}
+    	}
+    	else{
+        	std::cout << "  Nadmiarowa deklaracja parametru " << ParameterName << ": [" << *LinePtr << "]" << std::endl;
+            return FailureCodes::ERROR_SETTINGS_EXCESSIVE_PARAMETER;
+    	}
+    }
+    return FailureCodes::NO_FAILURE;
+}

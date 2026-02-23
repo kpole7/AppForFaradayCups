@@ -22,6 +22,8 @@ extern std::string ThisApplicationDirectory;
 
 extern int MaximumPropagationTime;
 
+extern int NumberOfFaradayCupsToBeOperated;
+
 //.................................................................................................
 // Global function prototypes
 //.................................................................................................

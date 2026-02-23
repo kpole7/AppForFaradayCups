@@ -135,7 +135,7 @@ static void peripheralThreadHandler(void){
 		std::chrono::milliseconds DurationTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - PeripheralThreadLoopStart);
 		while(DurationTime.count() < PeripheralThreadTimeInMilliseconds){
 			// free time activities:  checking for inconsistencies in the status of limit switches
-			for (int J=0; J<PHYSICALLY_INSTALLED_CUPS; J++){
+			for (int J=0; J<NumberOfFaradayCupsToBeOperated; J++){
 				int TemporaryCoilIndex1 = COIL_OFFSET_IS_CUP_FORCED+J*MODBUS_COILS_PER_CUP;
 				assert( TemporaryCoilIndex1 < MODBUS_COILS_NUMBER );
 				int TemporaryCoilIndex2 = COIL_OFFSET_IS_SWITCH_PRESSED+J*MODBUS_COILS_PER_CUP;
@@ -185,7 +185,7 @@ static void peripheralThreadHandler(void){
 		}
 
 		if (!IsEssentialActionDone && (ModbusFsmStates::READING_COILS == FsmState)){
-			for (int J=0; J<PHYSICALLY_INSTALLED_CUPS; J++){
+			for (int J=0; J<NumberOfFaradayCupsToBeOperated; J++){
 				if (atomic_load_explicit( &ModbusCoilChangeReqest[J], std::memory_order_acquire )){
 					FsmState = ModbusFsmStates::WRITING_COIL;
 
