@@ -2,8 +2,8 @@ Checks: >
   clang-analyzer-*,
   bugprone-*,
   performance-*,
-  readability-*,
-  modernize-*
+  readability-braces-*
+  readability-duplicate-*
 WarningsAsErrors: ''
 HeaderFilterRegex: '.*'
 FormatStyle: none

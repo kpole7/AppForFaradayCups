@@ -124,7 +124,7 @@ static void peripheralThreadHandler(){
 
 		// timing
 		if (LOW_LEVEL_CONTINUOUS_ERRORS_LIMIT <= LowLevelContinuousErrors){
-			PeripheralThreadTimeInMilliseconds += DELAY_MULTIPLIER_ON_ERROR * PERIPHERAL_THREAD_LOOP_DURATION;
+			PeripheralThreadTimeInMilliseconds += (uint32_t)(DELAY_MULTIPLIER_ON_ERROR * PERIPHERAL_THREAD_LOOP_DURATION);
 			DelayMultiplierOnError = DELAY_MULTIPLIER_ON_ERROR;
 		}
 		else{

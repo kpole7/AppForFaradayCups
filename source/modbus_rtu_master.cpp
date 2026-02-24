@@ -59,7 +59,7 @@ FailureCodes initializeModbus(){
     // Optional timeout
     struct timeval TimeoutValue;
     TimeoutValue.tv_sec = 0;
-    TimeoutValue.tv_usec = MODBUS_RESPONSE_TIMEOUT*1000; // microseconds
+    TimeoutValue.tv_usec = (uint32_t)(MODBUS_RESPONSE_TIMEOUT*1000); // microseconds
     modbus_set_response_timeout(Context, TimeoutValue.tv_sec, TimeoutValue.tv_usec);
 
     if (modbus_connect(Context) == -1) {

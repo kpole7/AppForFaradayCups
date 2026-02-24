@@ -63,9 +63,9 @@ static std::string ConfigurationFilePath;
 // Local function prototypes
 //.................................................................................................
 
-static FailureCodes parseFunctionFormula( std::regex Pattern, std::string *LinePtr, int CupIndex );
-static FailureCodes parseCupName( std::regex Pattern, std::string *LinePtr, int CupIndex );
-static FailureCodes parseSingleInteger( std::regex Pattern, std::string *LinePtr, int *OutputValue,
+static FailureCodes parseFunctionFormula( const std::regex *PatternPtr, std::string *LinePtr, int CupIndex );
+static FailureCodes parseCupName( const std::regex *PatternPtr, std::string *LinePtr, int CupIndex );
+static FailureCodes parseSingleInteger( const std::regex *PatternPtr, std::string *LinePtr, int *OutputValue,
 										int LowerLimit, int UpperLimit, const char* ParameterName );
 
 //........................................................................................................
@@ -156,40 +156,40 @@ FailureCodes configurationFileParsing(void) {
         }
 
         FailureCodes Result;
-        Result = parseFunctionFormula( PatternCup1FunctionFormula, &Line, 0 );
+        Result = parseFunctionFormula( &PatternCup1FunctionFormula, &Line, 0 );
         if (FailureCodes::NO_FAILURE != Result){
         	return Result;
         }
-        Result = parseFunctionFormula( PatternCup2FunctionFormula, &Line, 1 );
+        Result = parseFunctionFormula( &PatternCup2FunctionFormula, &Line, 1 );
         if (FailureCodes::NO_FAILURE != Result){
         	return Result;
         }
-        Result = parseFunctionFormula( PatternCup3FunctionFormula, &Line, 2 );
-        if (FailureCodes::NO_FAILURE != Result){
-        	return Result;
-        }
-
-        Result = parseCupName( PatternCup1Title, &Line, 0 );
-        if (FailureCodes::NO_FAILURE != Result){
-        	return Result;
-        }
-        Result = parseCupName( PatternCup2Title, &Line, 1 );
-        if (FailureCodes::NO_FAILURE != Result){
-        	return Result;
-        }
-        Result = parseCupName( PatternCup3Title, &Line, 2 );
+        Result = parseFunctionFormula( &PatternCup3FunctionFormula, &Line, 2 );
         if (FailureCodes::NO_FAILURE != Result){
         	return Result;
         }
 
-        Result = parseSingleInteger( PatternMaxPropagationTime, &Line, &MaximumPropagationTime,
+        Result = parseCupName( &PatternCup1Title, &Line, 0 );
+        if (FailureCodes::NO_FAILURE != Result){
+        	return Result;
+        }
+        Result = parseCupName( &PatternCup2Title, &Line, 1 );
+        if (FailureCodes::NO_FAILURE != Result){
+        	return Result;
+        }
+        Result = parseCupName( &PatternCup3Title, &Line, 2 );
+        if (FailureCodes::NO_FAILURE != Result){
+        	return Result;
+        }
+
+        Result = parseSingleInteger( &PatternMaxPropagationTime, &Line, &MaximumPropagationTime,
 									 MAX_PROPAGATION_TIME_LOWER_LIMIT, MAX_PROPAGATION_TIME_UPPER_LIMIT,
 									 "maks. czas propagacji" );
         if (FailureCodes::NO_FAILURE != Result){
         	return Result;
         }
 
-        Result = parseSingleInteger( PatternFaradayCupsNumber, &Line, &NumberOfFaradayCupsToBeOperated,
+        Result = parseSingleInteger( &PatternFaradayCupsNumber, &Line, &NumberOfFaradayCupsToBeOperated,
 									 1, CUPS_NUMBER, "Liczba kubków Faradaya do obsłużenia" );
         if (FailureCodes::NO_FAILURE != Result){
         	return Result;
@@ -227,10 +227,10 @@ FailureCodes configurationFileParsing(void) {
     return FailureCodes::NO_FAILURE;
 }
 
-static FailureCodes parseFunctionFormula( std::regex Pattern, std::string *LinePtr, int CupIndex ){
+static FailureCodes parseFunctionFormula( const std::regex *PatternPtr, std::string *LinePtr, int CupIndex ){
     std::smatch Matches;
     assert( CupIndex < CUPS_NUMBER );
-    if (std::regex_match(*LinePtr, Matches, Pattern)) {
+    if (std::regex_match(*LinePtr, Matches, *PatternPtr)) {
     	if (!FormulaIsDefined[CupIndex]){
     		FormulaIsDefined[CupIndex] = true;
 
@@ -294,10 +294,10 @@ static FailureCodes parseFunctionFormula( std::regex Pattern, std::string *LineP
     return FailureCodes::NO_FAILURE;
 }
 
-static FailureCodes parseCupName( std::regex Pattern, std::string *LinePtr, int CupIndex ){
+static FailureCodes parseCupName( const std::regex *PatternPtr, std::string *LinePtr, int CupIndex ){
     std::smatch Matches;
     assert( CupIndex < CUPS_NUMBER );
-    if (std::regex_match(*LinePtr, Matches, Pattern)) {
+    if (std::regex_match(*LinePtr, Matches, *PatternPtr)) {
     	if (0 == CupDescriptionPtr[CupIndex][0]){
    			std::string CupDescription = Matches[1];
     		strncpy( CupDescriptionPtr[CupIndex], CupDescription.c_str(), sizeof(CupDescriptionPtr[0])-1 );
@@ -314,9 +314,11 @@ static FailureCodes parseCupName( std::regex Pattern, std::string *LinePtr, int 
 }
 
 
-static FailureCodes parseSingleInteger( std::regex Pattern, std::string *LinePtr, int *OutputValue, int LowerLimit, int UpperLimit, const char* ParameterName ){
+static FailureCodes parseSingleInteger( const std::regex *PatternPtr, std::string *LinePtr, int *OutputValue,
+										int LowerLimit, int UpperLimit, const char* ParameterName )
+{
     std::smatch Matches;
-    if (std::regex_match(*LinePtr, Matches, Pattern)) {
+    if (std::regex_match(*LinePtr, Matches, *PatternPtr)) {
     	if (*OutputValue < 0){
 			std::string ParameterText  = Matches[1]; // integer
 

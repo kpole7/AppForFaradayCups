@@ -73,7 +73,7 @@ static Fl_Box * FailureMessagePtr;
 // Local function prototypes
 //.................................................................................................
 
-static void criticalHandler(int sig);
+static void criticalHandler(int Signal);
 
 static void setupCriticalSignalHandler();
 
@@ -152,43 +152,44 @@ int WindowEscProof::handle(int event){
 }
 
 // This function is used to save the log file in case of SIGSEGV and so on
-static void criticalHandler(int sig) {
-    void* frames[100];
-    int num_frames = backtrace(frames, 100);
+static void criticalHandler(int Signal) {
+    void* Frames[100];
+    int NumberOfFrames = backtrace(Frames, 100);
 
-    FILE* f = fopen("backtrace_Faraday_cups.log", "a");
-    if (f) {
-        time_t now = time(NULL);
-        fprintf(f, "\n=== Backtrace (");
-        if (SIGSEGV == sig){
-        	fprintf(f, "signal SIGSEGV");
+    FILE* LogFileHandler = fopen("backtrace_Faraday_cups.log", "a");
+    if (LogFileHandler) {
+        time_t TimeNow = time(nullptr);
+        fprintf(LogFileHandler, "\n=== Backtrace (");
+        if (SIGSEGV == Signal){
+        	fprintf(LogFileHandler, "signal SIGSEGV");
         }
-        else if (SIGABRT == sig){
-        	fprintf(f, "signal SIGABRT");
+        else if (SIGABRT == Signal){
+        	fprintf(LogFileHandler, "signal SIGABRT");
         }
-        else if (SIGFPE == sig){
-        	fprintf(f, "signal SIGFPE");
+        else if (SIGFPE == Signal){
+        	fprintf(LogFileHandler, "signal SIGFPE");
         }
-        else if (SIGILL == sig){
-        	fprintf(f, "signal SIGILL");
+        else if (SIGILL == Signal){
+        	fprintf(LogFileHandler, "signal SIGILL");
         }
-        else if (SIGBUS == sig){
-        	fprintf(f, "signal SIGBUS");
+        else if (SIGBUS == Signal){
+        	fprintf(LogFileHandler, "signal SIGBUS");
         }
         else{
-        	fprintf(f, "signal %d", sig);
+        	fprintf(LogFileHandler, "signal %d", Signal);
         }
-        fprintf(f, ") at %s\n", ctime(&now));
-        char** symbols = backtrace_symbols(frames, num_frames);
-        if (symbols) {
-            for (int i = 0; i < num_frames; ++i)
-                fprintf(f, "%s\n", symbols[i]);
-            free(symbols);
+        fprintf(LogFileHandler, ") at %s\n", ctime(&TimeNow));
+        char** Symbols = backtrace_symbols(Frames, NumberOfFrames);
+        if (Symbols) {
+            for (int i = 0; i < NumberOfFrames; i++){
+                fprintf(LogFileHandler, "%s\n", Symbols[i]);
+            }
+            free(Symbols);
         }
-        fclose(f);
+        fclose(LogFileHandler);
     }
-    signal(sig, SIG_DFL);
-    kill(getpid(), sig);
+    signal(Signal, SIG_DFL);
+    kill(getpid(), Signal);
 }
 
 // this function hooks up the function criticalHandler()
