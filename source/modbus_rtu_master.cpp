@@ -2,8 +2,8 @@
 
 
 #include <iostream>
+#include <cerrno>
 #include <modbus.h>
-#include <errno.h>
 
 #include "peripheral_thread.h"
 #include "modbus_rtu_master.h"
@@ -44,7 +44,7 @@ FailureCodes initializeModbus(){
     int StopBit = 1;
 
 	Context = modbus_new_rtu(PortNameCharPtr, Baudrate, Parity, DataBits, StopBit);
-    if (Context == NULL) {
+    if (nullptr == Context) {
         std::cout << "Nie można utworzyć kontekstu libmodbus\n" << '\n';
         return FailureCodes::ERROR_MODBUS_INITIALIZATION_1;
     }
@@ -91,25 +91,23 @@ FailureCodes readInputRegisters(){
    		}
         return FailureCodes::ERROR_MODBUS_FRAME_READ;
     }
-    else {
-        for (int i = 0; i < ReceivedRegisters; ++i) {
-        	atomic_store_explicit( &ModbusInputRegisters[i], RegistersTable[i], std::memory_order_release );
-        }
+	for (int i = 0; i < ReceivedRegisters; ++i) {
+		atomic_store_explicit( &ModbusInputRegisters[i], RegistersTable[i], std::memory_order_release );
+	}
 
 #if 0 // debugging
-        printf("Odczytano: " );
-        for (int i = 0; i < ReceivedRegisters; ++i) {
-        	static char TemporaryCharacterArray[10];
-            snprintf( TemporaryCharacterArray, sizeof(TemporaryCharacterArray)-1, " %04X", RegistersTable[i]);
-            std::cout << TemporaryCharacterArray;
-            if ((i % 4) == 3){
-                std::cout << ' ';
-            }
-        }
+	printf("Odczytano: " );
+	for (int i = 0; i < ReceivedRegisters; ++i) {
+		static char TemporaryCharacterArray[10];
+		snprintf( TemporaryCharacterArray, sizeof(TemporaryCharacterArray)-1, " %04X", RegistersTable[i]);
+		std::cout << TemporaryCharacterArray;
+		if ((i % 4) == 3){
+			std::cout << ' ';
+		}
+	}
 //        std::cout << '\n';
 #endif
 
-    }
     return FailureCodes::NO_FAILURE;
 }
 
@@ -133,33 +131,31 @@ FailureCodes readCoils(){
    		}
         return FailureCodes::ERROR_MODBUS_FRAME_READ;
     }
-    else {
-        for (int i = 0; i < ReceivedBits; ++i) {
-        	if (0 != TemporaryTable[i]){
-        		atomic_store_explicit( &ModbusCoilsReadout[i], true, std::memory_order_release );
-        	}
-        	else{
-        		atomic_store_explicit( &ModbusCoilsReadout[i], false, std::memory_order_release );
-        	}
-        }
+	for (int i = 0; i < ReceivedBits; ++i) {
+		if (0 != TemporaryTable[i]){
+			atomic_store_explicit( &ModbusCoilsReadout[i], true, std::memory_order_release );
+		}
+		else{
+			atomic_store_explicit( &ModbusCoilsReadout[i], false, std::memory_order_release );
+		}
+	}
 
 #if 0 // debugging
-        printf(" bity: " );
-        for (int i = 0; i < ReceivedBits; ++i) {
-        	if (0 != TemporaryTable[i]){
-        		std::cout << " 1";
-        	}
-        	else{
-        		std::cout << " 0";
-        	}
-            if ((i % 3) == 2){
-                std::cout << ' ';
-            }
-        }
-        std::cout << '\n';
+	printf(" bity: " );
+	for (int i = 0; i < ReceivedBits; ++i) {
+		if (0 != TemporaryTable[i]){
+			std::cout << " 1";
+		}
+		else{
+			std::cout << " 0";
+		}
+		if ((i % 3) == 2){
+			std::cout << ' ';
+		}
+	}
+	std::cout << '\n';
 #endif
 
-    }
     return FailureCodes::NO_FAILURE;
 }
 

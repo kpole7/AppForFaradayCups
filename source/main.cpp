@@ -157,7 +157,7 @@ static void criticalHandler(int Signal) {
     int NumberOfFrames = backtrace(Frames, 100);
 
     FILE* LogFileHandler = fopen("backtrace_Faraday_cups.log", "a");
-    if (LogFileHandler) {
+    if (nullptr != LogFileHandler) {
         time_t TimeNow = time(nullptr);
         fprintf(LogFileHandler, "\n=== Backtrace (");
         if (SIGSEGV == Signal){
@@ -180,7 +180,7 @@ static void criticalHandler(int Signal) {
         }
         fprintf(LogFileHandler, ") at %s\n", ctime(&TimeNow));
         char** Symbols = backtrace_symbols(Frames, NumberOfFrames);
-        if (Symbols) {
+        if (nullptr != Symbols) {
             for (int i = 0; i < NumberOfFrames; i++){
                 fprintf(LogFileHandler, "%s\n", Symbols[i]);
             }

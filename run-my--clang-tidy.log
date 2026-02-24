@@ -198,6 +198,40 @@ Enabled checks:
     clang-analyzer-webkit.NoUncountedMemberChecker
     clang-analyzer-webkit.RefCntblBaseVirtualDtor
     clang-analyzer-webkit.UncountedLambdaCapturesChecker
+    modernize-avoid-bind
+    modernize-concat-nested-namespaces
+    modernize-deprecated-headers
+    modernize-deprecated-ios-base-aliases
+    modernize-loop-convert
+    modernize-make-shared
+    modernize-make-unique
+    modernize-pass-by-value
+    modernize-raw-string-literal
+    modernize-redundant-void-arg
+    modernize-replace-auto-ptr
+    modernize-replace-disallow-copy-and-assign-macro
+    modernize-replace-random-shuffle
+    modernize-return-braced-init-list
+    modernize-shrink-to-fit
+    modernize-type-traits
+    modernize-unary-static-assert
+    modernize-use-auto
+    modernize-use-bool-literals
+    modernize-use-constraints
+    modernize-use-default-member-init
+    modernize-use-emplace
+    modernize-use-equals-default
+    modernize-use-equals-delete
+    modernize-use-nodiscard
+    modernize-use-noexcept
+    modernize-use-nullptr
+    modernize-use-override
+    modernize-use-starts-ends-with
+    modernize-use-std-numbers
+    modernize-use-std-print
+    modernize-use-transparent-functors
+    modernize-use-uncaught-exceptions
+    modernize-use-using
     performance-avoid-endl
     performance-enum-size
     performance-faster-string-find
@@ -217,16 +251,1142 @@ Enabled checks:
     performance-type-promotion-in-math-fn
     performance-unnecessary-copy-initialization
     performance-unnecessary-value-param
+    readability-avoid-const-params-in-decls
+    readability-avoid-nested-conditional-operator
+    readability-avoid-return-with-void-value
+    readability-avoid-unconditional-preprocessor-if
+    readability-braces-around-statements
+    readability-const-return-type
+    readability-container-contains
+    readability-container-data-pointer
+    readability-container-size-empty
+    readability-convert-member-functions-to-static
+    readability-delete-null-pointer
+    readability-duplicate-include
+    readability-else-after-return
+    readability-function-cognitive-complexity
+    readability-function-size
+    readability-identifier-length
+    readability-identifier-naming
+    readability-implicit-bool-conversion
+    readability-inconsistent-declaration-parameter-name
+    readability-isolate-declaration
+    readability-magic-numbers
+    readability-make-member-function-const
+    readability-misleading-indentation
+    readability-misplaced-array-index
+    readability-named-parameter
+    readability-non-const-parameter
+    readability-operators-representation
+    readability-qualified-auto
+    readability-redundant-access-specifiers
+    readability-redundant-casting
+    readability-redundant-control-flow
+    readability-redundant-declaration
+    readability-redundant-function-ptr-dereference
+    readability-redundant-inline-specifier
+    readability-redundant-member-init
+    readability-redundant-preprocessor
+    readability-redundant-smartptr-get
+    readability-redundant-string-cstr
+    readability-redundant-string-init
+    readability-reference-to-constructed-temporary
+    readability-simplify-boolean-expr
+    readability-simplify-subscript-expr
+    readability-static-accessed-through-instance
+    readability-static-definition-in-anonymous-namespace
+    readability-string-compare
+    readability-suspicious-call-argument
+    readability-uniqueptr-delete-release
+    readability-uppercase-literal-suffix
+    readability-use-anyofallof
 
 clang-tidy-18 -header-filter=^(source/(?!png_graphics\.h$).*) -extra-arg=-std=c++17 -extra-arg=--gcc-toolchain=/usr -p=. /home/krzysztof/LocalSoftware/AppForFaradayCups/source/shared_data.cpp
 clang-tidy-18 -header-filter=^(source/(?!png_graphics\.h$).*) -extra-arg=-std=c++17 -extra-arg=--gcc-toolchain=/usr -p=. /home/krzysztof/LocalSoftware/AppForFaradayCups/source/main.cpp
+source/main.cpp:45:21: warning: parameter name 'W' is too short, expected at least 3 characters [readability-identifier-length]
+   45 |         WindowEscProof(int W, int H, const char* title) : Fl_Double_Window(W, H, title) { }
+      |                            ^
+source/main.cpp:45:28: warning: parameter name 'H' is too short, expected at least 3 characters [readability-identifier-length]
+   45 |         WindowEscProof(int W, int H, const char* title) : Fl_Double_Window(W, H, title) { }
+      |                                   ^
+source/main.cpp:84:66: warning: all parameters should be named in a function [readability-named-parameter]
+   84 | static void callbackForMenuItemStatus(Fl_Widget* WidgetPtr, void*);
+      |                                                                  ^
+      |                                                                   /*unused*/
+source/main.cpp:86:47: warning: all parameters should be named in a function [readability-named-parameter]
+   86 | static void callbackForMenuItemHelp(Fl_Widget*, void*);
+      |                                               ^      
+      |                                                /*unused*/  /*unused*/
+source/main.cpp:109:124: warning: use nullptr [modernize-use-nullptr]
+  109 |     MenuWidget.add(                                  "Narzędzia/Status/Ukryty",      0, callbackForMenuItemStatus, (void*)0, FL_MENU_RADIO);
+      |                                                                                                                           ^
+      |                                                                                                                           nullptr
+source/main.cpp:114:2: warning: use auto when initializing with a cast to avoid duplicating the type name [modernize-use-auto]
+  114 |         Fl_Menu_Item* MenuItems = const_cast<Fl_Menu_Item*>(MenuWidget.menu());
+      |         ^~~~~~~~~~~~
+      |         auto
+source/main.cpp:124:57: warning: 16 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  124 |                 FailureMessagePtr = new Fl_Box( (MAIN_WINDOW_WIDTH*1)/16, 40, (MAIN_WINDOW_WIDTH*14)/16, DISC_SPACE_Y,
+      |                                                                       ^
+source/main.cpp:124:61: warning: 40 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  124 |                 FailureMessagePtr = new Fl_Box( (MAIN_WINDOW_WIDTH*1)/16, 40, (MAIN_WINDOW_WIDTH*14)/16, DISC_SPACE_Y,
+      |                                                                           ^
+source/main.cpp:124:84: warning: 14 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  124 |                 FailureMessagePtr = new Fl_Box( (MAIN_WINDOW_WIDTH*1)/16, 40, (MAIN_WINDOW_WIDTH*14)/16, DISC_SPACE_Y,
+      |                                                                                                  ^
+source/main.cpp:124:88: warning: 16 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  124 |                 FailureMessagePtr = new Fl_Box( (MAIN_WINDOW_WIDTH*1)/16, 40, (MAIN_WINDOW_WIDTH*14)/16, DISC_SPACE_Y,
+      |                                                                                                      ^
+source/main.cpp:156:18: warning: 100 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  156 |     void* Frames[100];
+      |                  ^
+source/main.cpp:157:44: warning: 100 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  157 |     int NumberOfFrames = backtrace(Frames, 100);
+      |                                            ^
 source/main.cpp:187:18: warning: multilevel pointer conversion from 'char **' to 'void *', please use explicit cast [bugprone-multi-level-implicit-pointer-conversion]
   187 |             free(Symbols);
       |                  ^
-clang-tidy-18 -header-filter=^(source/(?!png_graphics\.h$).*) -extra-arg=-std=c++17 -extra-arg=--gcc-toolchain=/usr -p=. /home/krzysztof/LocalSoftware/AppForFaradayCups/source/modbus_rtu_master.cpp
-clang-tidy-18 -header-filter=^(source/(?!png_graphics\.h$).*) -extra-arg=-std=c++17 -extra-arg=--gcc-toolchain=/usr -p=. /home/krzysztof/LocalSoftware/AppForFaradayCups/source/gui_widgets.cpp
+source/main.cpp:216:21: warning: function 'mainInitializations' has cognitive complexity of 28 (threshold 25) [readability-function-cognitive-complexity]
+  216 | static FailureCodes mainInitializations(int argc, char** argv){
+      |                     ^
+source/main.cpp:220:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+  220 |         for (int J = 1; J < argc; J++) {
+      |         ^
+source/main.cpp:222:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+  222 |         if (Argument == "-v" || Argument == "--verbose") {
+      |         ^
+source/main.cpp:222:30: note: +1
+  222 |         if (Argument == "-v" || Argument == "--verbose") {
+      |                              ^
+source/main.cpp:223:10: note: +3, including nesting penalty of 2, nesting level increased to 3
+  223 |                 if (!VerboseMode){
+      |                 ^
+source/main.cpp:226:10: note: +1, nesting level increased to 3
+  226 |                 else{
+      |                 ^
+source/main.cpp:235:9: note: +1, nesting level increased to 2
+  235 |         else {
+      |         ^
+source/main.cpp:240:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+  240 |         if (VeryVerboseMode){
+      |         ^
+source/main.cpp:243:2: note: +1, nesting level increased to 1
+  243 |         else{
+      |         ^
+source/main.cpp:244:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+  244 |                 if (VerboseMode){
+      |                 ^
+source/main.cpp:249:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+  249 |         if (FailureCodes::NO_FAILURE == FailureCode){
+      |         ^
+source/main.cpp:252:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+  252 |         if (FailureCodes::NO_FAILURE == FailureCode){
+      |         ^
+source/main.cpp:255:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+  255 |         if (FailureCodes::NO_FAILURE == FailureCode){
+      |         ^
+source/main.cpp:258:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+  258 |         for (int Cup = 0; Cup < CUPS_NUMBER; Cup++){
+      |         ^
+source/main.cpp:259:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+  259 |                 for (int J=0; J < MODBUS_INPUTS_PER_CUP; J++){
+      |                 ^
+source/main.cpp:261:4: note: +3, including nesting penalty of 2, nesting level increased to 3
+  261 |                         assert( TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER );
+      |                         ^
+/usr/include/assert.h:104:7: note: expanded from macro 'assert'
+  104 |       ? void (0)                                                        \
+      |       ^
+source/main.cpp:265:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+  265 |         for (int Cup = 0; Cup < CUPS_NUMBER; Cup++){
+      |         ^
+source/main.cpp:266:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+  266 |                 for (int J=0; J < MODBUS_COILS_PER_CUP; J++){
+      |                 ^
+source/main.cpp:268:4: note: +3, including nesting penalty of 2, nesting level increased to 3
+  268 |                         assert( TemporaryRegisterIndex < MODBUS_COILS_NUMBER );
+      |                         ^
+/usr/include/assert.h:104:7: note: expanded from macro 'assert'
+  104 |       ? void (0)                                                        \
+      |       ^
+source/main.cpp:220:11: warning: loop variable name 'J' is too short, expected at least 2 characters [readability-identifier-length]
+  220 |         for (int J = 1; J < argc; J++) {
+      |                  ^
+source/main.cpp:230:2: warning: preprocessor condition is always 'false', consider removing both the condition and its contents [readability-avoid-unconditional-preprocessor-if]
+  230 | #if 0 // debugging
+      |  ^
+source/main.cpp:259:12: warning: loop variable name 'J' is too short, expected at least 2 characters [readability-identifier-length]
+  259 |                 for (int J=0; J < MODBUS_INPUTS_PER_CUP; J++){
+      |                          ^
+source/main.cpp:262:74: warning: 0xFFFF is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  262 |                         atomic_store_explicit( &ModbusInputRegisters[TemporaryRegisterIndex], 0xFFFF, std::memory_order_release );
+      |                                                                                               ^
+source/main.cpp:266:12: warning: loop variable name 'J' is too short, expected at least 2 characters [readability-identifier-length]
+  266 |                 for (int J=0; J < MODBUS_COILS_PER_CUP; J++){
+      |                          ^
+source/main.cpp:275:66: warning: all parameters should be named in a function [readability-named-parameter]
+  275 | static void callbackForMenuItemStatus(Fl_Widget* WidgetPtr, void*) {
+      |                                                                  ^
+      |                                                                   /*unused*/
+source/main.cpp:278:10: warning: implicit conversion 'const Fl_Menu_Item *' -> 'bool' [readability-implicit-bool-conversion]
+  278 |     if (!TemporaryMenuItem){
+      |         ~^                
+      |                            == nullptr
+source/main.cpp:288:47: warning: all parameters should be named in a function [readability-named-parameter]
+  288 | static void callbackForMenuItemHelp(Fl_Widget*, void*) {
+      |                                               ^      
+      |                                                /*unused*/  /*unused*/
 clang-tidy-18 -header-filter=^(source/(?!png_graphics\.h$).*) -extra-arg=-std=c++17 -extra-arg=--gcc-toolchain=/usr -p=. /home/krzysztof/LocalSoftware/AppForFaradayCups/source/peripheral_thread.cpp
 source/peripheral_thread.cpp:36:12: warning: enum 'ModbusFsmStates' uses a larger base type ('int', size: 4 bytes) than necessary for its value set, consider using 'std::uint8_t' (1 byte) as the base type to reduce its size [performance-enum-size]
    36 | enum class ModbusFsmStates{
       |            ^
+source/peripheral_thread.cpp:102:16: warning: 0.001 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  102 |             Fl::wait( 0.001*SHUT_DOWN_LOOP_DELAY ); // DELAY_IN_SHUT_DOWN_LOOP in milliseconds
+      |                       ^
+source/peripheral_thread.cpp:108:58: warning: redundant explicit casting to the same type 'int' as the sub-expression, remove this casting [readability-redundant-casting]
+  108 |                         std::cout << "Peripherals closed; delay loop ran " << (int)(SHUT_DOWN_COUNT_DOWN-TimeoutCounter) << " times" << '\n';
+      |                                                                               ^~~~~~                                   ~
+      |                                                                               (                                        )
+source/peripheral_thread.cpp:115:13: warning: function 'peripheralThreadHandler' has cognitive complexity of 71 (threshold 25) [readability-function-cognitive-complexity]
+  115 | static void peripheralThreadHandler(){
+      |             ^
+source/peripheral_thread.cpp:123:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+  123 |         while( !atomic_load_explicit( &ClosePeripheralsFlag, std::memory_order_acquire )){
+      |         ^
+source/peripheral_thread.cpp:126:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+  126 |                 if (LOW_LEVEL_CONTINUOUS_ERRORS_LIMIT <= LowLevelContinuousErrors){
+      |                 ^
+source/peripheral_thread.cpp:130:3: note: +1, nesting level increased to 2
+  130 |                 else{
+      |                 ^
+source/peripheral_thread.cpp:136:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+  136 |                 while(DurationTime.count() < PeripheralThreadTimeInMilliseconds){
+      |                 ^
+source/peripheral_thread.cpp:138:4: note: +3, including nesting penalty of 2, nesting level increased to 3
+  138 |                         for (int J=0; J<NumberOfFaradayCupsToBeOperated; J++){
+      |                         ^
+source/peripheral_thread.cpp:140:5: note: +4, including nesting penalty of 3, nesting level increased to 4
+  140 |                                 assert( TemporaryCoilIndex1 < MODBUS_COILS_NUMBER );
+      |                                 ^
+/usr/include/assert.h:104:7: note: expanded from macro 'assert'
+  104 |       ? void (0)                                                        \
+      |       ^
+source/peripheral_thread.cpp:142:5: note: +4, including nesting penalty of 3, nesting level increased to 4
+  142 |                                 assert( TemporaryCoilIndex2 < MODBUS_COILS_NUMBER );
+      |                                 ^
+/usr/include/assert.h:104:7: note: expanded from macro 'assert'
+  104 |       ? void (0)                                                        \
+      |       ^
+source/peripheral_thread.cpp:143:5: note: +4, including nesting penalty of 3, nesting level increased to 4
+  143 |                                 if (ModbusCoilsReadout[TemporaryCoilIndex1] == ModbusCoilsReadout[TemporaryCoilIndex2]){
+      |                                 ^
+source/peripheral_thread.cpp:146:5: note: +1, nesting level increased to 4
+  146 |                                 else{
+      |                                 ^
+source/peripheral_thread.cpp:149:6: note: +5, including nesting penalty of 4, nesting level increased to 5
+  149 |                                         if (CupInsertionOrRemovalDuration.count() > MaximumPropagationTime){
+      |                                         ^
+source/peripheral_thread.cpp:152:6: note: +1, nesting level increased to 5
+  152 |                                         else{
+      |                                         ^
+source/peripheral_thread.cpp:159:4: note: +3, including nesting penalty of 2, nesting level increased to 3
+  159 |                         if (DurationTime.count() >= PeripheralThreadTimeInMilliseconds){
+      |                         ^
+source/peripheral_thread.cpp:175:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+  175 |                 if (ModbusFsmStates::OPEN == FsmState){
+      |                 ^
+source/peripheral_thread.cpp:181:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+  181 |                 if (!IsEssentialActionDone && (ModbusFsmStates::READING_INPUT_REGISTERS == FsmState)){
+      |                 ^
+source/peripheral_thread.cpp:181:30: note: +1
+  181 |                 if (!IsEssentialActionDone && (ModbusFsmStates::READING_INPUT_REGISTERS == FsmState)){
+      |                                            ^
+source/peripheral_thread.cpp:187:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+  187 |                 if (!IsEssentialActionDone && (ModbusFsmStates::READING_COILS == FsmState)){
+      |                 ^
+source/peripheral_thread.cpp:187:30: note: +1
+  187 |                 if (!IsEssentialActionDone && (ModbusFsmStates::READING_COILS == FsmState)){
+      |                                            ^
+source/peripheral_thread.cpp:188:4: note: +3, including nesting penalty of 2, nesting level increased to 3
+  188 |                         for (int J=0; J<NumberOfFaradayCupsToBeOperated; J++){
+      |                         ^
+source/peripheral_thread.cpp:189:5: note: +4, including nesting penalty of 3, nesting level increased to 4
+  189 |                                 if (atomic_load_explicit( &ModbusCoilChangeReqest[J], std::memory_order_acquire )){
+      |                                 ^
+source/peripheral_thread.cpp:203:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+  203 |                 if (!IsEssentialActionDone && (ModbusFsmStates::READING_COILS == FsmState)){
+      |                 ^
+source/peripheral_thread.cpp:203:30: note: +1
+  203 |                 if (!IsEssentialActionDone && (ModbusFsmStates::READING_COILS == FsmState)){
+      |                                            ^
+source/peripheral_thread.cpp:209:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+  209 |                 if (!IsEssentialActionDone && (ModbusFsmStates::WRITING_COIL == FsmState)){
+      |                 ^
+source/peripheral_thread.cpp:209:30: note: +1
+  209 |                 if (!IsEssentialActionDone && (ModbusFsmStates::WRITING_COIL == FsmState)){
+      |                                            ^
+source/peripheral_thread.cpp:216:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+  216 |                 if (FailureCodes::NO_FAILURE == Result) {
+      |                 ^
+source/peripheral_thread.cpp:217:4: note: +3, including nesting penalty of 2, nesting level increased to 3
+  217 |                         if (LOW_LEVEL_CONTINUOUS_COUNTING_MAX
+      |                         ^
+source/peripheral_thread.cpp:220:5: note: +4, including nesting penalty of 3, nesting level increased to 4
+  220 |                                 if (LowLevelSuccessfulTransmission
+      |                                 ^
+source/peripheral_thread.cpp:228:3: note: +1, nesting level increased to 2
+  228 |                 else {
+      |                 ^
+source/peripheral_thread.cpp:229:4: note: +3, including nesting penalty of 2, nesting level increased to 3
+  229 |                         if (LOW_LEVEL_CONTINUOUS_COUNTING_MAX
+      |                         ^
+source/peripheral_thread.cpp:233:4: note: +3, including nesting penalty of 2, nesting level increased to 3
+  233 |                         if (LowLevelSuccessfulTransmission > DelayMultiplierOnError) {
+      |                         ^
+source/peripheral_thread.cpp:236:4: note: +1, nesting level increased to 3
+  236 |                         else {
+      |                         ^
+source/peripheral_thread.cpp:249:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+  249 |                 if (ModbusFsmStates::READING_INPUT_REGISTERS == FsmState) {
+      |                 ^
+source/peripheral_thread.cpp:116:9: warning: 100000UL is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  116 |         usleep(100000UL); // 100 ms
+      |                ^
+source/peripheral_thread.cpp:138:13: warning: loop variable name 'J' is too short, expected at least 2 characters [readability-identifier-length]
+  138 |                         for (int J=0; J<NumberOfFaradayCupsToBeOperated; J++){
+      |                                  ^
+source/peripheral_thread.cpp:164:11: warning: 2000 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  164 |                         usleep(2000);
+      |                                ^
+source/peripheral_thread.cpp:188:13: warning: loop variable name 'J' is too short, expected at least 2 characters [readability-identifier-length]
+  188 |                         for (int J=0; J<NumberOfFaradayCupsToBeOperated; J++){
+      |                                  ^
+source/peripheral_thread.cpp:243:2: warning: preprocessor condition is always 'false', consider removing both the condition and its contents [readability-avoid-unconditional-preprocessor-if]
+  243 | #if 0 // debugging
+      |  ^
+source/peripheral_thread.cpp:254:2: warning: preprocessor condition is always 'false', consider removing both the condition and its contents [readability-avoid-unconditional-preprocessor-if]
+  254 | #if 0 // debugging
+      |  ^
+source/peripheral_thread.cpp:279:47: warning: 10 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  279 |         static char TransmissionQualityIndicatorText[10];
+      |                                                      ^
+source/peripheral_thread.cpp:287:47: warning: 10 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  287 |         static char TransmissionQualityIndicatorText[10];
+      |                                                      ^
+clang-tidy-18 -header-filter=^(source/(?!png_graphics\.h$).*) -extra-arg=-std=c++17 -extra-arg=--gcc-toolchain=/usr -p=. /home/krzysztof/LocalSoftware/AppForFaradayCups/source/modbus_rtu_master.cpp
+source/modbus_rtu_master.cpp:41:20: warning: 19200 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+   41 |     int Baudrate = 19200;
+      |                    ^
+source/modbus_rtu_master.cpp:43:20: warning: 8 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+   43 |     int DataBits = 8;
+      |                    ^
+source/modbus_rtu_master.cpp:62:63: warning: 1000 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+   62 |     TimeoutValue.tv_usec = (uint32_t)(MODBUS_RESPONSE_TIMEOUT*1000); // microseconds
+      |                                                               ^
+source/modbus_rtu_master.cpp:74:33: warning: 25 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+   74 |         static uint16_t RegistersTable[25]; // 125 max
+      |                                        ^
+source/modbus_rtu_master.cpp:98:2: warning: preprocessor condition is always 'false', consider removing both the condition and its contents [readability-avoid-unconditional-preprocessor-if]
+   98 | #if 0 // debugging
+      |  ^
+source/modbus_rtu_master.cpp:143:2: warning: preprocessor condition is always 'false', consider removing both the condition and its contents [readability-avoid-unconditional-preprocessor-if]
+  143 | #if 0 // debugging
+      |  ^
+clang-tidy-18 -header-filter=^(source/(?!png_graphics\.h$).*) -extra-arg=-std=c++17 -extra-arg=--gcc-toolchain=/usr -p=. /home/krzysztof/LocalSoftware/AppForFaradayCups/source/gui_widgets.cpp
+source/gui_widgets.cpp:6:10: warning: inclusion of deprecated C++ header 'assert.h'; consider using 'cassert' instead [modernize-deprecated-headers]
+    6 | #include <assert.h>
+      |          ^~~~~~~~~~
+      |          <cassert>
+source/gui_widgets.cpp:8:1: warning: duplicate include [readability-duplicate-include]
+    7 | #include <memory>
+      |                  
+    8 | #include <string>
+      | ^~~~~~~~~~~~~~~~~
+source/gui_widgets.cpp:52:33: warning: parameter name 'X' is too short, expected at least 3 characters [readability-identifier-length]
+   52 |         TripleDiscWidgetWithNoSlit(int X, int Y, int W, int H, const char* L = nullptr) : Fl_Widget(X, Y, W, H, L) {}
+      |                                        ^
+source/gui_widgets.cpp:52:40: warning: parameter name 'Y' is too short, expected at least 3 characters [readability-identifier-length]
+   52 |         TripleDiscWidgetWithNoSlit(int X, int Y, int W, int H, const char* L = nullptr) : Fl_Widget(X, Y, W, H, L) {}
+      |                                               ^
+source/gui_widgets.cpp:52:47: warning: parameter name 'W' is too short, expected at least 3 characters [readability-identifier-length]
+   52 |         TripleDiscWidgetWithNoSlit(int X, int Y, int W, int H, const char* L = nullptr) : Fl_Widget(X, Y, W, H, L) {}
+      |                                                      ^
+source/gui_widgets.cpp:52:54: warning: parameter name 'H' is too short, expected at least 3 characters [readability-identifier-length]
+   52 |         TripleDiscWidgetWithNoSlit(int X, int Y, int W, int H, const char* L = nullptr) : Fl_Widget(X, Y, W, H, L) {}
+      |                                                             ^
+source/gui_widgets.cpp:52:69: warning: parameter name 'L' is too short, expected at least 3 characters [readability-identifier-length]
+   52 |         TripleDiscWidgetWithNoSlit(int X, int Y, int W, int H, const char* L = nullptr) : Fl_Widget(X, Y, W, H, L) {}
+      |                                                                            ^
+source/gui_widgets.cpp:59:39: warning: parameter name 'X' is too short, expected at least 3 characters [readability-identifier-length]
+   59 |         TripleDiscWidgetWithVerticalSlit(int X, int Y, int W, int H, const char* L = nullptr) : Fl_Widget(X, Y, W, H, L) {}
+      |                                              ^
+source/gui_widgets.cpp:59:46: warning: parameter name 'Y' is too short, expected at least 3 characters [readability-identifier-length]
+   59 |         TripleDiscWidgetWithVerticalSlit(int X, int Y, int W, int H, const char* L = nullptr) : Fl_Widget(X, Y, W, H, L) {}
+      |                                                     ^
+source/gui_widgets.cpp:59:53: warning: parameter name 'W' is too short, expected at least 3 characters [readability-identifier-length]
+   59 |         TripleDiscWidgetWithVerticalSlit(int X, int Y, int W, int H, const char* L = nullptr) : Fl_Widget(X, Y, W, H, L) {}
+      |                                                            ^
+source/gui_widgets.cpp:59:60: warning: parameter name 'H' is too short, expected at least 3 characters [readability-identifier-length]
+   59 |         TripleDiscWidgetWithVerticalSlit(int X, int Y, int W, int H, const char* L = nullptr) : Fl_Widget(X, Y, W, H, L) {}
+      |                                                                   ^
+source/gui_widgets.cpp:59:75: warning: parameter name 'L' is too short, expected at least 3 characters [readability-identifier-length]
+   59 |         TripleDiscWidgetWithVerticalSlit(int X, int Y, int W, int H, const char* L = nullptr) : Fl_Widget(X, Y, W, H, L) {}
+      |                                                                                  ^
+source/gui_widgets.cpp:66:41: warning: parameter name 'X' is too short, expected at least 3 characters [readability-identifier-length]
+   66 |         TripleDiscWidgetWithHorizontalSlit(int X, int Y, int W, int H, const char* L = nullptr) : Fl_Widget(X, Y, W, H, L) {}
+      |                                                ^
+source/gui_widgets.cpp:66:48: warning: parameter name 'Y' is too short, expected at least 3 characters [readability-identifier-length]
+   66 |         TripleDiscWidgetWithHorizontalSlit(int X, int Y, int W, int H, const char* L = nullptr) : Fl_Widget(X, Y, W, H, L) {}
+      |                                                       ^
+source/gui_widgets.cpp:66:55: warning: parameter name 'W' is too short, expected at least 3 characters [readability-identifier-length]
+   66 |         TripleDiscWidgetWithHorizontalSlit(int X, int Y, int W, int H, const char* L = nullptr) : Fl_Widget(X, Y, W, H, L) {}
+      |                                                              ^
+source/gui_widgets.cpp:66:62: warning: parameter name 'H' is too short, expected at least 3 characters [readability-identifier-length]
+   66 |         TripleDiscWidgetWithHorizontalSlit(int X, int Y, int W, int H, const char* L = nullptr) : Fl_Widget(X, Y, W, H, L) {}
+      |                                                                     ^
+source/gui_widgets.cpp:66:77: warning: parameter name 'L' is too short, expected at least 3 characters [readability-identifier-length]
+   66 |         TripleDiscWidgetWithHorizontalSlit(int X, int Y, int W, int H, const char* L = nullptr) : Fl_Widget(X, Y, W, H, L) {}
+      |                                                                                    ^
+source/gui_widgets.cpp:72:21: warning: parameter name 'X' is too short, expected at least 3 characters [readability-identifier-length]
+   72 |     ImageWidget(int X, int Y, int W, int H,
+      |                     ^
+source/gui_widgets.cpp:72:28: warning: parameter name 'Y' is too short, expected at least 3 characters [readability-identifier-length]
+   72 |     ImageWidget(int X, int Y, int W, int H,
+      |                            ^
+source/gui_widgets.cpp:72:35: warning: parameter name 'W' is too short, expected at least 3 characters [readability-identifier-length]
+   72 |     ImageWidget(int X, int Y, int W, int H,
+      |                                   ^
+source/gui_widgets.cpp:72:42: warning: parameter name 'H' is too short, expected at least 3 characters [readability-identifier-length]
+   72 |     ImageWidget(int X, int Y, int W, int H,
+      |                                          ^
+source/gui_widgets.cpp:78:13: warning: implicit conversion 'const unsigned char *' -> 'bool' [readability-implicit-bool-conversion]
+   78 |         if (data && data_len > 0) {
+      |             ^
+      |             (    != nullptr)
+source/gui_widgets.cpp:114:54: warning: 64 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  114 |         char ValueLabelBuffer[CUPS_NUMBER][VALUES_PER_DISC][64];
+      |                                                             ^
+source/gui_widgets.cpp:115:18: warning: 800 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  115 |         char StatusText[800];
+      |                         ^
+source/gui_widgets.cpp:128:18: warning: parameter name 'X' is too short, expected at least 3 characters [readability-identifier-length]
+  128 |         CupGuiGroup(int X, int Y, int W, int H, const char* L = nullptr);
+      |                         ^
+source/gui_widgets.cpp:128:25: warning: parameter name 'Y' is too short, expected at least 3 characters [readability-identifier-length]
+  128 |         CupGuiGroup(int X, int Y, int W, int H, const char* L = nullptr);
+      |                                ^
+source/gui_widgets.cpp:128:32: warning: parameter name 'W' is too short, expected at least 3 characters [readability-identifier-length]
+  128 |         CupGuiGroup(int X, int Y, int W, int H, const char* L = nullptr);
+      |                                       ^
+source/gui_widgets.cpp:128:39: warning: parameter name 'H' is too short, expected at least 3 characters [readability-identifier-length]
+  128 |         CupGuiGroup(int X, int Y, int W, int H, const char* L = nullptr);
+      |                                              ^
+source/gui_widgets.cpp:128:54: warning: parameter name 'L' is too short, expected at least 3 characters [readability-identifier-length]
+  128 |         CupGuiGroup(int X, int Y, int W, int H, const char* L = nullptr);
+      |                                                             ^
+source/gui_widgets.cpp:162:2: warning: use range-based for loop instead [modernize-loop-convert]
+  162 |         for (int J=0; J<CUPS_NUMBER; J++){
+      |         ^   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |             (auto & J : CupInsertionOrRemovalStartTime)
+  163 |                 CupInsertionOrRemovalStartTime[J] = NowTemporary;
+      |                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                 J
+source/gui_widgets.cpp:162:11: warning: loop variable name 'J' is too short, expected at least 2 characters [readability-identifier-length]
+  162 |         for (int J=0; J<CUPS_NUMBER; J++){
+      |                  ^
+source/gui_widgets.cpp:166:39: warning: 200 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  166 |         GeneralStatusTextBoxPtr = new Fl_Box(200, 10, 300, 15, "Tu powinny być różne dane");
+      |                                              ^
+source/gui_widgets.cpp:166:44: warning: 10 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  166 |         GeneralStatusTextBoxPtr = new Fl_Box(200, 10, 300, 15, "Tu powinny być różne dane");
+      |                                                   ^
+source/gui_widgets.cpp:166:48: warning: 300 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  166 |         GeneralStatusTextBoxPtr = new Fl_Box(200, 10, 300, 15, "Tu powinny być różne dane");
+      |                                                       ^
+source/gui_widgets.cpp:166:53: warning: 15 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  166 |         GeneralStatusTextBoxPtr = new Fl_Box(200, 10, 300, 15, "Tu powinny być różne dane");
+      |                                                            ^
+source/gui_widgets.cpp:171:2: warning: preprocessor condition is always 'false', consider removing both the condition and its contents [readability-avoid-unconditional-preprocessor-if]
+  171 | #if 0 // debugging
+      |  ^
+source/gui_widgets.cpp:176:11: warning: loop variable name 'J' is too short, expected at least 2 characters [readability-identifier-length]
+  176 |         for (int J=0; J<CUPS_NUMBER; J++){
+      |                  ^
+source/gui_widgets.cpp:177:59: warning: 10 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  177 |                 CupGroupPtr[J] = new CupGuiGroup( 0, MAIN_MENU_HEIGHT + 10 + J*DISC_SPACE_Y, MAIN_WINDOW_WIDTH, 300 );
+      |                                                                         ^
+source/gui_widgets.cpp:177:99: warning: 300 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  177 |                 CupGroupPtr[J] = new CupGuiGroup( 0, MAIN_MENU_HEIGHT + 10 + J*DISC_SPACE_Y, MAIN_WINDOW_WIDTH, 300 );
+      |                                                                                                                 ^
+source/gui_widgets.cpp:185:2: warning: preprocessor condition is always 'false', consider removing both the condition and its contents [readability-avoid-unconditional-preprocessor-if]
+  185 | #if 0
+      |  ^
+source/gui_widgets.cpp:210:32: warning: 360 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  210 |         fl_pie(x(), y(), w(), h(), 0, 360);     // outer ring
+      |                                       ^
+source/gui_widgets.cpp:213:20: warning: 128 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  213 |         fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
+      |                           ^
+source/gui_widgets.cpp:213:39: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  213 |         fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
+      |                                              ^
+source/gui_widgets.cpp:213:54: warning: 128 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  213 |         fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
+      |                                                             ^
+source/gui_widgets.cpp:213:73: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  213 |         fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
+      |                                                                                ^
+source/gui_widgets.cpp:213:99: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  213 |         fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
+      |                                                                                                          ^
+source/gui_widgets.cpp:213:125: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  213 |         fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
+      |                                                                                                                                    ^
+source/gui_widgets.cpp:213:133: warning: 360 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  213 |         fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
+      |                                                                                                                                            ^
+source/gui_widgets.cpp:216:20: warning: 128 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  216 |         fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
+      |                           ^
+source/gui_widgets.cpp:216:39: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  216 |         fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
+      |                                              ^
+source/gui_widgets.cpp:216:54: warning: 128 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  216 |         fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
+      |                                                             ^
+source/gui_widgets.cpp:216:73: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  216 |         fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
+      |                                                                                ^
+source/gui_widgets.cpp:216:99: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  216 |         fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
+      |                                                                                                          ^
+source/gui_widgets.cpp:216:125: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  216 |         fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
+      |                                                                                                                                    ^
+source/gui_widgets.cpp:216:133: warning: 360 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  216 |         fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
+      |                                                                                                                                            ^
+source/gui_widgets.cpp:221:32: warning: 360 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  221 |         fl_pie(x(), y(), w(), h(), 0, 360);     // outer ring
+      |                                       ^
+source/gui_widgets.cpp:228:20: warning: 128 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  228 |         fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
+      |                           ^
+source/gui_widgets.cpp:228:39: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  228 |         fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
+      |                                              ^
+source/gui_widgets.cpp:228:54: warning: 128 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  228 |         fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
+      |                                                             ^
+source/gui_widgets.cpp:228:73: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  228 |         fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
+      |                                                                                ^
+source/gui_widgets.cpp:228:99: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  228 |         fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
+      |                                                                                                          ^
+source/gui_widgets.cpp:228:125: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  228 |         fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
+      |                                                                                                                                    ^
+source/gui_widgets.cpp:228:133: warning: 360 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  228 |         fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
+      |                                                                                                                                            ^
+source/gui_widgets.cpp:231:20: warning: 128 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  231 |         fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
+      |                           ^
+source/gui_widgets.cpp:231:39: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  231 |         fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
+      |                                              ^
+source/gui_widgets.cpp:231:54: warning: 128 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  231 |         fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
+      |                                                             ^
+source/gui_widgets.cpp:231:73: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  231 |         fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
+      |                                                                                ^
+source/gui_widgets.cpp:231:99: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  231 |         fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
+      |                                                                                                          ^
+source/gui_widgets.cpp:231:125: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  231 |         fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
+      |                                                                                                                                    ^
+source/gui_widgets.cpp:231:133: warning: 360 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  231 |         fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
+      |                                                                                                                                            ^
+source/gui_widgets.cpp:236:32: warning: 360 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  236 |         fl_pie(x(), y(), w(), h(), 0, 360);     // outer ring
+      |                                       ^
+source/gui_widgets.cpp:239:20: warning: 128 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  239 |         fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
+      |                           ^
+source/gui_widgets.cpp:239:39: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  239 |         fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
+      |                                              ^
+source/gui_widgets.cpp:239:54: warning: 128 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  239 |         fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
+      |                                                             ^
+source/gui_widgets.cpp:239:73: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  239 |         fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
+      |                                                                                ^
+source/gui_widgets.cpp:239:99: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  239 |         fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
+      |                                                                                                          ^
+source/gui_widgets.cpp:239:125: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  239 |         fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
+      |                                                                                                                                    ^
+source/gui_widgets.cpp:239:133: warning: 360 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  239 |         fl_pie( x()+(w()*(128-DISC2_RADIUS))/256, y()+(h()*(128-DISC2_RADIUS))/256, (w()*2*DISC2_RADIUS)/256, (h()*2*DISC2_RADIUS)/256, 0, 360);
+      |                                                                                                                                            ^
+source/gui_widgets.cpp:242:20: warning: 128 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  242 |         fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
+      |                           ^
+source/gui_widgets.cpp:242:39: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  242 |         fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
+      |                                              ^
+source/gui_widgets.cpp:242:54: warning: 128 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  242 |         fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
+      |                                                             ^
+source/gui_widgets.cpp:242:73: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  242 |         fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
+      |                                                                                ^
+source/gui_widgets.cpp:242:99: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  242 |         fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
+      |                                                                                                          ^
+source/gui_widgets.cpp:242:125: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  242 |         fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
+      |                                                                                                                                    ^
+source/gui_widgets.cpp:242:133: warning: 360 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  242 |         fl_pie( x()+(w()*(128-DISC3_RADIUS))/256, y()+(h()*(128-DISC3_RADIUS))/256, (w()*2*DISC3_RADIUS)/256, (h()*2*DISC3_RADIUS)/256, 0, 360);
+      |                                                                                                                                            ^
+source/gui_widgets.cpp:288:30: warning: parameter name 'X' is too short, expected at least 3 characters [readability-identifier-length]
+  288 | CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char* L) : Fl_Group(X, Y, W, H, L) {
+      |                              ^
+source/gui_widgets.cpp:288:37: warning: parameter name 'Y' is too short, expected at least 3 characters [readability-identifier-length]
+  288 | CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char* L) : Fl_Group(X, Y, W, H, L) {
+      |                                     ^
+source/gui_widgets.cpp:288:44: warning: parameter name 'W' is too short, expected at least 3 characters [readability-identifier-length]
+  288 | CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char* L) : Fl_Group(X, Y, W, H, L) {
+      |                                            ^
+source/gui_widgets.cpp:288:51: warning: parameter name 'H' is too short, expected at least 3 characters [readability-identifier-length]
+  288 | CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char* L) : Fl_Group(X, Y, W, H, L) {
+      |                                                   ^
+source/gui_widgets.cpp:288:66: warning: parameter name 'L' is too short, expected at least 3 characters [readability-identifier-length]
+  288 | CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char* L) : Fl_Group(X, Y, W, H, L) {
+      |                                                                  ^
+source/gui_widgets.cpp:295:39: warning: 296 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  295 |         TitleTextBoxPtr = new Fl_Box(X+0, Y, 296, 20, "Tytuł");
+      |                                              ^
+source/gui_widgets.cpp:295:44: warning: 20 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  295 |         TitleTextBoxPtr = new Fl_Box(X+0, Y, 296, 20, "Tytuł");
+      |                                                   ^
+source/gui_widgets.cpp:298:2: warning: preprocessor condition is always 'false', consider removing both the condition and its contents [readability-avoid-unconditional-preprocessor-if]
+  298 | #if 0
+      |  ^
+source/gui_widgets.cpp:304:49: warning: 20 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  304 |         TripleDisc = new TripleDiscWidgetWithNoSlit( X+20, Y+20, 256, 256 );
+      |                                                        ^
+source/gui_widgets.cpp:304:55: warning: 20 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  304 |         TripleDisc = new TripleDiscWidgetWithNoSlit( X+20, Y+20, 256, 256 );
+      |                                                              ^
+source/gui_widgets.cpp:304:59: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  304 |         TripleDisc = new TripleDiscWidgetWithNoSlit( X+20, Y+20, 256, 256 );
+      |                                                                  ^
+source/gui_widgets.cpp:304:64: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  304 |         TripleDisc = new TripleDiscWidgetWithNoSlit( X+20, Y+20, 256, 256 );
+      |                                                                       ^
+source/gui_widgets.cpp:307:11: warning: loop variable name 'J' is too short, expected at least 2 characters [readability-identifier-length]
+  307 |         for (int J=0; J <VALUES_PER_DISC; J++){
+      |                  ^
+source/gui_widgets.cpp:308:38: warning: 20 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  308 |                 CupValueLabelPtr[J] = new Fl_Box(X+20, Y+DISC_VALUE1_Y+J*(DISC_VALUE2_Y-DISC_VALUE1_Y), 256, 30, "?" );
+      |                                                    ^
+source/gui_widgets.cpp:308:91: warning: 256 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  308 |                 CupValueLabelPtr[J] = new Fl_Box(X+20, Y+DISC_VALUE1_Y+J*(DISC_VALUE2_Y-DISC_VALUE1_Y), 256, 30, "?" );
+      |                                                                                                         ^
+source/gui_widgets.cpp:308:96: warning: 30 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  308 |                 CupValueLabelPtr[J] = new Fl_Box(X+20, Y+DISC_VALUE1_Y+J*(DISC_VALUE2_Y-DISC_VALUE1_Y), 256, 30, "?" );
+      |                                                                                                              ^
+source/gui_widgets.cpp:310:35: warning: 26 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  310 |                 CupValueLabelPtr[J]->labelsize( 26 );
+      |                                                 ^
+source/gui_widgets.cpp:314:39: warning: 380 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  314 |         PadlockImagePtr = new ImageWidget( X+380, Y+30, 54, 54, padlock_png, padlock_png_len, nullptr );
+      |                                              ^
+source/gui_widgets.cpp:314:46: warning: 30 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  314 |         PadlockImagePtr = new ImageWidget( X+380, Y+30, 54, 54, padlock_png, padlock_png_len, nullptr );
+      |                                                     ^
+source/gui_widgets.cpp:314:50: warning: 54 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  314 |         PadlockImagePtr = new ImageWidget( X+380, Y+30, 54, 54, padlock_png, padlock_png_len, nullptr );
+      |                                                         ^
+source/gui_widgets.cpp:314:54: warning: 54 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  314 |         PadlockImagePtr = new ImageWidget( X+380, Y+30, 54, 54, padlock_png, padlock_png_len, nullptr );
+      |                                                             ^
+source/gui_widgets.cpp:317:43: warning: 380 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  317 |         UnconnectedImagePtr = new ImageWidget( X+380, Y+60, 51, 51, unconnected_png, unconnected_png_len, nullptr );
+      |                                                  ^
+source/gui_widgets.cpp:317:50: warning: 60 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  317 |         UnconnectedImagePtr = new ImageWidget( X+380, Y+60, 51, 51, unconnected_png, unconnected_png_len, nullptr );
+      |                                                         ^
+source/gui_widgets.cpp:317:54: warning: 51 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  317 |         UnconnectedImagePtr = new ImageWidget( X+380, Y+60, 51, 51, unconnected_png, unconnected_png_len, nullptr );
+      |                                                             ^
+source/gui_widgets.cpp:317:58: warning: 51 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  317 |         UnconnectedImagePtr = new ImageWidget( X+380, Y+60, 51, 51, unconnected_png, unconnected_png_len, nullptr );
+      |                                                                 ^
+source/gui_widgets.cpp:320:35: warning: 340 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  320 |         LockoutTextBoxPtr = new Fl_Box(X+340, Y+90, 150, 25, "Blokada Aktywna");
+      |                                          ^
+source/gui_widgets.cpp:320:42: warning: 90 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  320 |         LockoutTextBoxPtr = new Fl_Box(X+340, Y+90, 150, 25, "Blokada Aktywna");
+      |                                                 ^
+source/gui_widgets.cpp:320:46: warning: 150 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  320 |         LockoutTextBoxPtr = new Fl_Box(X+340, Y+90, 150, 25, "Blokada Aktywna");
+      |                                                     ^
+source/gui_widgets.cpp:320:51: warning: 25 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  320 |         LockoutTextBoxPtr = new Fl_Box(X+340, Y+90, 150, 25, "Blokada Aktywna");
+      |                                                          ^
+source/gui_widgets.cpp:323:32: warning: 16 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  323 |         LockoutTextBoxPtr->labelsize( 16 );
+      |                                       ^
+source/gui_widgets.cpp:327:39: warning: 330 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  327 |         UnconnectedTextBoxPtr = new Fl_Box(X+330, Y+112, 150, 45, "Błąd Modbus:\nBrak Połączenia");
+      |                                              ^
+source/gui_widgets.cpp:327:46: warning: 112 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  327 |         UnconnectedTextBoxPtr = new Fl_Box(X+330, Y+112, 150, 45, "Błąd Modbus:\nBrak Połączenia");
+      |                                                     ^
+source/gui_widgets.cpp:327:51: warning: 150 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  327 |         UnconnectedTextBoxPtr = new Fl_Box(X+330, Y+112, 150, 45, "Błąd Modbus:\nBrak Połączenia");
+      |                                                          ^
+source/gui_widgets.cpp:327:56: warning: 45 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  327 |         UnconnectedTextBoxPtr = new Fl_Box(X+330, Y+112, 150, 45, "Błąd Modbus:\nBrak Połączenia");
+      |                                                               ^
+source/gui_widgets.cpp:330:36: warning: 16 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  330 |         UnconnectedTextBoxPtr->labelsize( 16 );
+      |                                           ^
+source/gui_widgets.cpp:336:39: warning: 330 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  336 |         SwitchErrorTextBoxPtr = new Fl_Box(X+330, Y+118, 160, 60, "Błąd krańcówki\nlub sterownika");
+      |                                              ^
+source/gui_widgets.cpp:336:46: warning: 118 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  336 |         SwitchErrorTextBoxPtr = new Fl_Box(X+330, Y+118, 160, 60, "Błąd krańcówki\nlub sterownika");
+      |                                                     ^
+source/gui_widgets.cpp:336:51: warning: 160 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  336 |         SwitchErrorTextBoxPtr = new Fl_Box(X+330, Y+118, 160, 60, "Błąd krańcówki\nlub sterownika");
+      |                                                          ^
+source/gui_widgets.cpp:336:56: warning: 60 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  336 |         SwitchErrorTextBoxPtr = new Fl_Box(X+330, Y+118, 160, 60, "Błąd krańcówki\nlub sterownika");
+      |                                                               ^
+source/gui_widgets.cpp:339:36: warning: 16 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  339 |         SwitchErrorTextBoxPtr->labelsize( 16 );
+      |                                           ^
+source/gui_widgets.cpp:345:43: warning: 360 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  345 |         CupInsertionButtonPtr = new Fl_Button( X+360, Y+190, 90, 40, "Wysuń" ); // "??????" );
+      |                                                  ^
+source/gui_widgets.cpp:345:50: warning: 190 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  345 |         CupInsertionButtonPtr = new Fl_Button( X+360, Y+190, 90, 40, "Wysuń" ); // "??????" );
+      |                                                         ^
+source/gui_widgets.cpp:345:55: warning: 90 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  345 |         CupInsertionButtonPtr = new Fl_Button( X+360, Y+190, 90, 40, "Wysuń" ); // "??????" );
+      |                                                              ^
+source/gui_widgets.cpp:345:59: warning: 40 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  345 |         CupInsertionButtonPtr = new Fl_Button( X+360, Y+190, 90, 40, "Wysuń" ); // "??????" );
+      |                                                                  ^
+source/gui_widgets.cpp:352:34: warning: 300 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  352 |         StatusTextBoxPtr = new Fl_Box(X+300, Y+230, 210, 60, TextCupIsInserted ); // "tu powinny być różne dane");
+      |                                         ^
+source/gui_widgets.cpp:352:41: warning: 230 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  352 |         StatusTextBoxPtr = new Fl_Box(X+300, Y+230, 210, 60, TextCupIsInserted ); // "tu powinny być różne dane");
+      |                                                ^
+source/gui_widgets.cpp:352:46: warning: 210 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  352 |         StatusTextBoxPtr = new Fl_Box(X+300, Y+230, 210, 60, TextCupIsInserted ); // "tu powinny być różne dane");
+      |                                                     ^
+source/gui_widgets.cpp:352:51: warning: 60 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  352 |         StatusTextBoxPtr = new Fl_Box(X+300, Y+230, 210, 60, TextCupIsInserted ); // "tu powinny być różne dane");
+      |                                                          ^
+source/gui_widgets.cpp:373:18: warning: method 'getCupId' can be made const [readability-make-member-function-const]
+  130 | int CupGuiGroup::getCupId(){
+      |                  ^         
+      |                             const
+source/gui_widgets.cpp:377:19: warning: function 'refreshData' has cognitive complexity of 99 (threshold 25) [readability-function-cognitive-complexity]
+  377 | void CupGuiGroup::refreshData(){
+      |                   ^
+source/gui_widgets.cpp:378:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+  378 |         assert( CupId < CUPS_NUMBER );
+      |         ^
+/usr/include/assert.h:104:7: note: expanded from macro 'assert'
+  104 |       ? void (0)                                                        \
+      |       ^
+source/gui_widgets.cpp:381:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+  381 |         assert(TemporaryIndexForSwitchPressed < MODBUS_COILS_NUMBER);
+      |         ^
+/usr/include/assert.h:104:7: note: expanded from macro 'assert'
+  104 |       ? void (0)                                                        \
+      |       ^
+source/gui_widgets.cpp:384:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+  384 |         assert(TemporaryIndexForBlockage < MODBUS_COILS_NUMBER);
+      |         ^
+/usr/include/assert.h:104:7: note: expanded from macro 'assert'
+  104 |       ? void (0)                                                        \
+      |       ^
+source/gui_widgets.cpp:388:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+  388 |         if (IsTransmissionCorrect && atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndexForSwitchPressed], std::memory_order_acquire )){
+      |         ^
+source/gui_widgets.cpp:388:28: note: +1
+  388 |         if (IsTransmissionCorrect && atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndexForSwitchPressed], std::memory_order_acquire )){
+      |                                   ^
+source/gui_widgets.cpp:389:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+  389 |                 if (0 == TripleDisc->visible()){
+      |                 ^
+source/gui_widgets.cpp:392:3: note: +1, nesting level increased to 2
+  392 |                 else{
+      |                 ^
+source/gui_widgets.cpp:396:2: note: +1, nesting level increased to 1
+  396 |         else{
+      |         ^
+source/gui_widgets.cpp:397:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+  397 |                 if (0 != TripleDisc->visible()){
+      |                 ^
+source/gui_widgets.cpp:402:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+  402 |         if (IsTransmissionCorrect &&
+      |         ^
+source/gui_widgets.cpp:402:28: note: +1
+  402 |         if (IsTransmissionCorrect &&
+      |                                   ^
+source/gui_widgets.cpp:405:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+  405 |                 for (int J=0; J < VISIBLE_VALUES_PER_DISC; J++){
+      |                 ^
+source/gui_widgets.cpp:407:4: note: +3, including nesting penalty of 2, nesting level increased to 3
+  407 |                         assert( TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER );
+      |                         ^
+/usr/include/assert.h:104:7: note: expanded from macro 'assert'
+  104 |       ? void (0)                                                        \
+      |       ^
+source/gui_widgets.cpp:410:4: note: +3, including nesting penalty of 2, nesting level increased to 3
+  410 |                         if (J >= 3){
+      |                         ^
+source/gui_widgets.cpp:413:9: note: +1, nesting level increased to 3
+  413 |                         else if (0x8000 > TemporaryValue){
+      |                              ^
+source/gui_widgets.cpp:416:5: note: +4, including nesting penalty of 3, nesting level increased to 4
+  416 |                                 if (strcmp(ValueLabelBuffer[CupId][J], "-0.0μA") == 0){
+      |                                 ^
+source/gui_widgets.cpp:420:4: note: +1, nesting level increased to 3
+  420 |                         else{
+      |                         ^
+source/gui_widgets.cpp:430:2: note: +1, nesting level increased to 1
+  430 |         else{
+      |         ^
+source/gui_widgets.cpp:431:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+  431 |                 for (int J=0; J < VALUES_PER_DISC; J++){
+      |                 ^
+source/gui_widgets.cpp:436:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+  436 |         if (IsTransmissionCorrect){
+      |         ^
+source/gui_widgets.cpp:437:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+  437 |                 if (atomic_load_explicit( &DisplayLimitSwitchError[CupId], std::memory_order_acquire )){
+      |                 ^
+source/gui_widgets.cpp:438:4: note: +3, including nesting penalty of 2, nesting level increased to 3
+  438 |                         if (0 == SwitchErrorTextBoxPtr->visible()){
+      |                         ^
+source/gui_widgets.cpp:442:3: note: +1, nesting level increased to 2
+  442 |                 else{
+      |                 ^
+source/gui_widgets.cpp:443:4: note: +3, including nesting penalty of 2, nesting level increased to 3
+  443 |                         if (ModbusCoilsReadout[TemporaryIndexForBlockage] && !ModbusCoilsReadout[TemporaryIndexForSwitchPressed]){
+      |                         ^
+source/gui_widgets.cpp:443:54: note: +1
+  443 |                         if (ModbusCoilsReadout[TemporaryIndexForBlockage] && !ModbusCoilsReadout[TemporaryIndexForSwitchPressed]){
+      |                                                                           ^
+source/gui_widgets.cpp:444:5: note: +4, including nesting penalty of 3, nesting level increased to 4
+  444 |                                 if (0 == SwitchErrorTextBoxPtr->visible()){
+      |                                 ^
+source/gui_widgets.cpp:448:4: note: +1, nesting level increased to 3
+  448 |                         else{
+      |                         ^
+source/gui_widgets.cpp:449:5: note: +4, including nesting penalty of 3, nesting level increased to 4
+  449 |                                 if (0 != SwitchErrorTextBoxPtr->visible()){
+      |                                 ^
+source/gui_widgets.cpp:455:2: note: +1, nesting level increased to 1
+  455 |         else{
+      |         ^
+source/gui_widgets.cpp:456:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+  456 |                 if (0 != SwitchErrorTextBoxPtr->visible()){
+      |                 ^
+source/gui_widgets.cpp:461:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+  461 |         if (IsTransmissionCorrect && atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndexForBlockage], std::memory_order_acquire )){
+      |         ^
+source/gui_widgets.cpp:461:28: note: +1
+  461 |         if (IsTransmissionCorrect && atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndexForBlockage], std::memory_order_acquire )){
+      |                                   ^
+source/gui_widgets.cpp:462:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+  462 |                 if (0 == PadlockImagePtr->visible()){
+      |                 ^
+source/gui_widgets.cpp:467:2: note: +1, nesting level increased to 1
+  467 |         else{
+      |         ^
+source/gui_widgets.cpp:468:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+  468 |                 if (0 != PadlockImagePtr->visible()){
+      |                 ^
+source/gui_widgets.cpp:474:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+  474 |         if (IsTransmissionCorrect){
+      |         ^
+source/gui_widgets.cpp:478:2: note: +1, nesting level increased to 1
+  478 |         else{
+      |         ^
+source/gui_widgets.cpp:483:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+  483 |         if ((0 == StatusLevelForGui) || (!IsTransmissionCorrect)){
+      |         ^
+source/gui_widgets.cpp:483:31: note: +1
+  483 |         if ((0 == StatusLevelForGui) || (!IsTransmissionCorrect)){
+      |                                      ^
+source/gui_widgets.cpp:484:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+  484 |                 if (0 != StatusTextBoxPtr->visible()){
+      |                 ^
+source/gui_widgets.cpp:488:2: note: +1, nesting level increased to 1
+  488 |         else{
+      |         ^
+source/gui_widgets.cpp:489:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+  489 |                 if (0 == StatusTextBoxPtr->visible()){
+      |                 ^
+source/gui_widgets.cpp:492:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+  492 |                 if (1 == StatusLevelForGui){
+      |                 ^
+source/gui_widgets.cpp:493:4: note: +3, including nesting penalty of 2, nesting level increased to 3
+  493 |                         if (StatusTextBoxPtr->labelsize() != ORDINARY_TEXT_SIZE){
+      |                         ^
+source/gui_widgets.cpp:496:4: note: +3, including nesting penalty of 2, nesting level increased to 3
+  496 |                         if (atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndexForSwitchPressed], std::memory_order_acquire )){
+      |                         ^
+source/gui_widgets.cpp:499:4: note: +1, nesting level increased to 3
+  499 |                         else{
+      |                         ^
+source/gui_widgets.cpp:503:3: note: +1, nesting level increased to 2
+  503 |                 else{
+      |                 ^
+source/gui_widgets.cpp:504:4: note: +3, including nesting penalty of 2, nesting level increased to 3
+  504 |                         if (StatusTextBoxPtr->labelsize() != DEBUGGING_TEXT_SIZE){
+      |                         ^
+source/gui_widgets.cpp:511:108: note: +3, including nesting penalty of 2, nesting level increased to 3
+  511 |                                         atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndexForSwitchPressed], std::memory_order_acquire )?
+      |                                                                                                                                               ^
+source/gui_widgets.cpp:518:106: note: +3, including nesting penalty of 2, nesting level increased to 3
+  518 |                                         atomic_load_explicit( &ModbusCoilsReadout[MODBUS_COILS_PER_CUP*CupId+0], std::memory_order_acquire )? '1' : '0',
+      |                                                                                                                                             ^
+source/gui_widgets.cpp:519:106: note: +3, including nesting penalty of 2, nesting level increased to 3
+  519 |                                         atomic_load_explicit( &ModbusCoilsReadout[MODBUS_COILS_PER_CUP*CupId+1], std::memory_order_acquire )? '1' : '0',
+      |                                                                                                                                             ^
+source/gui_widgets.cpp:520:106: note: +3, including nesting penalty of 2, nesting level increased to 3
+  520 |                                         atomic_load_explicit( &ModbusCoilsReadout[MODBUS_COILS_PER_CUP*CupId+2], std::memory_order_acquire )? '1' : '0' );
+      |                                                                                                                                             ^
+source/gui_widgets.cpp:525:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+  525 |         if (atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndexForSwitchPressed], std::memory_order_acquire )){
+      |         ^
+source/gui_widgets.cpp:528:2: note: +1, nesting level increased to 1
+  528 |         else{
+      |         ^
+source/gui_widgets.cpp:531:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+  531 |         if (!IsTransmissionCorrect ||
+      |         ^
+source/gui_widgets.cpp:531:29: note: +1
+  531 |         if (!IsTransmissionCorrect ||
+      |                                    ^
+source/gui_widgets.cpp:536:2: note: +1, nesting level increased to 1
+  536 |         else{
+      |         ^
+source/gui_widgets.cpp:405:12: warning: loop variable name 'J' is too short, expected at least 2 characters [readability-identifier-length]
+  405 |                 for (int J=0; J < VISIBLE_VALUES_PER_DISC; J++){
+      |                          ^
+source/gui_widgets.cpp:413:13: warning: 0x8000 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  413 |                         else if (0x8000 > TemporaryValue){
+      |                                  ^
+source/gui_widgets.cpp:431:3: warning: use range-based for loop instead [modernize-loop-convert]
+  431 |                 for (int J=0; J < VALUES_PER_DISC; J++){
+      |                 ^   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                     (auto & J : CupValueLabelPtr)
+  432 |                         CupValueLabelPtr[J]->hide();
+      |                         ~~~~~~~~~~~~~~~~~~~
+      |                         J
+source/gui_widgets.cpp:431:12: warning: loop variable name 'J' is too short, expected at least 2 characters [readability-identifier-length]
+  431 |                 for (int J=0; J < VALUES_PER_DISC; J++){
+      |                          ^
+source/gui_widgets.cpp:552:38: warning: 800 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+  552 |                 static char GeneralDescriptionText[800];
+      |                                                    ^
 clang-tidy-18 -header-filter=^(source/(?!png_graphics\.h$).*) -extra-arg=-std=c++17 -extra-arg=--gcc-toolchain=/usr -p=. /home/krzysztof/LocalSoftware/AppForFaradayCups/source/settings_file.cpp
+source/settings_file.cpp:5:10: warning: inclusion of deprecated C++ header 'limits.h'; consider using 'climits' instead [modernize-deprecated-headers]
+    5 | #include <limits.h>  // for PATH_MAX
+      |          ^~~~~~~~~~
+      |          <climits>
+source/settings_file.cpp:38:37: warning: 101 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+   38 | char CupDescriptionPtr[CUPS_NUMBER][101];
+      |                                     ^
+source/settings_file.cpp:81:9: warning: implicit conversion 'char *' -> 'bool' [readability-implicit-bool-conversion]
+   81 |     if (realpath( Argv0, Path)) {
+      |         ^                     
+      |                                != nullptr
+source/settings_file.cpp:86:2: warning: preprocessor condition is always 'false', consider removing both the condition and its contents [readability-avoid-unconditional-preprocessor-if]
+   86 | #if 0
+      |  ^
+source/settings_file.cpp:101:14: warning: function 'configurationFileParsing' has cognitive complexity of 45 (threshold 25) [readability-function-cognitive-complexity]
+  101 | FailureCodes configurationFileParsing(void) {
+      |              ^
+source/settings_file.cpp:103:5: note: +1, including nesting penalty of 0, nesting level increased to 1
+  103 |     for (int J=0; J<CUPS_NUMBER; J++){
+      |     ^
+source/settings_file.cpp:121:5: note: +1, including nesting penalty of 0, nesting level increased to 1
+  121 |     if (!File.is_open()) {
+      |     ^
+source/settings_file.cpp:125:5: note: +1, including nesting penalty of 0, nesting level increased to 1
+  125 |     if (VerboseMode){
+      |     ^
+source/settings_file.cpp:139:5: note: +1, including nesting penalty of 0, nesting level increased to 1
+  139 |     while (std::getline(File, Line)) {
+      |     ^
+source/settings_file.cpp:140:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+  140 |         if (VerboseMode){
+      |         ^
+source/settings_file.cpp:144:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+  144 |         if (std::regex_match(Line, Matches, PatternSerialPort)) {
+      |         ^
+source/settings_file.cpp:145:10: note: +3, including nesting penalty of 2, nesting level increased to 3
+  145 |                 if (nullptr == SerialPortRequestedNamePtr){
+      |                 ^
+source/settings_file.cpp:148:17: note: +4, including nesting penalty of 3, nesting level increased to 4
+  148 |                 if (VerboseMode){
+      |                 ^
+source/settings_file.cpp:152:10: note: +1, nesting level increased to 3
+  152 |                 else{
+      |                 ^
+source/settings_file.cpp:160:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+  160 |         if (FailureCodes::NO_FAILURE != Result){
+      |         ^
+source/settings_file.cpp:164:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+  164 |         if (FailureCodes::NO_FAILURE != Result){
+      |         ^
+source/settings_file.cpp:168:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+  168 |         if (FailureCodes::NO_FAILURE != Result){
+      |         ^
+source/settings_file.cpp:173:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+  173 |         if (FailureCodes::NO_FAILURE != Result){
+      |         ^
+source/settings_file.cpp:177:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+  177 |         if (FailureCodes::NO_FAILURE != Result){
+      |         ^
+source/settings_file.cpp:181:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+  181 |         if (FailureCodes::NO_FAILURE != Result){
+      |         ^
+source/settings_file.cpp:188:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+  188 |         if (FailureCodes::NO_FAILURE != Result){
+      |         ^
+source/settings_file.cpp:194:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+  194 |         if (FailureCodes::NO_FAILURE != Result){
+      |         ^
+source/settings_file.cpp:201:5: note: +1, including nesting penalty of 0, nesting level increased to 1
+  201 |     if (nullptr == SerialPortRequestedNamePtr){
+      |     ^
+source/settings_file.cpp:205:5: note: +1, including nesting penalty of 0, nesting level increased to 1
+  205 |     for (int J=0; J<CUPS_NUMBER; J++){
+      |     ^
+source/settings_file.cpp:206:6: note: +2, including nesting penalty of 1, nesting level increased to 2
+  206 |         if (!FormulaIsDefined[J]){
+      |         ^
+source/settings_file.cpp:211:5: note: +1, including nesting penalty of 0, nesting level increased to 1
+  211 |     for (int J=0; J<CUPS_NUMBER; J++){
+      |     ^
+source/settings_file.cpp:212:6: note: +2, including nesting penalty of 1, nesting level increased to 2
+  212 |         if (0 == CupDescriptionPtr[J][0]){
+      |         ^
+source/settings_file.cpp:214:10: note: +3, including nesting penalty of 2, nesting level increased to 3
+  214 |                 if (VerboseMode){
+      |                 ^
+source/settings_file.cpp:219:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+  219 |         if (VerboseMode){
+      |         ^
+source/settings_file.cpp:224:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+  224 |         assert( NumberOfFaradayCupsToBeOperated > 0 );
+      |         ^
+/usr/include/assert.h:104:7: note: expanded from macro 'assert'
+  104 |       ? void (0)                                                        \
+      |       ^
+source/settings_file.cpp:225:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+  225 |         assert( NumberOfFaradayCupsToBeOperated <= CUPS_NUMBER );
+      |         ^
+/usr/include/assert.h:104:7: note: expanded from macro 'assert'
+  104 |       ? void (0)                                                        \
+      |       ^
+source/settings_file.cpp:101:39: warning: redundant void argument list in function definition [modernize-redundant-void-arg]
+  101 | FailureCodes configurationFileParsing(void) {
+      |                                       ^~~~
+source/settings_file.cpp:103:14: warning: loop variable name 'J' is too short, expected at least 2 characters [readability-identifier-length]
+  103 |     for (int J=0; J<CUPS_NUMBER; J++){
+      |              ^
+source/settings_file.cpp:205:14: warning: loop variable name 'J' is too short, expected at least 2 characters [readability-identifier-length]
+  205 |     for (int J=0; J<CUPS_NUMBER; J++){
+      |              ^
+source/settings_file.cpp:207:77: warning: redundant explicit casting to the same type 'int' as the sub-expression, remove this casting [readability-redundant-casting]
+  207 |                 std::cout << " Nie znaleziono formuły konwersji dla kubka " << (int)(J+1) << '\n';
+      |                                                                                ^~~~~~   ~
+      |                                                                                (        )
+source/settings_file.cpp:211:14: warning: loop variable name 'J' is too short, expected at least 2 characters [readability-identifier-length]
+  211 |     for (int J=0; J<CUPS_NUMBER; J++){
+      |              ^
+source/settings_file.cpp:213:89: warning: redundant explicit casting to the same type 'int' as the sub-expression, remove this casting [readability-redundant-casting]
+  213 |                 snprintf( CupDescriptionPtr[J], sizeof(CupDescriptionPtr[0])-1, "Kubek nr %d", (int)(J+1) );
+      |                                                                                                ^~~~~~   ~
+      |                                                                                                (        )
+source/settings_file.cpp:215:60: warning: redundant explicit casting to the same type 'int' as the sub-expression, remove this casting [readability-redundant-casting]
+  215 |                         std::cout << " Nie znaleziono tytułu kubka " << (int)(J+1) << "; nadano tytuł zastępczy" << '\n';
+      |                                                                         ^~~~~~   ~
+      |                                                                         (        )
+source/settings_file.cpp:230:21: warning: function 'parseFunctionFormula' has cognitive complexity of 33 (threshold 25) [readability-function-cognitive-complexity]
+  230 | static FailureCodes parseFunctionFormula( const std::regex *PatternPtr, std::string *LinePtr, int CupIndex ){
+      |                     ^
+source/settings_file.cpp:232:5: note: +1, including nesting penalty of 0, nesting level increased to 1
+  232 |     assert( CupIndex < CUPS_NUMBER );
+      |     ^
+/usr/include/assert.h:104:7: note: expanded from macro 'assert'
+  104 |       ? void (0)                                                        \
+      |       ^
+source/settings_file.cpp:233:5: note: +1, including nesting penalty of 0, nesting level increased to 1
+  233 |     if (std::regex_match(*LinePtr, Matches, *PatternPtr)) {
+      |     ^
+source/settings_file.cpp:234:6: note: +2, including nesting penalty of 1, nesting level increased to 2
+  234 |         if (!FormulaIsDefined[CupIndex]){
+      |         ^
+source/settings_file.cpp:244:7: note: +3, including nesting penalty of 2, nesting level increased to 3
+  244 |                 catch (const std::invalid_argument&) {
+      |                 ^
+source/settings_file.cpp:248:7: note: +3, including nesting penalty of 2, nesting level increased to 3
+  248 |                 catch (const std::out_of_range&) {
+      |                 ^
+source/settings_file.cpp:254:7: note: +3, including nesting penalty of 2, nesting level increased to 3
+  254 |                 if (SignText == "+"){
+      |                 ^
+source/settings_file.cpp:257:12: note: +1, nesting level increased to 3
+  257 |                 else if (SignText == "-"){
+      |                      ^
+source/settings_file.cpp:260:7: note: +1, nesting level increased to 3
+  260 |                 else{
+      |                 ^
+source/settings_file.cpp:268:7: note: +3, including nesting penalty of 2, nesting level increased to 3
+  268 |                 catch (const std::invalid_argument&) {
+      |                 ^
+source/settings_file.cpp:272:7: note: +3, including nesting penalty of 2, nesting level increased to 3
+  272 |                 catch (const std::out_of_range&) {
+      |                 ^
+source/settings_file.cpp:276:7: note: +3, including nesting penalty of 2, nesting level increased to 3
+  276 |                 if (ChangeSign){
+      |                 ^
+source/settings_file.cpp:280:7: note: +3, including nesting penalty of 2, nesting level increased to 3
+  280 |                 if (VerboseMode){
+      |                 ^
+source/settings_file.cpp:281:8: note: +4, including nesting penalty of 3, nesting level increased to 4
+  281 |                         if (OffsetForZeroCurrent[CupIndex] >= 0){
+      |                         ^
+source/settings_file.cpp:284:8: note: +1, nesting level increased to 4
+  284 |                         else{
+      |                         ^
+source/settings_file.cpp:289:6: note: +1, nesting level increased to 2
+  289 |         else{
+      |         ^
+source/settings_file.cpp:305:52: warning: redundant explicit casting to the same type 'int' as the sub-expression, remove this casting [readability-redundant-casting]
+  305 |                         std::cout << "  Tytuł kubka " << (int)(CupIndex+1) << ": [" << CupDescriptionPtr[CupIndex] << "] w linii: [" << *LinePtr << "]" << '\n';
+      |                                                          ^~~~~~          ~
+      |                                                          (               )
