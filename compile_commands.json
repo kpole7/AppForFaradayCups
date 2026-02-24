@@ -1,0 +1,104 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-g",
+      "-Wall",
+      "-Wextra",
+      "-Iinclude",
+      "-I/usr/include/modbus",
+      "-c",
+      "-o",
+      "build/source/gui_widgets.o",
+      "source/gui_widgets.cpp"
+    ],
+    "directory": "/home/krzysztof/LocalSoftware/AppForFaradayCups",
+    "file": "/home/krzysztof/LocalSoftware/AppForFaradayCups/source/gui_widgets.cpp",
+    "output": "/home/krzysztof/LocalSoftware/AppForFaradayCups/build/source/gui_widgets.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-g",
+      "-Wall",
+      "-Wextra",
+      "-Iinclude",
+      "-I/usr/include/modbus",
+      "-c",
+      "-o",
+      "build/source/main.o",
+      "source/main.cpp"
+    ],
+    "directory": "/home/krzysztof/LocalSoftware/AppForFaradayCups",
+    "file": "/home/krzysztof/LocalSoftware/AppForFaradayCups/source/main.cpp",
+    "output": "/home/krzysztof/LocalSoftware/AppForFaradayCups/build/source/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-g",
+      "-Wall",
+      "-Wextra",
+      "-Iinclude",
+      "-I/usr/include/modbus",
+      "-c",
+      "-o",
+      "build/source/peripheral_thread.o",
+      "source/peripheral_thread.cpp"
+    ],
+    "directory": "/home/krzysztof/LocalSoftware/AppForFaradayCups",
+    "file": "/home/krzysztof/LocalSoftware/AppForFaradayCups/source/peripheral_thread.cpp",
+    "output": "/home/krzysztof/LocalSoftware/AppForFaradayCups/build/source/peripheral_thread.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-g",
+      "-Wall",
+      "-Wextra",
+      "-Iinclude",
+      "-I/usr/include/modbus",
+      "-c",
+      "-o",
+      "build/source/settings_file.o",
+      "source/settings_file.cpp"
+    ],
+    "directory": "/home/krzysztof/LocalSoftware/AppForFaradayCups",
+    "file": "/home/krzysztof/LocalSoftware/AppForFaradayCups/source/settings_file.cpp",
+    "output": "/home/krzysztof/LocalSoftware/AppForFaradayCups/build/source/settings_file.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-g",
+      "-Wall",
+      "-Wextra",
+      "-Iinclude",
+      "-I/usr/include/modbus",
+      "-c",
+      "-o",
+      "build/source/shared_data.o",
+      "source/shared_data.cpp"
+    ],
+    "directory": "/home/krzysztof/LocalSoftware/AppForFaradayCups",
+    "file": "/home/krzysztof/LocalSoftware/AppForFaradayCups/source/shared_data.cpp",
+    "output": "/home/krzysztof/LocalSoftware/AppForFaradayCups/build/source/shared_data.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-g",
+      "-Wall",
+      "-Wextra",
+      "-Iinclude",
+      "-I/usr/include/modbus",
+      "-c",
+      "-o",
+      "build/source/modbus_rtu_master.o",
+      "source/modbus_rtu_master.cpp"
+    ],
+    "directory": "/home/krzysztof/LocalSoftware/AppForFaradayCups",
+    "file": "/home/krzysztof/LocalSoftware/AppForFaradayCups/source/modbus_rtu_master.cpp",
+    "output": "/home/krzysztof/LocalSoftware/AppForFaradayCups/build/source/modbus_rtu_master.o"
+  }
+]

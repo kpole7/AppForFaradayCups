@@ -5,14 +5,14 @@
 
 #include "config.h"
 
-FailureCodes initializeModbus(void);
+FailureCodes initializeModbus();
 
-FailureCodes readInputRegisters(void);
+FailureCodes readInputRegisters();
 
-FailureCodes readCoils(void);
+FailureCodes readCoils();
 
 FailureCodes writeSingleCoil( uint16_t CoilAddress, bool NewValue );
 
-void closeModbus(void);
+void closeModbus();
 
 #endif // SOURCE_MODBUS_RTU_MASTER_H_

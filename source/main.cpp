@@ -206,7 +206,7 @@ static void onMainWindowCloseCallback(Fl_Widget *Widget, void *Data) {
 	(void)Data; // intentionally unused
 
     if (VerboseMode){
-    	std::cout << "Zamykanie aplikacji" << std::endl;
+    	std::cout << "Zamykanie aplikacji" << '\n';
     }
     serialCommunicationExit();
     ApplicationWindow->hide(); // close the application
@@ -228,20 +228,20 @@ static FailureCodes mainInitializations(int argc, char** argv){
 
 #if 0 // debugging
             std::string Argument0 = argv[0];
-        	std::cout << "Wywołanie programu: " << Argument0 << std::endl;
+        	std::cout << "Wywołanie programu: " << Argument0 << '\n';
 #endif
         }
         else {
-            std::cout << "Nieznany argument: " << Argument << std::endl;
+            std::cout << "Nieznany argument: " << Argument << '\n';
             FailureCode = FailureCodes::ERROR_COMMAND_SYNTAX;
         }
     }
 	if (VeryVerboseMode){
-		std::cout << "Tryb \"very verbose\"" << std::endl;
+		std::cout << "Tryb \"very verbose\"" << '\n';
 	}
 	else{
 		if (VerboseMode){
-			std::cout << "Tryb \"verbose\"" << std::endl;
+			std::cout << "Tryb \"verbose\"" << '\n';
 		}
 	}
 
@@ -280,7 +280,7 @@ static void callbackForMenuItemStatus(Fl_Widget* WidgetPtr, void*) {
 
     StatusLevelForGui = static_cast<int>(reinterpret_cast<intptr_t>(TemporaryMenuItem->user_data()));
 	if (VerboseMode){
-		std::cout << "Opcja Status ustawiona na wartość: " << StatusLevelForGui << std::endl;
+		std::cout << "Opcja Status ustawiona na wartość: " << StatusLevelForGui << '\n';
 	}
 }
 

@@ -28,7 +28,7 @@
 // Function prototypes
 //.................................................................................................
 
-void initializeGraphicWidgets(void);
+void initializeGraphicWidgets();
 
 void refreshGui(void* Data);
 

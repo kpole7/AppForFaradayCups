@@ -30,6 +30,6 @@ extern int NumberOfFaradayCupsToBeOperated;
 
 FailureCodes determineApplicationPath( char* Argv0 );
 
-FailureCodes configurationFileParsing(void);
+FailureCodes configurationFileParsing();
 
 #endif // SOURCE_SETTINGS_FILE_H_

@@ -157,7 +157,7 @@ static void cupInsertionButtonCallback(Fl_Widget* Widget, void* Data);
 // Function definitions
 //.................................................................................................
 
-void initializeGraphicWidgets(void){
+void initializeGraphicWidgets(){
 	std::chrono::high_resolution_clock::time_point NowTemporary = std::chrono::high_resolution_clock::now();
 	for (int J=0; J<CUPS_NUMBER; J++){
 		CupInsertionOrRemovalStartTime[J] = NowTemporary;
@@ -258,7 +258,7 @@ static void cupInsertionButtonCallback(Fl_Widget* Widget, void* Data){
 
 	if (DurationTime.count() < MaximumPropagationTime){
 	    if (VeryVerboseMode){
-	    	std::cout << "Akcja związana z naciśnięciem przycisku: ODMOWA " << DiscIndex << std::endl;
+	    	std::cout << "Akcja związana z naciśnięciem przycisku: ODMOWA " << DiscIndex << '\n';
 	    }
 		return;
 	}
@@ -268,20 +268,20 @@ static void cupInsertionButtonCallback(Fl_Widget* Widget, void* Data){
 		if (atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndex], std::memory_order_acquire )){
 			atomic_store_explicit( &ModbusCoilRequestedValue[DiscIndex], false, std::memory_order_release );
 		    if (VeryVerboseMode){
-		    	std::cout << "Akcja związana z naciśnięciem przycisku: wysuń " << DiscIndex << std::endl;
+		    	std::cout << "Akcja związana z naciśnięciem przycisku: wysuń " << DiscIndex << '\n';
 		    }
 		}
 		else{
 			atomic_store_explicit( &ModbusCoilRequestedValue[DiscIndex], true, std::memory_order_release );
 		    if (VeryVerboseMode){
-		    	std::cout << "Akcja związana z naciśnięciem przycisku: wsuń " << DiscIndex << std::endl;
+		    	std::cout << "Akcja związana z naciśnięciem przycisku: wsuń " << DiscIndex << '\n';
 		    }
 		}
 		atomic_store_explicit( &ModbusCoilChangeReqest[DiscIndex], true, std::memory_order_release );
 		CupInsertionOrRemovalStartTime[DiscIndex] = std::chrono::high_resolution_clock::now();
 	}
 	else{
-	    std::cout << "Internal error, file " << __FILE__ << ", line " << __LINE__ << ", index " << DiscIndex << std::endl;
+	    std::cout << "Internal error, file " << __FILE__ << ", line " << __LINE__ << ", index " << DiscIndex << '\n';
 	}
 }
 

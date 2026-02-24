@@ -2,10 +2,8 @@ Code review
 
 1.
 make clean
-make -j
-cppcheck --enable=all --inconclusive --std=c++17 --language=c++   --suppress=missingIncludeSystem   -Isource source
-
-
+bear -- make -j
+./run-my--clang-tidy.sh > run-my--clang-tidy.log
 
 
 

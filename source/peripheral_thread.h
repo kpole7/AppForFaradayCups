@@ -10,16 +10,16 @@
 // Function prototypes
 //.................................................................................................
 
-void initializeModuleSerialCommunication(void);
+void initializeModuleSerialCommunication();
 
-void serialCommunicationStart(void);
+void serialCommunicationStart();
 
-void serialCommunicationExit(void);
+void serialCommunicationExit();
 
-char * getTransmissionQualityIndicatorTextForGui(void);
+char * getTransmissionQualityIndicatorTextForGui();
 
-char * getTransmissionQualityIndicatorTextForDebugging(void);
+char * getTransmissionQualityIndicatorTextForDebugging();
 
-bool isTransmissionCorrect(void);
+bool isTransmissionCorrect();
 
 #endif // SOURCE_PERIPHERAL_THREAD_H_

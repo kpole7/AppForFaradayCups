@@ -63,13 +63,13 @@ static std::atomic<int> TransmissionQualityLowLevelIndicator;
 // Local function prototypes
 //.................................................................................................
 
-static void peripheralThreadHandler(void);
+static void peripheralThreadHandler();
 
 //.................................................................................................
 // Function definitions
 //.................................................................................................
 
-void initializeModuleSerialCommunication(void){
+void initializeModuleSerialCommunication(){
 	atomic_store_explicit( &ClosePeripheralsFlag, false, std::memory_order_release );
 	atomic_store_explicit( &PeripheralsClosedFlag, true, std::memory_order_release );
 	LowLevelContinuousErrors = 0;
@@ -77,14 +77,14 @@ void initializeModuleSerialCommunication(void){
 }
 
 /// This function initializes the module variables and launches a new thread to support peripherals
-void serialCommunicationStart(void){
+void serialCommunicationStart(){
 	atomic_store_explicit( &ClosePeripheralsFlag, false, std::memory_order_release );
 	atomic_store_explicit( &PeripheralsClosedFlag, false, std::memory_order_release );
 	peripheralThread = std::thread(peripheralThreadHandler);
 }
 
 /// This function is called by FLTK onMainWindowCloseCallback event handler
-void serialCommunicationExit(void){
+void serialCommunicationExit(){
 	if (atomic_load_explicit( &PeripheralsClosedFlag, std::memory_order_acquire )){
 		return;
 	}
@@ -96,7 +96,7 @@ void serialCommunicationExit(void){
 			(!peripheralThread.joinable()))
 	{
 	    if (0 == TimeoutCounter){
-	    	std::cout << "Problem encountered during peripherals closing" << std::endl;
+	    	std::cout << "Problem encountered during peripherals closing" << '\n';
 	    	break;
 	    }
 	    Fl::wait( 0.001*SHUT_DOWN_LOOP_DELAY ); // DELAY_IN_SHUT_DOWN_LOOP in milliseconds
@@ -105,14 +105,14 @@ void serialCommunicationExit(void){
 	if (peripheralThread.joinable()){
 		peripheralThread.join();
 		if (VeryVerboseMode){
-			std::cout << "Peripherals closed; delay loop ran " << (int)(SHUT_DOWN_COUNT_DOWN-TimeoutCounter) << " times" << std::endl;
+			std::cout << "Peripherals closed; delay loop ran " << (int)(SHUT_DOWN_COUNT_DOWN-TimeoutCounter) << " times" << '\n';
 		}
 	}
 }
 
 /// This function runs the second thread (FLTK is the main thread).
 /// The peripheral thread supports Modbus communication and sends signals to FLTK to refresh graphics.
-static void peripheralThreadHandler(void){
+static void peripheralThreadHandler(){
 	usleep(100000UL); // 100 ms
 
 	PeripheralThreadTimeInMilliseconds = 0;
@@ -243,7 +243,7 @@ static void peripheralThreadHandler(void){
 #if 0 // debugging
 		std::chrono::high_resolution_clock::time_point TimeAfter = std::chrono::high_resolution_clock::now();
 		std::chrono::milliseconds ProcessingTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeAfter - TimeNow);
-		std::cout << "Peripheral thread " << PeripheralThreadTimeInMilliseconds << "  " << ProcessingTime.count() << std::endl;
+		std::cout << "Peripheral thread " << PeripheralThreadTimeInMilliseconds << "  " << ProcessingTime.count() << '\n';
 #endif
 
 		if (ModbusFsmStates::READING_INPUT_REGISTERS == FsmState) {
@@ -257,7 +257,7 @@ static void peripheralThreadHandler(void){
 		if (((ModbusFsmStates::READING_COILS != FsmState) && (ModbusFsmStates::READING_INPUT_REGISTERS != FsmState)) ||
 				(DebugFsmStatesPrintoutCounter > 40))
 		{
-			std::cout << std::endl;
+			std::cout << '\n';
 			DebugFsmStatesPrintoutCounter = 0;
 		}
 		else{
@@ -271,11 +271,11 @@ static void peripheralThreadHandler(void){
 	atomic_store_explicit( &PeripheralsClosedFlag, true, std::memory_order_release );
 }
 
-bool isTransmissionCorrect(void){
+bool isTransmissionCorrect(){
 	return atomic_load_explicit( &TransmissionQualityLowLevelIndicator, std::memory_order_acquire ) > TRANSMISSION_CORRECTNESS_LIMIT;
 }
 
-char * getTransmissionQualityIndicatorTextForGui(void){
+char * getTransmissionQualityIndicatorTextForGui(){
 	static char TransmissionQualityIndicatorText[10];
 	double TransmissionQualityIndicatorFactor =
 			(100.0 * atomic_load_explicit( &TransmissionQualityLowLevelIndicator, std::memory_order_acquire )) / (double)LOW_LEVEL_CONTINUOUS_COUNTING_MAX;
@@ -283,7 +283,7 @@ char * getTransmissionQualityIndicatorTextForGui(void){
 	return TransmissionQualityIndicatorText;
 }
 
-char * getTransmissionQualityIndicatorTextForDebugging(void){
+char * getTransmissionQualityIndicatorTextForDebugging(){
 	static char TransmissionQualityIndicatorText[10];
 	double TransmissionQualityIndicatorFactor =
 			(100.0 * atomic_load_explicit( &TransmissionQualityLowLevelIndicator, std::memory_order_acquire )) / (double)LOW_LEVEL_CONTINUOUS_COUNTING_MAX;
