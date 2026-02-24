@@ -10,7 +10,7 @@
 // Function prototypes
 //.................................................................................................
 
-void initializeModuleSerialCommunication();
+void initializeSerialCommunicationModule();
 
 void serialCommunicationStart();
 

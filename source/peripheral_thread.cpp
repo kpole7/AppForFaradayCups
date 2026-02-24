@@ -53,7 +53,9 @@ static std::atomic<bool> PeripheralsClosedFlag;
 static std::thread peripheralThread;
 
 static std::chrono::high_resolution_clock::time_point PeripheralThreadLoopStart;
+static std::chrono::high_resolution_clock::time_point TimeNow;
 static int64_t PeripheralThreadTimeInMilliseconds;
+static int DelayMultiplierOnError;
 
 static uint16_t LowLevelContinuousErrors, LowLevelSuccessfulTransmission;
 
@@ -63,13 +65,14 @@ static std::atomic<int> TransmissionQualityLowLevelIndicator;
 // Local function prototypes
 //.................................................................................................
 
+static void peripheralThreadTiming();
 static void peripheralThreadHandler();
 
 //.................................................................................................
 // Function definitions
 //.................................................................................................
 
-void initializeModuleSerialCommunication(){
+void initializeSerialCommunicationModule(){
 	atomic_store_explicit( &ClosePeripheralsFlag, false, std::memory_order_release );
 	atomic_store_explicit( &PeripheralsClosedFlag, true, std::memory_order_release );
 	LowLevelContinuousErrors = 0;
@@ -110,6 +113,53 @@ void serialCommunicationExit(){
 	}
 }
 
+static void peripheralThreadTiming(){
+	// timing
+	if (LOW_LEVEL_CONTINUOUS_ERRORS_LIMIT <= LowLevelContinuousErrors){
+		PeripheralThreadTimeInMilliseconds += (uint32_t)(DELAY_MULTIPLIER_ON_ERROR * PERIPHERAL_THREAD_LOOP_DURATION);
+		DelayMultiplierOnError = DELAY_MULTIPLIER_ON_ERROR;
+	}
+	else{
+		PeripheralThreadTimeInMilliseconds += PERIPHERAL_THREAD_LOOP_DURATION;
+		DelayMultiplierOnError = 1;
+	}
+	TimeNow = std::chrono::high_resolution_clock::now();
+	std::chrono::milliseconds DurationTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - PeripheralThreadLoopStart);
+	while(DurationTime.count() < PeripheralThreadTimeInMilliseconds){
+		// free time activities:  checking for inconsistencies in the status of limit switches
+		for (int J=0; J<NumberOfFaradayCupsToBeOperated; J++){
+			int TemporaryCoilIndex1 = COIL_OFFSET_IS_CUP_FORCED+J*MODBUS_COILS_PER_CUP;
+			assert( TemporaryCoilIndex1 < MODBUS_COILS_NUMBER );
+			int TemporaryCoilIndex2 = COIL_OFFSET_IS_SWITCH_PRESSED+J*MODBUS_COILS_PER_CUP;
+			assert( TemporaryCoilIndex2 < MODBUS_COILS_NUMBER );
+			if (ModbusCoilsReadout[TemporaryCoilIndex1] == ModbusCoilsReadout[TemporaryCoilIndex2]){
+				atomic_store_explicit( &DisplayLimitSwitchError[J], false, std::memory_order_release );
+			}
+			else{
+				std::chrono::milliseconds CupInsertionOrRemovalDuration =
+						std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - CupInsertionOrRemovalStartTime[J]);
+				if (CupInsertionOrRemovalDuration.count() > MaximumPropagationTime){
+					atomic_store_explicit( &DisplayLimitSwitchError[J], true, std::memory_order_release );
+				}
+				else{
+					atomic_store_explicit( &DisplayLimitSwitchError[J], false, std::memory_order_release );
+				}
+			}
+		}
+		TimeNow = std::chrono::high_resolution_clock::now();
+		DurationTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - PeripheralThreadLoopStart);
+		if (DurationTime.count() >= PeripheralThreadTimeInMilliseconds){
+			break;
+		}
+
+		// delay so as not to overload the processor core
+		usleep(2000);
+
+		TimeNow = std::chrono::high_resolution_clock::now();
+		DurationTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - PeripheralThreadLoopStart);
+	}
+}
+
 /// This function runs the second thread (FLTK is the main thread).
 /// The peripheral thread supports Modbus communication and sends signals to FLTK to refresh graphics.
 static void peripheralThreadHandler(){
@@ -117,55 +167,11 @@ static void peripheralThreadHandler(){
 
 	PeripheralThreadTimeInMilliseconds = 0;
 	PeripheralThreadLoopStart = std::chrono::high_resolution_clock::now();
-	int DelayMultiplierOnError;
 	ModbusFsmStates FsmState = ModbusFsmStates::OPEN;
 
 	while( !atomic_load_explicit( &ClosePeripheralsFlag, std::memory_order_acquire )){
 
-		// timing
-		if (LOW_LEVEL_CONTINUOUS_ERRORS_LIMIT <= LowLevelContinuousErrors){
-			PeripheralThreadTimeInMilliseconds += (uint32_t)(DELAY_MULTIPLIER_ON_ERROR * PERIPHERAL_THREAD_LOOP_DURATION);
-			DelayMultiplierOnError = DELAY_MULTIPLIER_ON_ERROR;
-		}
-		else{
-			PeripheralThreadTimeInMilliseconds += PERIPHERAL_THREAD_LOOP_DURATION;
-			DelayMultiplierOnError = 1;
-		}
-		std::chrono::high_resolution_clock::time_point TimeNow = std::chrono::high_resolution_clock::now();
-		std::chrono::milliseconds DurationTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - PeripheralThreadLoopStart);
-		while(DurationTime.count() < PeripheralThreadTimeInMilliseconds){
-			// free time activities:  checking for inconsistencies in the status of limit switches
-			for (int J=0; J<NumberOfFaradayCupsToBeOperated; J++){
-				int TemporaryCoilIndex1 = COIL_OFFSET_IS_CUP_FORCED+J*MODBUS_COILS_PER_CUP;
-				assert( TemporaryCoilIndex1 < MODBUS_COILS_NUMBER );
-				int TemporaryCoilIndex2 = COIL_OFFSET_IS_SWITCH_PRESSED+J*MODBUS_COILS_PER_CUP;
-				assert( TemporaryCoilIndex2 < MODBUS_COILS_NUMBER );
-				if (ModbusCoilsReadout[TemporaryCoilIndex1] == ModbusCoilsReadout[TemporaryCoilIndex2]){
-					atomic_store_explicit( &DisplayLimitSwitchError[J], false, std::memory_order_release );
-				}
-				else{
-					std::chrono::milliseconds CupInsertionOrRemovalDuration =
-							std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - CupInsertionOrRemovalStartTime[J]);
-					if (CupInsertionOrRemovalDuration.count() > MaximumPropagationTime){
-						atomic_store_explicit( &DisplayLimitSwitchError[J], true, std::memory_order_release );
-					}
-					else{
-						atomic_store_explicit( &DisplayLimitSwitchError[J], false, std::memory_order_release );
-					}
-				}
-			}
-			TimeNow = std::chrono::high_resolution_clock::now();
-			DurationTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - PeripheralThreadLoopStart);
-			if (DurationTime.count() >= PeripheralThreadTimeInMilliseconds){
-				break;
-			}
-
-			// delay so as not to overload the processor core
-			usleep(2000);
-
-			TimeNow = std::chrono::high_resolution_clock::now();
-			DurationTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - PeripheralThreadLoopStart);
-		}
+		peripheralThreadTiming();
 
 		// essential action
 		//normal mode of operation

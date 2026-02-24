@@ -81,6 +81,8 @@ static void onMainWindowCloseCallback(Fl_Widget *Widget, void *Data);
 
 static FailureCodes mainInitializations(int argc, char** argv);
 
+static FailureCodes determineVerbosity(int argc, char** argv);
+
 static void callbackForMenuItemStatus(Fl_Widget* WidgetPtr, void*);
 
 static void callbackForMenuItemHelp(Fl_Widget*, void*);
@@ -214,37 +216,9 @@ static void onMainWindowCloseCallback(Fl_Widget *Widget, void *Data) {
 }
 
 static FailureCodes mainInitializations(int argc, char** argv){
-	initializeModuleSerialCommunication();
+	initializeSerialCommunicationModule();
 
-	FailureCodes FailureCode = FailureCodes::NO_FAILURE;
-	for (int J = 1; J < argc; J++) {
-        std::string Argument = argv[J];
-        if (Argument == "-v" || Argument == "--verbose") {
-        	if (!VerboseMode){
-				VerboseMode = true;
-        	}
-        	else{
-				VeryVerboseMode = true;
-        	}
-
-#if 0 // debugging
-            std::string Argument0 = argv[0];
-        	std::cout << "Wywołanie programu: " << Argument0 << '\n';
-#endif
-        }
-        else {
-            std::cout << "Nieznany argument: " << Argument << '\n';
-            FailureCode = FailureCodes::ERROR_COMMAND_SYNTAX;
-        }
-    }
-	if (VeryVerboseMode){
-		std::cout << "Tryb \"very verbose\"" << '\n';
-	}
-	else{
-		if (VerboseMode){
-			std::cout << "Tryb \"verbose\"" << '\n';
-		}
-	}
+	FailureCodes FailureCode = determineVerbosity( argc, argv );
 
 	if (FailureCodes::NO_FAILURE == FailureCode){
 		FailureCode = determineApplicationPath( argv[0] );
@@ -272,10 +246,43 @@ static FailureCodes mainInitializations(int argc, char** argv){
 	return FailureCode;
 }
 
+static FailureCodes determineVerbosity(int argc, char** argv){
+	for (int J = 1; J < argc; J++) {
+        std::string Argument = argv[J];
+        if (Argument == "-v") {
+        	if (!VerboseMode){
+				VerboseMode = true;
+        	}
+        	else{
+				VeryVerboseMode = true;
+        	}
+
+#if 0 // debugging
+            std::string Argument0 = argv[0];
+        	std::cout << "Wywołanie programu: " << Argument0 << '\n';
+#endif
+        }
+        else {
+            std::cout << "Nieznany argument: " << Argument << '\n';
+            return FailureCodes::ERROR_COMMAND_SYNTAX;
+        }
+    }
+	if (VeryVerboseMode){
+		std::cout << "Tryb \"very verbose\"" << '\n';
+	}
+	else{
+		if (VerboseMode){
+			std::cout << "Tryb \"verbose\"" << '\n';
+		}
+	}
+    return FailureCodes::NO_FAILURE;
+}
+
+
 static void callbackForMenuItemStatus(Fl_Widget* WidgetPtr, void*) {
     auto* TemporaryMenu = static_cast<Fl_Menu_Bar*>(WidgetPtr);
     const Fl_Menu_Item* TemporaryMenuItem = TemporaryMenu->mvalue();
-    if (!TemporaryMenuItem){
+    if (nullptr == TemporaryMenuItem){
     	return;
     }
 
