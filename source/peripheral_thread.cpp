@@ -109,7 +109,7 @@ void serialCommunicationExit(){
 	if (peripheralThread.joinable()){
 		peripheralThread.join();
 		if (VeryVerboseMode){
-			std::cout << "Peripherals closed; delay loop ran " << (int)(SHUT_DOWN_COUNT_DOWN-TimeoutCounter) << " times" << '\n';
+			std::cout << "Peripherals closed; delay loop ran " << SHUT_DOWN_COUNT_DOWN-TimeoutCounter << " times" << '\n';
 		}
 	}
 }

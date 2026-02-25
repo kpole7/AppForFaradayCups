@@ -69,7 +69,7 @@ static FailureCodes initializations();
 static FailureCodes parseSerialPortName( const std::regex *PatternPtr, std::string *LinePtr );
 static FailureCodes parseFunctionFormula( const std::regex *PatternPtr, std::string *LinePtr, int CupIndex );
 static FailureCodes readDirectionalCoefficient( const std::string *InputTextPtr, int WhichCup);
-static FailureCodes readOffsetCoefficient( const std::string *SignTextPtr, const std::string *NumberTextPtr, int WhichCup);
+static FailureCodes readOffsetCoefficient( const std::string& SignTextPtr, const std::string& NumberTextPtr, int WhichCup);
 static FailureCodes parseCupName( const std::regex *PatternPtr, std::string *LinePtr, int CupIndex );
 static FailureCodes parseSingleInteger( const std::regex *PatternPtr, std::string *LinePtr, int *OutputValue,
 										int LowerLimit, int UpperLimit, const char* ParameterName );
@@ -248,7 +248,7 @@ static FailureCodes parseFunctionFormula( const std::regex *PatternPtr, std::str
             	return Result;
             }
 
-            Result = readOffsetCoefficient( &SignText, &OffsetText, CupIndex );
+            Result = readOffsetCoefficient( SignText, OffsetText, CupIndex );
             if (FailureCodes::NO_FAILURE != Result){
             	return Result;
             }
@@ -285,12 +285,12 @@ static FailureCodes readDirectionalCoefficient( const std::string *InputTextPtr,
     return FailureCodes::NO_FAILURE;
 }
 
-static FailureCodes readOffsetCoefficient( const std::string *SignTextPtr, const std::string *NumberTextPtr, int WhichCup){
+static FailureCodes readOffsetCoefficient( const std::string& SignText, const std::string& NumberText, int WhichCup){
 	bool ChangeSign;
-	if (*SignTextPtr == "+"){
+	if (SignText == "+"){
 		ChangeSign = false;
 	}
-	else if (*SignTextPtr == "-"){
+	else if (SignText == "-"){
 		ChangeSign = true;
 	}
 	else{
@@ -299,7 +299,7 @@ static FailureCodes readOffsetCoefficient( const std::string *SignTextPtr, const
 	}
 
 	try {
-		OffsetForZeroCurrent[WhichCup] = std::stoi( *NumberTextPtr, nullptr, 0 );
+		OffsetForZeroCurrent[WhichCup] = std::stoi( NumberText, nullptr, 0 );
 	}
 	catch (const std::invalid_argument&) {
        	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << '\n';
@@ -323,7 +323,7 @@ static FailureCodes parseCupName( const std::regex *PatternPtr, std::string *Lin
    			std::string CupDescription = Matches[1];
     		strncpy( CupDescriptionPtr[CupIndex], CupDescription.c_str(), sizeof(CupDescriptionPtr[0])-1 );
     		if (VerboseMode){
-                	std::cout << "  Tytuł kubka " << (int)(CupIndex+1) << ": [" << CupDescriptionPtr[CupIndex] << "] w linii: [" << *LinePtr << "]" << '\n';
+                	std::cout << "  Tytuł kubka " << CupIndex+1 << ": [" << CupDescriptionPtr[CupIndex] << "] w linii: [" << *LinePtr << "]" << '\n';
             }
     	}
     	else{
@@ -378,15 +378,15 @@ static FailureCodes finalTest(){
     }
     for (int J=0; J<CUPS_NUMBER; J++){
     	if (!FormulaIsDefined[J]){
-           	std::cout << " Nie znaleziono formuły konwersji dla kubka " << (int)(J+1) << '\n';
+           	std::cout << " Nie znaleziono formuły konwersji dla kubka " << J+1 << '\n';
             return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
     	}
     }
     for (int J=0; J<CUPS_NUMBER; J++){
     	if (0 == CupDescriptionPtr[J][0]){
-       		snprintf( CupDescriptionPtr[J], sizeof(CupDescriptionPtr[0])-1, "Kubek nr %d", (int)(J+1) );
+       		snprintf( CupDescriptionPtr[J], sizeof(CupDescriptionPtr[0])-1, "Kubek nr %d", J+1 );
        		if (VerboseMode){
-       			std::cout << " Nie znaleziono tytułu kubka " << (int)(J+1) << "; nadano tytuł zastępczy" << '\n';
+       			std::cout << " Nie znaleziono tytułu kubka " << J+1 << "; nadano tytuł zastępczy" << '\n';
        		}
     	}
     }
