@@ -68,8 +68,8 @@ static std::string ConfigurationFilePath;
 static FailureCodes initializations();
 static FailureCodes parseSerialPortName( const std::regex *PatternPtr, std::string *LinePtr );
 static FailureCodes parseFunctionFormula( const std::regex *PatternPtr, std::string *LinePtr, int CupIndex );
-static FailureCodes readDirectionalCoefficient( const std::string *InputTextPtr, int WhichCup);
-static FailureCodes readOffsetCoefficient( const std::string& SignTextPtr, const std::string& NumberTextPtr, int WhichCup);
+static FailureCodes readDirectionalCoefficient( const std::string& InputText, int WhichCup);
+static FailureCodes readOffsetCoefficient( const std::string& SignText, const std::string& NumberText, int WhichCup);
 static FailureCodes parseCupName( const std::regex *PatternPtr, std::string *LinePtr, int CupIndex );
 static FailureCodes parseSingleInteger( const std::regex *PatternPtr, std::string *LinePtr, int *OutputValue,
 										int LowerLimit, int UpperLimit, const char* ParameterName );
@@ -232,7 +232,6 @@ static FailureCodes parseSerialPortName( const std::regex *PatternPtr, std::stri
 
 
 static FailureCodes parseFunctionFormula( const std::regex *PatternPtr, std::string *LinePtr, int CupIndex ){
-    FailureCodes Result;
     std::smatch Matches;
     assert( CupIndex < CUPS_NUMBER );
     if (std::regex_match(*LinePtr, Matches, *PatternPtr)) {
@@ -243,7 +242,7 @@ static FailureCodes parseFunctionFormula( const std::regex *PatternPtr, std::str
     		std::string SignText         = Matches[2]; // '+' or '-'
     		std::string OffsetText       = Matches[3]; // decimal or hexadecimal 0x...
 
-    		Result = readDirectionalCoefficient( &CoefficientText, CupIndex );
+    	    FailureCodes Result = readDirectionalCoefficient( CoefficientText, CupIndex );
             if (FailureCodes::NO_FAILURE != Result){
             	return Result;
             }
@@ -270,9 +269,9 @@ static FailureCodes parseFunctionFormula( const std::regex *PatternPtr, std::str
     return FailureCodes::NO_FAILURE;
 }
 
-static FailureCodes readDirectionalCoefficient( const std::string *InputTextPtr, int WhichCup){
+static FailureCodes readDirectionalCoefficient( const std::string& InputText, int WhichCup){
 	try {
-		DirectionalCoefficient[WhichCup] = std::stod( *InputTextPtr );
+		DirectionalCoefficient[WhichCup] = std::stod( InputText );
 	}
 	catch (const std::invalid_argument&) {
        	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << '\n';

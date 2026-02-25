@@ -251,11 +251,9 @@ void TripleDiscWidgetWithHorizontalSlit::draw(){
 }
 
 static void cupInsertionButtonCallback(Fl_Widget* Widget, void* Data){
-	(void)Widget; // intentionally unused
 	(void)Data; // intentionally unused
 
-	CupGuiGroup* MyGroup;
-	MyGroup = (CupGuiGroup*)(Widget->parent());
+	const auto* MyGroup = static_cast<CupGuiGroup*>(Widget->parent());
 	int DiscIndex = MyGroup->getCupId();
 	assert( DiscIndex < CUPS_NUMBER );
 
@@ -266,7 +264,7 @@ static void cupInsertionButtonCallback(Fl_Widget* Widget, void* Data){
 
 	if (DurationTime.count() < MaximumPropagationTime){
 	    if (VeryVerboseMode){
-	    	std::cout << "Akcja związana z naciśnięciem przycisku: ODMOWA " << DiscIndex << '\n';
+	    	std::cout << "Akcja związana z naciśnięciem przycisku: ODMOWA " << DiscIndex+1 << '\n';
 	    }
 		return;
 	}
@@ -276,13 +274,13 @@ static void cupInsertionButtonCallback(Fl_Widget* Widget, void* Data){
 		if (atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndex], std::memory_order_acquire )){
 			atomic_store_explicit( &ModbusCoilRequestedValue[DiscIndex], false, std::memory_order_release );
 		    if (VeryVerboseMode){
-		    	std::cout << "Akcja związana z naciśnięciem przycisku: wysuń " << DiscIndex << '\n';
+		    	std::cout << "Akcja związana z naciśnięciem przycisku: wysuń " << DiscIndex+1 << '\n';
 		    }
 		}
 		else{
 			atomic_store_explicit( &ModbusCoilRequestedValue[DiscIndex], true, std::memory_order_release );
 		    if (VeryVerboseMode){
-		    	std::cout << "Akcja związana z naciśnięciem przycisku: wsuń " << DiscIndex << '\n';
+		    	std::cout << "Akcja związana z naciśnięciem przycisku: wsuń " << DiscIndex+1 << '\n';
 		    }
 		}
 		atomic_store_explicit( &ModbusCoilChangeReqest[DiscIndex], true, std::memory_order_release );

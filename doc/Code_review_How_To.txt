@@ -5,5 +5,5 @@ make clean
 bear -- make -j
 ./run-my--clang-tidy.sh > run-my--clang-tidy.log
 
-
-
+2.
+cppcheck --enable=all --inconclusive --std=c++17 --language=c++ --suppress=missingIncludeSystem -Iinclude -Isource source 2> cppcheck.log

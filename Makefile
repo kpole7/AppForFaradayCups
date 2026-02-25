@@ -1,7 +1,7 @@
 CXX	        = g++
 OBJCOPY	    = objcopy
 
-CCFLAGS	    =  -g -rdynamic -Wall -Wextra -Iinclude -I/usr/include/modbus -MMD -MP
+CCFLAGS	    =  -g -rdynamic -Wall -Wextra -Wpedantic -Iinclude -I/usr/include/modbus -MMD -MP
 
 LDFLAGS     =  -g -rdynamic -lfltk -lX11 -lpthread -lmodbus -lfltk_images -lpng -lz
 
