@@ -66,6 +66,7 @@ static std::atomic<int> TransmissionQualityLowLevelIndicator;
 //.................................................................................................
 
 static void peripheralThreadTiming();
+static void determineTransmissionQuality( FailureCodes EssentialActionResult );
 static void peripheralThreadHandler();
 
 //.................................................................................................
@@ -160,6 +161,33 @@ static void peripheralThreadTiming(){
 	}
 }
 
+static void determineTransmissionQuality( FailureCodes EssentialActionResult ){
+	if (FailureCodes::NO_FAILURE == EssentialActionResult) {
+		if (LOW_LEVEL_CONTINUOUS_COUNTING_MAX > LowLevelSuccessfulTransmission) {
+			LowLevelSuccessfulTransmission += DelayMultiplierOnError;
+			if (LowLevelSuccessfulTransmission > LOW_LEVEL_CONTINUOUS_COUNTING_MAX) {
+				LowLevelSuccessfulTransmission = LOW_LEVEL_CONTINUOUS_COUNTING_MAX;
+			}
+		}
+		LowLevelContinuousErrors = 0;
+	}
+	else {
+		if (LOW_LEVEL_CONTINUOUS_COUNTING_MAX
+				> LowLevelContinuousErrors) {
+			LowLevelContinuousErrors++;
+		}
+		if (LowLevelSuccessfulTransmission > DelayMultiplierOnError) {
+			LowLevelSuccessfulTransmission -= DelayMultiplierOnError;
+		}
+		else {
+			LowLevelSuccessfulTransmission = 0;
+		}
+	}
+	atomic_store_explicit(&TransmissionQualityLowLevelIndicator,
+			LowLevelSuccessfulTransmission, std::memory_order_release);
+
+}
+
 /// This function runs the second thread (FLTK is the main thread).
 /// The peripheral thread supports Modbus communication and sends signals to FLTK to refresh graphics.
 static void peripheralThreadHandler(){
@@ -218,33 +246,7 @@ static void peripheralThreadHandler(){
 //				IsEssentialActionDone = true;
 		}
 
-
-		if (FailureCodes::NO_FAILURE == Result) {
-			if (LOW_LEVEL_CONTINUOUS_COUNTING_MAX
-					> LowLevelSuccessfulTransmission) {
-				LowLevelSuccessfulTransmission += DelayMultiplierOnError;
-				if (LowLevelSuccessfulTransmission
-						> LOW_LEVEL_CONTINUOUS_COUNTING_MAX) {
-					LowLevelSuccessfulTransmission =
-							LOW_LEVEL_CONTINUOUS_COUNTING_MAX;
-				}
-			}
-			LowLevelContinuousErrors = 0;
-		}
-		else {
-			if (LOW_LEVEL_CONTINUOUS_COUNTING_MAX
-					> LowLevelContinuousErrors) {
-				LowLevelContinuousErrors++;
-			}
-			if (LowLevelSuccessfulTransmission > DelayMultiplierOnError) {
-				LowLevelSuccessfulTransmission -= DelayMultiplierOnError;
-			}
-			else {
-				LowLevelSuccessfulTransmission = 0;
-			}
-		}
-		atomic_store_explicit(&TransmissionQualityLowLevelIndicator,
-				LowLevelSuccessfulTransmission, std::memory_order_release);
+		determineTransmissionQuality( Result );
 
 #if 0 // debugging
 		std::chrono::high_resolution_clock::time_point TimeAfter = std::chrono::high_resolution_clock::now();

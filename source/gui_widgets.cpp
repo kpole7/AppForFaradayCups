@@ -124,6 +124,15 @@ private:
 	Fl_Button* CupInsertionButtonPtr;
 	Fl_Box* StatusTextBoxPtr;
 	Fl_Box* SeparatorPtr;
+	int getIndexForSwitchPressed();
+	int getIndexForBlockage();
+	void redrawTripleDisc();
+	void redrawLabelsValues();
+	void redrawSwitchErrorLabel();
+	void redrawLockoutIndicator();
+	void redrawTransmissionErrorIdicator();
+	void redrawStatusLabel();
+	void redrawButton();
 public:
 	CupGuiGroup(int X, int Y, int W, int H, const char* L = nullptr);
     void configure( int IdValue );
@@ -374,18 +383,16 @@ int CupGuiGroup::getCupId(){
 	return CupId;
 }
 
-void CupGuiGroup::refreshData(){
-	assert( CupId < CUPS_NUMBER );
+int CupGuiGroup::getIndexForSwitchPressed(){
+	return MODBUS_COILS_PER_CUP * CupId + COIL_OFFSET_IS_SWITCH_PRESSED;
+}
 
-	int TemporaryIndexForSwitchPressed = COIL_OFFSET_IS_SWITCH_PRESSED+MODBUS_COILS_PER_CUP*CupId;
-	assert(TemporaryIndexForSwitchPressed < MODBUS_COILS_NUMBER);
+int CupGuiGroup::getIndexForBlockage(){
+	return MODBUS_COILS_PER_CUP * CupId + COIL_OFFSET_IS_CUP_BLOCKED;
+}
 
-	int TemporaryIndexForBlockage = COIL_OFFSET_IS_CUP_BLOCKED+MODBUS_COILS_PER_CUP*CupId;
-	assert(TemporaryIndexForBlockage < MODBUS_COILS_NUMBER);
-
-	bool IsTransmissionCorrect = isTransmissionCorrect();
-
-	if (IsTransmissionCorrect && atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndexForSwitchPressed], std::memory_order_acquire )){
+void CupGuiGroup::redrawTripleDisc(){
+	if (isTransmissionCorrect() && atomic_load_explicit( &ModbusCoilsReadout[getIndexForSwitchPressed()], std::memory_order_acquire )){
 		if (0 == TripleDisc->visible()){
 			TripleDisc->show();
 		}
@@ -398,8 +405,10 @@ void CupGuiGroup::refreshData(){
 			TripleDisc->hide();
 		}
 	}
+}
 
-	if (IsTransmissionCorrect &&
+void CupGuiGroup::redrawLabelsValues(){
+	if (isTransmissionCorrect() &&
 			atomic_load_explicit( &ModbusCoilsReadout[COIL_OFFSET_IS_SWITCH_PRESSED + CupId*MODBUS_COILS_PER_CUP], std::memory_order_acquire ))
 		{
 		for (int J=0; J < VISIBLE_VALUES_PER_DISC; J++){
@@ -432,15 +441,17 @@ void CupGuiGroup::refreshData(){
 			CupValueLabelPtr[J]->hide();
 		}
 	}
+}
 
-	if (IsTransmissionCorrect){
+void CupGuiGroup::redrawSwitchErrorLabel(){
+	if (isTransmissionCorrect()){
 		if (atomic_load_explicit( &DisplayLimitSwitchError[CupId], std::memory_order_acquire )){
 			if (0 == SwitchErrorTextBoxPtr->visible()){
 				SwitchErrorTextBoxPtr->show();
 			}
 		}
 		else{
-			if (ModbusCoilsReadout[TemporaryIndexForBlockage] && !ModbusCoilsReadout[TemporaryIndexForSwitchPressed]){
+			if (ModbusCoilsReadout[getIndexForBlockage()] && !ModbusCoilsReadout[getIndexForSwitchPressed()]){
 				if (0 == SwitchErrorTextBoxPtr->visible()){
 					SwitchErrorTextBoxPtr->show();
 				}
@@ -457,8 +468,12 @@ void CupGuiGroup::refreshData(){
 			SwitchErrorTextBoxPtr->hide();
 		}
 	}
+}
 
-	if (IsTransmissionCorrect && atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndexForBlockage], std::memory_order_acquire )){
+void CupGuiGroup::redrawLockoutIndicator(){
+	if (isTransmissionCorrect() &&
+			atomic_load_explicit( &ModbusCoilsReadout[getIndexForBlockage()], std::memory_order_acquire ))
+	{
 		if (0 == PadlockImagePtr->visible()){
 			PadlockImagePtr->show();
 			LockoutTextBoxPtr->show();
@@ -470,8 +485,10 @@ void CupGuiGroup::refreshData(){
 			LockoutTextBoxPtr->hide();
 		}
 	}
+}
 
-	if (IsTransmissionCorrect){
+void CupGuiGroup::redrawTransmissionErrorIdicator(){
+	if (isTransmissionCorrect()){
 		UnconnectedImagePtr->hide();
 		UnconnectedTextBoxPtr->hide();
 	}
@@ -479,8 +496,10 @@ void CupGuiGroup::refreshData(){
 		UnconnectedImagePtr->show();
 		UnconnectedTextBoxPtr->show();
 	}
+}
 
-	if ((0 == StatusLevelForGui) || (!IsTransmissionCorrect)){
+void CupGuiGroup::redrawStatusLabel(){
+	if ((0 == StatusLevelForGui) || (!isTransmissionCorrect())){
 		if (0 != StatusTextBoxPtr->visible()){
 			StatusTextBoxPtr->hide();
 		}
@@ -493,7 +512,7 @@ void CupGuiGroup::refreshData(){
 			if (StatusTextBoxPtr->labelsize() != ORDINARY_TEXT_SIZE){
 				StatusTextBoxPtr->labelsize(ORDINARY_TEXT_SIZE);
 			}
-			if (atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndexForSwitchPressed], std::memory_order_acquire )){
+			if (atomic_load_explicit( &ModbusCoilsReadout[getIndexForSwitchPressed()], std::memory_order_acquire )){
 				StatusTextBoxPtr->label( TextCupIsInserted );
 			}
 			else{
@@ -508,7 +527,7 @@ void CupGuiGroup::refreshData(){
 					"%s\n"
 					"In: %04X %04X %04X %04X %04X\n"
 					"Coils %c %c %c",
-					atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndexForSwitchPressed], std::memory_order_acquire )?
+					atomic_load_explicit( &ModbusCoilsReadout[getIndexForSwitchPressed()], std::memory_order_acquire )?
 							TextCupIsInserted : TextCupIsRemoved,
 					(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*CupId+0], std::memory_order_acquire ),
 					(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*CupId+1], std::memory_order_acquire ),
@@ -521,21 +540,38 @@ void CupGuiGroup::refreshData(){
 			StatusTextBoxPtr->label( StatusText );
 		}
 	}
+}
 
-	if (atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndexForSwitchPressed], std::memory_order_acquire )){
+void CupGuiGroup::redrawButton(){
+	if (atomic_load_explicit( &ModbusCoilsReadout[getIndexForSwitchPressed()], std::memory_order_acquire )){
 		CupInsertionButtonPtr->label( "Wysuń" );
 	}
 	else{
 		CupInsertionButtonPtr->label( "Wsuń" );
 	}
-	if (!IsTransmissionCorrect ||
-		atomic_load_explicit( &ModbusCoilsReadout[TemporaryIndexForBlockage], std::memory_order_acquire ))
+	if (!isTransmissionCorrect() ||
+		atomic_load_explicit( &ModbusCoilsReadout[getIndexForBlockage()], std::memory_order_acquire ))
 	{
 		CupInsertionButtonPtr->deactivate();
 	}
 	else{
 		CupInsertionButtonPtr->activate();
 	}
+}
+
+void CupGuiGroup::refreshData(){
+	assert( CupId < CUPS_NUMBER );
+
+	assert(getIndexForSwitchPressed() < MODBUS_COILS_NUMBER);
+	assert(getIndexForBlockage()      < MODBUS_COILS_NUMBER);
+
+	redrawTripleDisc();
+	redrawLabelsValues();
+	redrawSwitchErrorLabel();
+	redrawLockoutIndicator();
+	redrawTransmissionErrorIdicator();
+	redrawStatusLabel();
+	redrawButton();
 }
 
 void refreshGui(void* Data){
