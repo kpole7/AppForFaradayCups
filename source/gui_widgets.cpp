@@ -3,9 +3,8 @@
 #include <cstdio>
 #include <string>
 #include <iostream>
-#include <assert.h>
+#include <cassert>
 #include <memory>
-#include <string>
 
 #include <FL/Fl.H>
 #include <FL/Fl_Widget.H>
@@ -75,7 +74,7 @@ public:
         : Fl_Widget(X, Y, W, H, label),
           img_(nullptr)
     {
-        if (data && data_len > 0) {
+        if ((data != nullptr) && (data_len > 0)) {
             img_ = std::make_unique<Fl_PNG_Image>("memory", data, data_len);
         }
     }
@@ -124,8 +123,8 @@ private:
 	Fl_Button* CupInsertionButtonPtr;
 	Fl_Box* StatusTextBoxPtr;
 	Fl_Box* SeparatorPtr;
-	int getIndexForSwitchPressed();
-	int getIndexForBlockage();
+	[[nodiscard]] int getIndexForSwitchPressed() const;
+	[[nodiscard]] int getIndexForBlockage() const;
 	void redrawTripleDisc();
 	void redrawLabelsValues();
 	void redrawSwitchErrorLabel();
@@ -136,7 +135,7 @@ private:
 public:
 	CupGuiGroup(int X, int Y, int W, int H, const char* L = nullptr);
     void configure( int IdValue );
-    int getCupId();
+    [[nodiscard]] int getCupId() const;
     void refreshData();
 };
 
@@ -379,15 +378,15 @@ void CupGuiGroup::configure( int IdValue ){
 	TitleTextBoxPtr->label( CupDescriptionPtr[CupId] );
 }
 
-int CupGuiGroup::getCupId(){
+int CupGuiGroup::getCupId() const {
 	return CupId;
 }
 
-int CupGuiGroup::getIndexForSwitchPressed(){
+int CupGuiGroup::getIndexForSwitchPressed() const {
 	return MODBUS_COILS_PER_CUP * CupId + COIL_OFFSET_IS_SWITCH_PRESSED;
 }
 
-int CupGuiGroup::getIndexForBlockage(){
+int CupGuiGroup::getIndexForBlockage() const {
 	return MODBUS_COILS_PER_CUP * CupId + COIL_OFFSET_IS_CUP_BLOCKED;
 }
 
@@ -503,43 +502,43 @@ void CupGuiGroup::redrawStatusLabel(){
 		if (0 != StatusTextBoxPtr->visible()){
 			StatusTextBoxPtr->hide();
 		}
+		return;
 	}
-	else{
-		if (0 == StatusTextBoxPtr->visible()){
-			StatusTextBoxPtr->show();
+
+	if (0 == StatusTextBoxPtr->visible()){
+		StatusTextBoxPtr->show();
+	}
+	if (1 == StatusLevelForGui){
+		if (StatusTextBoxPtr->labelsize() != ORDINARY_TEXT_SIZE){
+			StatusTextBoxPtr->labelsize(ORDINARY_TEXT_SIZE);
 		}
-		if (1 == StatusLevelForGui){
-			if (StatusTextBoxPtr->labelsize() != ORDINARY_TEXT_SIZE){
-				StatusTextBoxPtr->labelsize(ORDINARY_TEXT_SIZE);
-			}
-			if (atomic_load_explicit( &ModbusCoilsReadout[getIndexForSwitchPressed()], std::memory_order_acquire )){
-				StatusTextBoxPtr->label( TextCupIsInserted );
-			}
-			else{
-				StatusTextBoxPtr->label( TextCupIsRemoved );
-			}
+		if (atomic_load_explicit( &ModbusCoilsReadout[getIndexForSwitchPressed()], std::memory_order_acquire )){
+			StatusTextBoxPtr->label( TextCupIsInserted );
 		}
 		else{
-			if (StatusTextBoxPtr->labelsize() != DEBUGGING_TEXT_SIZE){
-				StatusTextBoxPtr->labelsize(DEBUGGING_TEXT_SIZE);
-			}
-			snprintf( StatusText, sizeof(StatusText)-1,
-					"%s\n"
-					"In: %04X %04X %04X %04X %04X\n"
-					"Coils %c %c %c",
-					atomic_load_explicit( &ModbusCoilsReadout[getIndexForSwitchPressed()], std::memory_order_acquire )?
-							TextCupIsInserted : TextCupIsRemoved,
-					(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*CupId+0], std::memory_order_acquire ),
-					(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*CupId+1], std::memory_order_acquire ),
-					(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*CupId+2], std::memory_order_acquire ),
-					(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*CupId+3], std::memory_order_acquire ),
-					(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*CupId+4], std::memory_order_acquire ),
-					atomic_load_explicit( &ModbusCoilsReadout[MODBUS_COILS_PER_CUP*CupId+0], std::memory_order_acquire )? '1' : '0',
-					atomic_load_explicit( &ModbusCoilsReadout[MODBUS_COILS_PER_CUP*CupId+1], std::memory_order_acquire )? '1' : '0',
-					atomic_load_explicit( &ModbusCoilsReadout[MODBUS_COILS_PER_CUP*CupId+2], std::memory_order_acquire )? '1' : '0' );
-			StatusTextBoxPtr->label( StatusText );
+			StatusTextBoxPtr->label( TextCupIsRemoved );
 		}
+		return;
 	}
+
+	if (StatusTextBoxPtr->labelsize() != DEBUGGING_TEXT_SIZE){
+		StatusTextBoxPtr->labelsize(DEBUGGING_TEXT_SIZE);
+	}
+	snprintf( StatusText, sizeof(StatusText)-1,
+			"%s\n"
+			"In: %04X %04X %04X %04X %04X\n"
+			"Coils %c %c %c",
+			atomic_load_explicit( &ModbusCoilsReadout[getIndexForSwitchPressed()], std::memory_order_acquire )?
+					TextCupIsInserted : TextCupIsRemoved,
+			(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*CupId+0], std::memory_order_acquire ),
+			(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*CupId+1], std::memory_order_acquire ),
+			(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*CupId+2], std::memory_order_acquire ),
+			(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*CupId+3], std::memory_order_acquire ),
+			(uint16_t)atomic_load_explicit( &ModbusInputRegisters[MODBUS_INPUTS_PER_CUP*CupId+4], std::memory_order_acquire ),
+			atomic_load_explicit( &ModbusCoilsReadout[MODBUS_COILS_PER_CUP*CupId+0], std::memory_order_acquire )? '1' : '0',
+			atomic_load_explicit( &ModbusCoilsReadout[MODBUS_COILS_PER_CUP*CupId+1], std::memory_order_acquire )? '1' : '0',
+			atomic_load_explicit( &ModbusCoilsReadout[MODBUS_COILS_PER_CUP*CupId+2], std::memory_order_acquire )? '1' : '0' );
+	StatusTextBoxPtr->label( StatusText );
 }
 
 void CupGuiGroup::redrawButton(){
