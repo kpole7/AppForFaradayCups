@@ -4,36 +4,34 @@
 ///		uA = micro amperes
 /// 	FSM = finite state machine
 
-
-
+#include <atomic>
+#include <cassert>
+#include <csignal>
+#include <cstdlib>
+#include <execinfo.h> // backtrace
 #include <iostream>
 #include <string>
-#include <atomic>
-#include <csignal>
-#include <execinfo.h> // backtrace
-#include <cassert>
 #include <thread>
-#include <cstdlib>
 
 #include <FL/Fl.H>
-#include <FL/Fl_Window.H>
-#include <FL/Fl_Double_Window.H> // to eliminate flickering
-#include <FL/Fl_Button.H>
 #include <FL/Fl_Box.H>
+#include <FL/Fl_Button.H>
+#include <FL/Fl_Double_Window.H> // to eliminate flickering
 #include <FL/Fl_Menu_Bar.H>
+#include <FL/Fl_Window.H>
 #include <FL/fl_ask.H>
 
-#include "peripheral_thread.h"
 #include "gui_widgets.h"
-#include "shared_data.h"
-#include "settings_file.h"
 #include "modbus_rtu_master.h"
+#include "peripheral_thread.h"
+#include "settings_file.h"
+#include "shared_data.h"
 
 //.................................................................................................
 // Preprocessor directives
 //.................................................................................................
 
-#define DEFAULT_STATUS_LEVEL		1
+#define DEFAULT_STATUS_LEVEL 1
 
 //.................................................................................................
 // Definitions of types
@@ -41,11 +39,10 @@
 
 /// This is Esc-proof window (a FLTK standard window is sensitive to Esc)
 class WindowEscProof : public Fl_Double_Window {
-public:
-	WindowEscProof(int W, int H, const char* title) : Fl_Double_Window(W, H, title) { }
-    int handle(int event) override;
+  public:
+	WindowEscProof(int W, int H, const char *title) : Fl_Double_Window(W, H, title) {}
+	int handle(int event) override;
 };
-
 
 //.................................................................................................
 // Global variables
@@ -58,16 +55,15 @@ bool VerboseMode;
 bool VeryVerboseMode;
 
 /// This variable points to the main application window
-WindowEscProof* ApplicationWindow;
+WindowEscProof *ApplicationWindow;
 
 int StatusLevelForGui;
-
 
 //.................................................................................................
 // Local variables
 //.................................................................................................
 
-static Fl_Box * FailureMessagePtr;
+static Fl_Box *FailureMessagePtr;
 
 //.................................................................................................
 // Local function prototypes
@@ -79,64 +75,64 @@ static void setupCriticalSignalHandler();
 
 static void onMainWindowCloseCallback(Fl_Widget *Widget, void *Data);
 
-static FailureCodes mainInitializations(int argc, char** argv);
+static FailureCodes mainInitializations(int argc, char **argv);
 
-static FailureCodes determineVerbosity(int argc, char** argv);
+static FailureCodes determineVerbosity(int argc, char **argv);
 
-static void callbackForMenuItemStatus(Fl_Widget* WidgetPtr, void*);
+static void callbackForMenuItemStatus(Fl_Widget *WidgetPtr, void *);
 
-static void callbackForMenuItemHelp(Fl_Widget*, void*);
+static void callbackForMenuItemHelp(Fl_Widget *, void *);
 
 //.................................................................................................
 // The main application
 //.................................................................................................
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
 	setupCriticalSignalHandler();
 
-	FailureCodes ErrorCode = mainInitializations( argc, argv);
+	FailureCodes ErrorCode = mainInitializations(argc, argv);
 
-    // Main window of the application
+	// Main window of the application
 	Fl::scheme("gtk+");
-	ApplicationWindow = new WindowEscProof(MAIN_WINDOW_WIDTH, NumberOfFaradayCupsToBeOperated*DISC_SPACE_Y+MAIN_MENU_HEIGHT,
-										   "Pomiar Wiązki w Linii Iniekcyjnej" );
+	ApplicationWindow =
+	    new WindowEscProof(MAIN_WINDOW_WIDTH, NumberOfFaradayCupsToBeOperated * DISC_SPACE_Y + MAIN_MENU_HEIGHT, "Pomiar Wiązki w Linii Iniekcyjnej");
 	ApplicationWindow->begin();
-	ApplicationWindow->color( COLOR_BACKGROUND );
-    ApplicationWindow->callback(onMainWindowCloseCallback);	// Window close event is handled
+	ApplicationWindow->color(COLOR_BACKGROUND);
+	ApplicationWindow->callback(onMainWindowCloseCallback); // Window close event is handled
 
-    // Menu
-    Fl_Menu_Bar MenuWidget(0, 0, MAIN_WINDOW_WIDTH, MAIN_MENU_HEIGHT);
-    MenuWidget.box(FL_FLAT_BOX);
+	// Menu
+	Fl_Menu_Bar MenuWidget(0, 0, MAIN_WINDOW_WIDTH, MAIN_MENU_HEIGHT);
+	MenuWidget.box(FL_FLAT_BOX);
 
-    MenuWidget.add(                                  "Narzędzia/Status/Ukryty",      0, callbackForMenuItemStatus, (void*)0, FL_MENU_RADIO);
-	int indexOfMenuItemStatusNormal = MenuWidget.add("Narzędzia/Status/Normalny",    0, callbackForMenuItemStatus, (void*)1, FL_MENU_RADIO);
-	MenuWidget.add(                                  "Narzędzia/Status/Szczegółowy", 0, callbackForMenuItemStatus, (void*)2, FL_MENU_RADIO);
-	MenuWidget.add(                                  "Pomoc/Otwórz PDF",             0, callbackForMenuItemHelp);
+	MenuWidget.add("Narzędzia/Status/Ukryty", 0, callbackForMenuItemStatus, (void *)0, FL_MENU_RADIO);
+	int indexOfMenuItemStatusNormal = MenuWidget.add("Narzędzia/Status/Normalny", 0, callbackForMenuItemStatus, (void *)1, FL_MENU_RADIO);
+	MenuWidget.add("Narzędzia/Status/Szczegółowy", 0, callbackForMenuItemStatus, (void *)2, FL_MENU_RADIO);
+	MenuWidget.add("Pomoc/Otwórz PDF", 0, callbackForMenuItemHelp);
 
-	Fl_Menu_Item* MenuItems = const_cast<Fl_Menu_Item*>(MenuWidget.menu());
+	Fl_Menu_Item *MenuItems = const_cast<Fl_Menu_Item *>(MenuWidget.menu());
 	MenuWidget.setonly(&MenuItems[indexOfMenuItemStatusNormal]);
 
 	StatusLevelForGui = DEFAULT_STATUS_LEVEL;
 
-
-	if (FailureCodes::NO_FAILURE == ErrorCode){
+	if (FailureCodes::NO_FAILURE == ErrorCode) {
 		initializeGraphicWidgets();
 	}
-	else{
-		FailureMessagePtr = new Fl_Box( (MAIN_WINDOW_WIDTH*1)/16, 40, (MAIN_WINDOW_WIDTH*14)/16, DISC_SPACE_Y,
-				"Błędy podczas startu aplikacji\nUruchom aplikację z parametrem -v w konsoli\nInformacje o błędach wyświetlą się w konsoli" );
+	else {
+		FailureMessagePtr =
+		    new Fl_Box((MAIN_WINDOW_WIDTH * 1) / 16, 40, (MAIN_WINDOW_WIDTH * 14) / 16, DISC_SPACE_Y,
+		               "Błędy podczas startu aplikacji\nUruchom aplikację z parametrem -v w konsoli\nInformacje o błędach wyświetlą się w konsoli");
 	}
 
-    ApplicationWindow->end();
-    ApplicationWindow->show();
+	ApplicationWindow->end();
+	ApplicationWindow->show();
 
-    Fl::lock();  // Enable multi-threading support in FLTK; register a callback function for Fl::awake()
+	Fl::lock(); // Enable multi-threading support in FLTK; register a callback function for Fl::awake()
 
-	if (FailureCodes::NO_FAILURE == ErrorCode){
+	if (FailureCodes::NO_FAILURE == ErrorCode) {
 		serialCommunicationStart();
 	}
 
-    return Fl::run();
+	return Fl::run();
 }
 
 //.................................................................................................
@@ -144,54 +140,54 @@ int main(int argc, char** argv) {
 //.................................................................................................
 
 // Overlay handle() method
-int WindowEscProof::handle(int event){
-    if (event == FL_KEYDOWN) {  // Check if it is a key event
-        if (Fl::event_key() == FL_Escape) {  // Check if it is the Esc key
-            return 1;  // Block the default behavior
-        }
-    }
-    return Fl_Window::handle(event);  // For other events, call the default handler
+int WindowEscProof::handle(int event) {
+	if (event == FL_KEYDOWN) {              // Check if it is a key event
+		if (Fl::event_key() == FL_Escape) { // Check if it is the Esc key
+			return 1;                       // Block the default behavior
+		}
+	}
+	return Fl_Window::handle(event); // For other events, call the default handler
 }
 
 // This function is used to save the log file in case of SIGSEGV and so on
 static void criticalHandler(int Signal) {
-    void* Frames[100];
-    int NumberOfFrames = backtrace(Frames, 100);
+	void *Frames[100];
+	int NumberOfFrames = backtrace(Frames, 100);
 
-    FILE* LogFileHandler = fopen("backtrace_Faraday_cups.log", "a");
-    if (nullptr != LogFileHandler) {
-        time_t TimeNow = time(nullptr);
-        fprintf(LogFileHandler, "\n=== Backtrace (");
-        if (SIGSEGV == Signal){
-        	fprintf(LogFileHandler, "signal SIGSEGV");
-        }
-        else if (SIGABRT == Signal){
-        	fprintf(LogFileHandler, "signal SIGABRT");
-        }
-        else if (SIGFPE == Signal){
-        	fprintf(LogFileHandler, "signal SIGFPE");
-        }
-        else if (SIGILL == Signal){
-        	fprintf(LogFileHandler, "signal SIGILL");
-        }
-        else if (SIGBUS == Signal){
-        	fprintf(LogFileHandler, "signal SIGBUS");
-        }
-        else{
-        	fprintf(LogFileHandler, "signal %d", Signal);
-        }
-        fprintf(LogFileHandler, ") at %s\n", ctime(&TimeNow));
-        char** Symbols = backtrace_symbols(Frames, NumberOfFrames);
-        if (nullptr != Symbols) {
-            for (int i = 0; i < NumberOfFrames; i++){
-                fprintf(LogFileHandler, "%s\n", Symbols[i]);
-            }
-            free(Symbols);
-        }
-        fclose(LogFileHandler);
-    }
-    signal(Signal, SIG_DFL);
-    kill(getpid(), Signal);
+	FILE *LogFileHandler = fopen("backtrace_Faraday_cups.log", "a");
+	if (nullptr != LogFileHandler) {
+		time_t TimeNow = time(nullptr);
+		fprintf(LogFileHandler, "\n=== Backtrace (");
+		if (SIGSEGV == Signal) {
+			fprintf(LogFileHandler, "signal SIGSEGV");
+		}
+		else if (SIGABRT == Signal) {
+			fprintf(LogFileHandler, "signal SIGABRT");
+		}
+		else if (SIGFPE == Signal) {
+			fprintf(LogFileHandler, "signal SIGFPE");
+		}
+		else if (SIGILL == Signal) {
+			fprintf(LogFileHandler, "signal SIGILL");
+		}
+		else if (SIGBUS == Signal) {
+			fprintf(LogFileHandler, "signal SIGBUS");
+		}
+		else {
+			fprintf(LogFileHandler, "signal %d", Signal);
+		}
+		fprintf(LogFileHandler, ") at %s\n", ctime(&TimeNow));
+		char **Symbols = backtrace_symbols(Frames, NumberOfFrames);
+		if (nullptr != Symbols) {
+			for (int i = 0; i < NumberOfFrames; i++) {
+				fprintf(LogFileHandler, "%s\n", Symbols[i]);
+			}
+			free(Symbols);
+		}
+		fclose(LogFileHandler);
+	}
+	signal(Signal, SIG_DFL);
+	kill(getpid(), Signal);
 }
 
 // this function hooks up the function criticalHandler()
@@ -206,100 +202,98 @@ static void setupCriticalSignalHandler() {
 // Window close event is handled here
 static void onMainWindowCloseCallback(Fl_Widget *Widget, void *Data) {
 	(void)Widget; // intentionally unused
-	(void)Data; // intentionally unused
+	(void)Data;   // intentionally unused
 
-    if (VerboseMode){
-    	std::cout << "Zamykanie aplikacji" << '\n';
-    }
-    serialCommunicationExit();
-    ApplicationWindow->hide(); // close the application
+	if (VerboseMode) {
+		std::cout << "Zamykanie aplikacji" << '\n';
+	}
+	serialCommunicationExit();
+	ApplicationWindow->hide(); // close the application
 }
 
-static FailureCodes mainInitializations(int argc, char** argv){
+static FailureCodes mainInitializations(int argc, char **argv) {
 	initializeSerialCommunicationModule();
 
-	FailureCodes FailureCode = determineVerbosity( argc, argv );
+	FailureCodes FailureCode = determineVerbosity(argc, argv);
 
-	if (FailureCodes::NO_FAILURE == FailureCode){
-		FailureCode = determineApplicationPath( argv[0] );
+	if (FailureCodes::NO_FAILURE == FailureCode) {
+		FailureCode = determineApplicationPath(argv[0]);
 	}
-	if (FailureCodes::NO_FAILURE == FailureCode){
+	if (FailureCodes::NO_FAILURE == FailureCode) {
 		FailureCode = configurationFileParsing();
 	}
-	if (FailureCodes::NO_FAILURE == FailureCode){
+	if (FailureCodes::NO_FAILURE == FailureCode) {
 		FailureCode = initializeModbus();
 	}
-	for (int Cup = 0; Cup < CUPS_NUMBER; Cup++){
-		for (int J=0; J < MODBUS_INPUTS_PER_CUP; J++){
-			int TemporaryRegisterIndex = Cup*MODBUS_INPUTS_PER_CUP + J;
-			assert( TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER );
-			atomic_store_explicit( &ModbusInputRegisters[TemporaryRegisterIndex], 0xFFFF, std::memory_order_release );
+	for (int Cup = 0; Cup < CUPS_NUMBER; Cup++) {
+		for (int J = 0; J < MODBUS_INPUTS_PER_CUP; J++) {
+			int TemporaryRegisterIndex = Cup * MODBUS_INPUTS_PER_CUP + J;
+			assert(TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER);
+			atomic_store_explicit(&ModbusInputRegisters[TemporaryRegisterIndex], 0xFFFF, std::memory_order_release);
 		}
 	}
-	for (int Cup = 0; Cup < CUPS_NUMBER; Cup++){
-		for (int J=0; J < MODBUS_COILS_PER_CUP; J++){
-			int TemporaryRegisterIndex = Cup*MODBUS_COILS_PER_CUP + J;
-			assert( TemporaryRegisterIndex < MODBUS_COILS_NUMBER );
-			atomic_store_explicit( &ModbusCoilsReadout[TemporaryRegisterIndex], false, std::memory_order_release );
+	for (int Cup = 0; Cup < CUPS_NUMBER; Cup++) {
+		for (int J = 0; J < MODBUS_COILS_PER_CUP; J++) {
+			int TemporaryRegisterIndex = Cup * MODBUS_COILS_PER_CUP + J;
+			assert(TemporaryRegisterIndex < MODBUS_COILS_NUMBER);
+			atomic_store_explicit(&ModbusCoilsReadout[TemporaryRegisterIndex], false, std::memory_order_release);
 		}
 	}
 	return FailureCode;
 }
 
-static FailureCodes determineVerbosity(int argc, char** argv){
+static FailureCodes determineVerbosity(int argc, char **argv) {
 	for (int J = 1; J < argc; J++) {
-        std::string Argument = argv[J];
-        if (Argument == "-v") {
-        	if (!VerboseMode){
+		std::string Argument = argv[J];
+		if (Argument == "-v") {
+			if (!VerboseMode) {
 				VerboseMode = true;
-        	}
-        	else{
+			}
+			else {
 				VeryVerboseMode = true;
-        	}
+			}
 
 #if 0 // debugging
             std::string Argument0 = argv[0];
         	std::cout << "Wywołanie programu: " << Argument0 << '\n';
 #endif
-        }
-        else {
-            std::cout << "Nieznany argument: " << Argument << '\n';
-            return FailureCodes::ERROR_COMMAND_SYNTAX;
-        }
-    }
-	if (VeryVerboseMode){
+		}
+		else {
+			std::cout << "Nieznany argument: " << Argument << '\n';
+			return FailureCodes::ERROR_COMMAND_SYNTAX;
+		}
+	}
+	if (VeryVerboseMode) {
 		std::cout << "Tryb \"very verbose\"" << '\n';
 	}
-	else{
-		if (VerboseMode){
+	else {
+		if (VerboseMode) {
 			std::cout << "Tryb \"verbose\"" << '\n';
 		}
 	}
-    return FailureCodes::NO_FAILURE;
+	return FailureCodes::NO_FAILURE;
 }
 
+static void callbackForMenuItemStatus(Fl_Widget *WidgetPtr, void *) {
+	auto *TemporaryMenu = static_cast<Fl_Menu_Bar *>(WidgetPtr);
+	const Fl_Menu_Item *TemporaryMenuItem = TemporaryMenu->mvalue();
+	if (nullptr == TemporaryMenuItem) {
+		return;
+	}
 
-static void callbackForMenuItemStatus(Fl_Widget* WidgetPtr, void*) {
-    auto* TemporaryMenu = static_cast<Fl_Menu_Bar*>(WidgetPtr);
-    const Fl_Menu_Item* TemporaryMenuItem = TemporaryMenu->mvalue();
-    if (nullptr == TemporaryMenuItem){
-    	return;
-    }
-
-    StatusLevelForGui = static_cast<int>(reinterpret_cast<intptr_t>(TemporaryMenuItem->user_data()));
-	if (VerboseMode){
+	StatusLevelForGui = static_cast<int>(reinterpret_cast<intptr_t>(TemporaryMenuItem->user_data()));
+	if (VerboseMode) {
 		std::cout << "Opcja Status ustawiona na wartość: " << StatusLevelForGui << '\n';
 	}
 }
 
-static void callbackForMenuItemHelp(Fl_Widget*, void*) {
-    const char* PdfFileName = "Pomiar_Wiązki.pdf";
+static void callbackForMenuItemHelp(Fl_Widget *, void *) {
+	const char *PdfFileName = "Pomiar_Wiązki.pdf";
 
-    std::string DisplayPdfCommand = "xdg-open \"" + ThisApplicationDirectory + "/" + std::string(PdfFileName) + "\"";
+	std::string DisplayPdfCommand = "xdg-open \"" + ThisApplicationDirectory + "/" + std::string(PdfFileName) + "\"";
 
-    int Result = std::system(DisplayPdfCommand.c_str());
-    if (Result != 0) {
-        fl_alert("Nie udało się otworzyć pliku PDF.");
-    }
+	int Result = std::system(DisplayPdfCommand.c_str());
+	if (Result != 0) {
+		fl_alert("Nie udało się otworzyć pliku PDF.");
+	}
 }
-

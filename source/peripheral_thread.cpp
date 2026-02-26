@@ -1,39 +1,39 @@
 /// @file peripheral_thread.cpp
 ///
 
+#include <FL/Fl.H>
+#include <atomic>
+#include <cassert>
 #include <chrono>
 #include <iostream>
-#include <cassert>
-#include <unistd.h>
-#include <atomic>
 #include <thread>
-#include <FL/Fl.H>
+#include <unistd.h>
 
-#include "peripheral_thread.h"
-#include "shared_data.h"
-#include "modbus_rtu_master.h"
 #include "gui_widgets.h"
+#include "modbus_rtu_master.h"
+#include "peripheral_thread.h"
 #include "settings_file.h"
+#include "shared_data.h"
 
 //.................................................................................................
 // Preprocessor directives
 //.................................................................................................
 
-#define SHUT_DOWN_TIMEOUT					1000 // milliseconds
-#define SHUT_DOWN_LOOP_DELAY				20   // milliseconds
-#define SHUT_DOWN_COUNT_DOWN				(SHUT_DOWN_TIMEOUT/SHUT_DOWN_LOOP_DELAY)
+#define SHUT_DOWN_TIMEOUT 1000  // milliseconds
+#define SHUT_DOWN_LOOP_DELAY 20 // milliseconds
+#define SHUT_DOWN_COUNT_DOWN (SHUT_DOWN_TIMEOUT / SHUT_DOWN_LOOP_DELAY)
 
-#define LOW_LEVEL_CONTINUOUS_ERRORS_LIMIT	20	// condition for attempting recovery
-#define LOW_LEVEL_MODBUS_RESET_LIMIT		22	// condition for attempting low level reset of Modbus
-#define LOW_LEVEL_CONTINUOUS_COUNTING_MAX	(LOW_LEVEL_CONTINUOUS_ERRORS_LIMIT * 5)
+#define LOW_LEVEL_CONTINUOUS_ERRORS_LIMIT 20 // condition for attempting recovery
+#define LOW_LEVEL_MODBUS_RESET_LIMIT 22      // condition for attempting low level reset of Modbus
+#define LOW_LEVEL_CONTINUOUS_COUNTING_MAX (LOW_LEVEL_CONTINUOUS_ERRORS_LIMIT * 5)
 
-#define TRANSMISSION_CORRECTNESS_LIMIT		((LOW_LEVEL_CONTINUOUS_COUNTING_MAX * 3) / 4)
+#define TRANSMISSION_CORRECTNESS_LIMIT ((LOW_LEVEL_CONTINUOUS_COUNTING_MAX * 3) / 4)
 
 //...............................................................................................
 // Types definitions
 //...............................................................................................
 
-enum class ModbusFsmStates{
+enum class ModbusFsmStates {
 	OPEN,
 	READING_INPUT_REGISTERS,
 	READING_COILS,
@@ -66,90 +66,88 @@ static std::atomic<int> TransmissionQualityLowLevelIndicator;
 //.................................................................................................
 
 static void peripheralThreadTiming();
-static void determineTransmissionQuality( FailureCodes EssentialActionResult );
+static void determineTransmissionQuality(FailureCodes EssentialActionResult);
 static void peripheralThreadHandler();
 
 //.................................................................................................
 // Function definitions
 //.................................................................................................
 
-void initializeSerialCommunicationModule(){
-	atomic_store_explicit( &ClosePeripheralsFlag, false, std::memory_order_release );
-	atomic_store_explicit( &PeripheralsClosedFlag, true, std::memory_order_release );
+void initializeSerialCommunicationModule() {
+	atomic_store_explicit(&ClosePeripheralsFlag, false, std::memory_order_release);
+	atomic_store_explicit(&PeripheralsClosedFlag, true, std::memory_order_release);
 	LowLevelContinuousErrors = 0;
 	LowLevelSuccessfulTransmission = LOW_LEVEL_CONTINUOUS_COUNTING_MAX;
 }
 
 /// This function initializes the module variables and launches a new thread to support peripherals
-void serialCommunicationStart(){
-	atomic_store_explicit( &ClosePeripheralsFlag, false, std::memory_order_release );
-	atomic_store_explicit( &PeripheralsClosedFlag, false, std::memory_order_release );
+void serialCommunicationStart() {
+	atomic_store_explicit(&ClosePeripheralsFlag, false, std::memory_order_release);
+	atomic_store_explicit(&PeripheralsClosedFlag, false, std::memory_order_release);
 	peripheralThread = std::thread(peripheralThreadHandler);
 }
 
 /// This function is called by FLTK onMainWindowCloseCallback event handler
-void serialCommunicationExit(){
-	if (atomic_load_explicit( &PeripheralsClosedFlag, std::memory_order_acquire )){
+void serialCommunicationExit() {
+	if (atomic_load_explicit(&PeripheralsClosedFlag, std::memory_order_acquire)) {
 		return;
 	}
 
-	atomic_store_explicit( &ClosePeripheralsFlag, true, std::memory_order_release );
+	atomic_store_explicit(&ClosePeripheralsFlag, true, std::memory_order_release);
 
 	int TimeoutCounter = SHUT_DOWN_COUNT_DOWN;
-	while (!(atomic_load_explicit( &PeripheralsClosedFlag, std::memory_order_acquire )) ||
-			(!peripheralThread.joinable()))
-	{
-	    if (0 == TimeoutCounter){
-	    	std::cout << "Problem encountered during peripherals closing" << '\n';
-	    	break;
-	    }
-	    Fl::wait( 0.001*SHUT_DOWN_LOOP_DELAY ); // DELAY_IN_SHUT_DOWN_LOOP in milliseconds
-	    TimeoutCounter--;
+	while (!(atomic_load_explicit(&PeripheralsClosedFlag, std::memory_order_acquire)) || (!peripheralThread.joinable())) {
+		if (0 == TimeoutCounter) {
+			std::cout << "Problem encountered during peripherals closing" << '\n';
+			break;
+		}
+		Fl::wait(0.001 * SHUT_DOWN_LOOP_DELAY); // DELAY_IN_SHUT_DOWN_LOOP in milliseconds
+		TimeoutCounter--;
 	}
-	if (peripheralThread.joinable()){
+	if (peripheralThread.joinable()) {
 		peripheralThread.join();
-		if (VeryVerboseMode){
-			std::cout << "Peripherals closed; delay loop ran " << SHUT_DOWN_COUNT_DOWN-TimeoutCounter << " times" << '\n';
+		if (VeryVerboseMode) {
+			std::cout << "Peripherals closed; delay loop ran " << SHUT_DOWN_COUNT_DOWN - TimeoutCounter << " times" << '\n';
 		}
 	}
 }
 
-static void peripheralThreadTiming(){
+static void peripheralThreadTiming() {
 	// timing
-	if (LOW_LEVEL_CONTINUOUS_ERRORS_LIMIT <= LowLevelContinuousErrors){
+	if (LOW_LEVEL_CONTINUOUS_ERRORS_LIMIT <= LowLevelContinuousErrors) {
 		PeripheralThreadTimeInMilliseconds += (uint32_t)(DELAY_MULTIPLIER_ON_ERROR * PERIPHERAL_THREAD_LOOP_DURATION);
 		DelayMultiplierOnError = DELAY_MULTIPLIER_ON_ERROR;
 	}
-	else{
+	else {
 		PeripheralThreadTimeInMilliseconds += PERIPHERAL_THREAD_LOOP_DURATION;
 		DelayMultiplierOnError = 1;
 	}
 	TimeNow = std::chrono::high_resolution_clock::now();
 	std::chrono::milliseconds DurationTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - PeripheralThreadLoopStart);
-	while(DurationTime.count() < PeripheralThreadTimeInMilliseconds){
+	while (DurationTime.count() < PeripheralThreadTimeInMilliseconds) {
 		// free time activities:  checking for inconsistencies in the status of limit switches
-		for (int J=0; J<NumberOfFaradayCupsToBeOperated; J++){
-			int TemporaryCoilIndex1 = COIL_OFFSET_IS_CUP_FORCED+J*MODBUS_COILS_PER_CUP;
-			assert( TemporaryCoilIndex1 < MODBUS_COILS_NUMBER );
-			int TemporaryCoilIndex2 = COIL_OFFSET_IS_SWITCH_PRESSED+J*MODBUS_COILS_PER_CUP;
-			assert( TemporaryCoilIndex2 < MODBUS_COILS_NUMBER );
-			if (ModbusCoilsReadout[TemporaryCoilIndex1] == ModbusCoilsReadout[TemporaryCoilIndex2]){
-				atomic_store_explicit( &DisplayLimitSwitchError[J], false, std::memory_order_release );
+		for (int J = 0; J < NumberOfFaradayCupsToBeOperated; J++) {
+			int TemporaryCoilIndex1 = COIL_OFFSET_IS_CUP_FORCED + J * MODBUS_COILS_PER_CUP;
+			assert(TemporaryCoilIndex1 < MODBUS_COILS_NUMBER);
+			int TemporaryCoilIndex2 = COIL_OFFSET_IS_SWITCH_PRESSED + J * MODBUS_COILS_PER_CUP;
+			assert(TemporaryCoilIndex2 < MODBUS_COILS_NUMBER);
+			if (ModbusCoilsReadout[TemporaryCoilIndex1] == ModbusCoilsReadout[TemporaryCoilIndex2]) {
+				atomic_store_explicit(&DisplayLimitSwitchError[J], false, std::memory_order_release);
 			}
-			else{
+			else {
 				std::chrono::milliseconds CupInsertionOrRemovalDuration =
-						std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - CupInsertionOrRemovalStartTime[J]);
-				if (CupInsertionOrRemovalDuration.count() > MaximumPropagationTime){
-					atomic_store_explicit( &DisplayLimitSwitchError[J], true, std::memory_order_release );
+				    std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - CupInsertionOrRemovalStartTime[J]);
+				if (CupInsertionOrRemovalDuration.count() > MaximumPropagationTime) {
+					atomic_store_explicit(&DisplayLimitSwitchError[J], true, std::memory_order_release);
 				}
-				else{
-					atomic_store_explicit( &DisplayLimitSwitchError[J], false, std::memory_order_release );
+				else {
+					atomic_store_explicit(&DisplayLimitSwitchError[J], false, std::memory_order_release);
 				}
 			}
 		}
 		TimeNow = std::chrono::high_resolution_clock::now();
 		DurationTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - PeripheralThreadLoopStart);
-		if (DurationTime.count() >= PeripheralThreadTimeInMilliseconds){
+		if (DurationTime.count() >= PeripheralThreadTimeInMilliseconds) {
 			break;
 		}
 
@@ -161,7 +159,7 @@ static void peripheralThreadTiming(){
 	}
 }
 
-static void determineTransmissionQuality( FailureCodes EssentialActionResult ){
+static void determineTransmissionQuality(FailureCodes EssentialActionResult) {
 	if (FailureCodes::NO_FAILURE == EssentialActionResult) {
 		if (LOW_LEVEL_CONTINUOUS_COUNTING_MAX > LowLevelSuccessfulTransmission) {
 			LowLevelSuccessfulTransmission += DelayMultiplierOnError;
@@ -172,8 +170,7 @@ static void determineTransmissionQuality( FailureCodes EssentialActionResult ){
 		LowLevelContinuousErrors = 0;
 	}
 	else {
-		if (LOW_LEVEL_CONTINUOUS_COUNTING_MAX
-				> LowLevelContinuousErrors) {
+		if (LOW_LEVEL_CONTINUOUS_COUNTING_MAX > LowLevelContinuousErrors) {
 			LowLevelContinuousErrors++;
 		}
 		if (LowLevelSuccessfulTransmission > DelayMultiplierOnError) {
@@ -183,50 +180,47 @@ static void determineTransmissionQuality( FailureCodes EssentialActionResult ){
 			LowLevelSuccessfulTransmission = 0;
 		}
 	}
-	atomic_store_explicit(&TransmissionQualityLowLevelIndicator,
-			LowLevelSuccessfulTransmission, std::memory_order_release);
-
+	atomic_store_explicit(&TransmissionQualityLowLevelIndicator, LowLevelSuccessfulTransmission, std::memory_order_release);
 }
 
 /// This function runs the second thread (FLTK is the main thread).
 /// The peripheral thread supports Modbus communication and sends signals to FLTK to refresh graphics.
-static void peripheralThreadHandler(){
+static void peripheralThreadHandler() {
 	usleep(100000UL); // 100 ms
 
 	PeripheralThreadTimeInMilliseconds = 0;
 	PeripheralThreadLoopStart = std::chrono::high_resolution_clock::now();
 	ModbusFsmStates FsmState = ModbusFsmStates::OPEN;
 
-	while( !atomic_load_explicit( &ClosePeripheralsFlag, std::memory_order_acquire )){
+	while (!atomic_load_explicit(&ClosePeripheralsFlag, std::memory_order_acquire)) {
 
 		peripheralThreadTiming();
 
 		// essential action
-		//normal mode of operation
+		// normal mode of operation
 		bool IsEssentialActionDone = false;
 		FailureCodes Result;
 
-		if (ModbusFsmStates::OPEN == FsmState){
+		if (ModbusFsmStates::OPEN == FsmState) {
 			FsmState = ModbusFsmStates::READING_INPUT_REGISTERS;
 			Result = readInputRegisters();
 			IsEssentialActionDone = true;
 		}
 
-		if (!IsEssentialActionDone && (ModbusFsmStates::READING_INPUT_REGISTERS == FsmState)){
+		if (!IsEssentialActionDone && (ModbusFsmStates::READING_INPUT_REGISTERS == FsmState)) {
 			FsmState = ModbusFsmStates::READING_COILS;
 			Result = readCoils();
 			IsEssentialActionDone = true;
 		}
 
-		if (!IsEssentialActionDone && (ModbusFsmStates::READING_COILS == FsmState)){
-			for (int J=0; J<NumberOfFaradayCupsToBeOperated; J++){
-				if (atomic_load_explicit( &ModbusCoilChangeReqest[J], std::memory_order_acquire )){
+		if (!IsEssentialActionDone && (ModbusFsmStates::READING_COILS == FsmState)) {
+			for (int J = 0; J < NumberOfFaradayCupsToBeOperated; J++) {
+				if (atomic_load_explicit(&ModbusCoilChangeReqest[J], std::memory_order_acquire)) {
 					FsmState = ModbusFsmStates::WRITING_COIL;
 
-					atomic_store_explicit( &ModbusCoilChangeReqest[J], false, std::memory_order_release );
-					Result = writeSingleCoil(
-						MODBUS_COILS_ADDRESS+COIL_OFFSET_IS_CUP_FORCED+J*MODBUS_COILS_PER_CUP,
-						atomic_load_explicit( &ModbusCoilRequestedValue[J], std::memory_order_acquire ) );
+					atomic_store_explicit(&ModbusCoilChangeReqest[J], false, std::memory_order_release);
+					Result = writeSingleCoil(MODBUS_COILS_ADDRESS + COIL_OFFSET_IS_CUP_FORCED + J * MODBUS_COILS_PER_CUP,
+					                         atomic_load_explicit(&ModbusCoilRequestedValue[J], std::memory_order_acquire));
 
 					IsEssentialActionDone = true;
 					break;
@@ -234,19 +228,19 @@ static void peripheralThreadHandler(){
 			}
 		}
 
-		if (!IsEssentialActionDone && (ModbusFsmStates::READING_COILS == FsmState)){
+		if (!IsEssentialActionDone && (ModbusFsmStates::READING_COILS == FsmState)) {
 			FsmState = ModbusFsmStates::READING_INPUT_REGISTERS;
 			Result = readInputRegisters();
 			IsEssentialActionDone = true;
 		}
 
-		if (!IsEssentialActionDone && (ModbusFsmStates::WRITING_COIL == FsmState)){
+		if (!IsEssentialActionDone && (ModbusFsmStates::WRITING_COIL == FsmState)) {
 			FsmState = ModbusFsmStates::READING_INPUT_REGISTERS;
 			Result = readInputRegisters();
-//				IsEssentialActionDone = true;
+			//				IsEssentialActionDone = true;
 		}
 
-		determineTransmissionQuality( Result );
+		determineTransmissionQuality(Result);
 
 #if 0 // debugging
 		std::chrono::high_resolution_clock::time_point TimeAfter = std::chrono::high_resolution_clock::now();
@@ -257,7 +251,6 @@ static void peripheralThreadHandler(){
 		if (ModbusFsmStates::READING_INPUT_REGISTERS == FsmState) {
 			Fl::awake(refreshGui, nullptr);
 		}
-
 
 #if 0 // debugging
 		static int DebugFsmStatesPrintoutCounter;
@@ -276,26 +269,25 @@ static void peripheralThreadHandler(){
 	} // while (...)
 	// exit
 	closeModbus();
-	atomic_store_explicit( &PeripheralsClosedFlag, true, std::memory_order_release );
+	atomic_store_explicit(&PeripheralsClosedFlag, true, std::memory_order_release);
 }
 
-bool isTransmissionCorrect(){
-	return atomic_load_explicit( &TransmissionQualityLowLevelIndicator, std::memory_order_acquire ) > TRANSMISSION_CORRECTNESS_LIMIT;
+bool isTransmissionCorrect() {
+	return atomic_load_explicit(&TransmissionQualityLowLevelIndicator, std::memory_order_acquire) > TRANSMISSION_CORRECTNESS_LIMIT;
 }
 
-char * getTransmissionQualityIndicatorTextForGui(){
+char *getTransmissionQualityIndicatorTextForGui() {
 	static char TransmissionQualityIndicatorText[10];
 	double TransmissionQualityIndicatorFactor =
-			(100.0 * atomic_load_explicit( &TransmissionQualityLowLevelIndicator, std::memory_order_acquire )) / (double)LOW_LEVEL_CONTINUOUS_COUNTING_MAX;
-	snprintf( TransmissionQualityIndicatorText, sizeof(TransmissionQualityIndicatorText)-1, "%5.1f%%", TransmissionQualityIndicatorFactor );
+	    (100.0 * atomic_load_explicit(&TransmissionQualityLowLevelIndicator, std::memory_order_acquire)) / (double)LOW_LEVEL_CONTINUOUS_COUNTING_MAX;
+	snprintf(TransmissionQualityIndicatorText, sizeof(TransmissionQualityIndicatorText) - 1, "%5.1f%%", TransmissionQualityIndicatorFactor);
 	return TransmissionQualityIndicatorText;
 }
 
-char * getTransmissionQualityIndicatorTextForDebugging(){
+char *getTransmissionQualityIndicatorTextForDebugging() {
 	static char TransmissionQualityIndicatorText[10];
 	double TransmissionQualityIndicatorFactor =
-			(100.0 * atomic_load_explicit( &TransmissionQualityLowLevelIndicator, std::memory_order_acquire )) / (double)LOW_LEVEL_CONTINUOUS_COUNTING_MAX;
-	snprintf( TransmissionQualityIndicatorText, sizeof(TransmissionQualityIndicatorText)-1, "%5.1f%%", TransmissionQualityIndicatorFactor );
+	    (100.0 * atomic_load_explicit(&TransmissionQualityLowLevelIndicator, std::memory_order_acquire)) / (double)LOW_LEVEL_CONTINUOUS_COUNTING_MAX;
+	snprintf(TransmissionQualityIndicatorText, sizeof(TransmissionQualityIndicatorText) - 1, "%5.1f%%", TransmissionQualityIndicatorFactor);
 	return TransmissionQualityIndicatorText;
 }
-

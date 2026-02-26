@@ -1,14 +1,14 @@
 /// @file settings_file.cpp
 
+#include <cassert>
+#include <climits> // for PATH_MAX
+#include <cstdlib> // for realpath
+#include <cstring>
 #include <fstream>
 #include <iostream>
-#include <climits>  // for PATH_MAX
-#include <libgen.h>  // for dirname
-#include <cstdlib>   // for realpath
+#include <libgen.h> // for dirname
 #include <regex>
 #include <stdexcept>
-#include <cassert>
-#include <cstring>
 
 #include "settings_file.h"
 
@@ -16,8 +16,8 @@
 // Preprocessor directives
 //.................................................................................................
 
-#define MAX_PROPAGATION_TIME_UPPER_LIMIT	10000	// in milliseconds
-#define MAX_PROPAGATION_TIME_LOWER_LIMIT	100		// in milliseconds
+#define MAX_PROPAGATION_TIME_UPPER_LIMIT 10000 // in milliseconds
+#define MAX_PROPAGATION_TIME_LOWER_LIMIT 100   // in milliseconds
 
 //.................................................................................................
 // Global variables
@@ -25,7 +25,7 @@
 
 /// This variable points to the serial port name defined in the settings text file
 /// (CONFIGURATION_FILE_NAME) or nullptr if there is no definition
-std::string * SerialPortRequestedNamePtr;
+std::string *SerialPortRequestedNamePtr;
 
 /// The value of the Modbus register is converted to current in uA using a linear
 /// function I=DirectionalCoefficient[.]*x+OffsetForZeroCurrent[.]; here we have directional coefficients
@@ -51,9 +51,9 @@ int NumberOfFaradayCupsToBeOperated;
 //.................................................................................................
 
 /// This variable is used to locate the configuration file
-static std::string* ConfigurationFilePathPtr;
+static std::string *ConfigurationFilePathPtr;
 
-static 	std::ifstream MyConfigurationFile;
+static std::ifstream MyConfigurationFile;
 
 static std::string SerialPortRequestedName;
 
@@ -66,13 +66,13 @@ static std::string ConfigurationFilePath;
 //.................................................................................................
 
 static FailureCodes initializations();
-static FailureCodes parseSerialPortName( const std::regex *PatternPtr, std::string *LinePtr );
-static FailureCodes parseFunctionFormula( const std::regex *PatternPtr, std::string *LinePtr, int CupIndex );
-static FailureCodes readDirectionalCoefficient( const std::string& InputText, int WhichCup);
-static FailureCodes readOffsetCoefficient( const std::string& SignText, const std::string& NumberText, int WhichCup);
-static FailureCodes parseCupName( const std::regex *PatternPtr, std::string *LinePtr, int CupIndex );
-static FailureCodes parseSingleInteger( const std::regex *PatternPtr, std::string *LinePtr, int *OutputValue,
-										int LowerLimit, int UpperLimit, const char* ParameterName );
+static FailureCodes parseSerialPortName(const std::regex *PatternPtr, std::string *LinePtr);
+static FailureCodes parseFunctionFormula(const std::regex *PatternPtr, std::string *LinePtr, int CupIndex);
+static FailureCodes readDirectionalCoefficient(const std::string &InputText, int WhichCup);
+static FailureCodes readOffsetCoefficient(const std::string &SignText, const std::string &NumberText, int WhichCup);
+static FailureCodes parseCupName(const std::regex *PatternPtr, std::string *LinePtr, int CupIndex);
+static FailureCodes parseSingleInteger(const std::regex *PatternPtr, std::string *LinePtr, int *OutputValue, int LowerLimit, int UpperLimit,
+                                       const char *ParameterName);
 static FailureCodes finalTest();
 
 //........................................................................................................
@@ -81,322 +81,316 @@ static FailureCodes finalTest();
 
 /// The function searches for the directory where the executable file is located
 /// @return code defined in FailureCodes
-FailureCodes determineApplicationPath( char* Argv0 ){
-    char Path[PATH_MAX];
-    ConfigurationFilePathPtr = nullptr;
+FailureCodes determineApplicationPath(char *Argv0) {
+	char Path[PATH_MAX];
+	ConfigurationFilePathPtr = nullptr;
 
-    if (realpath( Argv0, Path) != nullptr) {
-        ThisApplicationDirectory = dirname(Path);
-        ConfigurationFilePath = ThisApplicationDirectory;
-        ConfigurationFilePathPtr = &ConfigurationFilePath;
-        if (VerboseMode){
+	if (realpath(Argv0, Path) != nullptr) {
+		ThisApplicationDirectory = dirname(Path);
+		ConfigurationFilePath = ThisApplicationDirectory;
+		ConfigurationFilePathPtr = &ConfigurationFilePath;
+		if (VerboseMode) {
 #if 0
         	std::cout << "PATH_MAX= " << PATH_MAX << '\n';
 #endif
-        	std::cout << " Katalog programu: " << ThisApplicationDirectory << '\n';
-    	}
-    }
-    else {
-        std::cerr << "Nie udało się uzyskać ścieżki do programu." << '\n';
-        return FailureCodes::ERROR_SETTINGS_PATH;
-    }
-    return FailureCodes::NO_FAILURE;
+			std::cout << " Katalog programu: " << ThisApplicationDirectory << '\n';
+		}
+	}
+	else {
+		std::cerr << "Nie udało się uzyskać ścieżki do programu." << '\n';
+		return FailureCodes::ERROR_SETTINGS_PATH;
+	}
+	return FailureCodes::NO_FAILURE;
 }
 
 /// This function loads the configuration file and allocates an array of objects of type TransmissionChannel
 /// @return code defined in FailureCodes
 FailureCodes configurationFileParsing() {
-    FailureCodes Result;
+	FailureCodes Result;
 
-    Result = initializations();
-    if (FailureCodes::NO_FAILURE != Result){
-    	return Result;
-    }
+	Result = initializations();
+	if (FailureCodes::NO_FAILURE != Result) {
+		return Result;
+	}
 
 	std::regex PatternSerialPort(R"(\s*(?!#)Port szeregowy:\s*([^\s]+)\s*$)");
-    std::regex PatternCup1FunctionFormula(R"(\s*(?!#)Wzór na prądy w pierwszym kubku:\s*I\s*=\s*([0-9]*\.?[0-9]+(?:[eE][+\-]?\d+)?)\s*\*\s*\(\s*x\s*([+-])\s*(0x[0-9A-Fa-f]+|\d+)\s*\)\s*$)");
-    std::regex PatternCup2FunctionFormula(R"(\s*(?!#)Wzór na prądy w drugim kubku:\s*I\s*=\s*([0-9]*\.?[0-9]+(?:[eE][+\-]?\d+)?)\s*\*\s*\(\s*x\s*([+-])\s*(0x[0-9A-Fa-f]+|\d+)\s*\)\s*$)");
-    std::regex PatternCup3FunctionFormula(R"(\s*(?!#)Wzór na prądy w trzecim kubku:\s*I\s*=\s*([0-9]*\.?[0-9]+(?:[eE][+\-]?\d+)?)\s*\*\s*\(\s*x\s*([+-])\s*(0x[0-9A-Fa-f]+|\d+)\s*\)\s*$)");
-    std::regex PatternCup1Title(R"(\s*(?!#)Tytuł pierwszego kubka:\s*(.+)\s*$)");
-    std::regex PatternCup2Title(R"(\s*(?!#)Tytuł drugiego kubka:\s*(.+)\s*$)");
-    std::regex PatternCup3Title(R"(\s*(?!#)Tytuł trzeciego kubka:\s*(.+)\s*$)");
-    std::regex PatternMaxPropagationTime(R"(\s*(?!#)Limit czasu propagacji sygnału z krańcówki:\s*(\d+)\s*$)");
-    std::regex PatternFaradayCupsNumber(R"(\s*(?!#)Liczba kubków Faradaya do obsłużenia:\s*(\d+)\s*$)");
+	std::regex PatternCup1FunctionFormula(
+	    R"(\s*(?!#)Wzór na prądy w pierwszym kubku:\s*I\s*=\s*([0-9]*\.?[0-9]+(?:[eE][+\-]?\d+)?)\s*\*\s*\(\s*x\s*([+-])\s*(0x[0-9A-Fa-f]+|\d+)\s*\)\s*$)");
+	std::regex PatternCup2FunctionFormula(
+	    R"(\s*(?!#)Wzór na prądy w drugim kubku:\s*I\s*=\s*([0-9]*\.?[0-9]+(?:[eE][+\-]?\d+)?)\s*\*\s*\(\s*x\s*([+-])\s*(0x[0-9A-Fa-f]+|\d+)\s*\)\s*$)");
+	std::regex PatternCup3FunctionFormula(
+	    R"(\s*(?!#)Wzór na prądy w trzecim kubku:\s*I\s*=\s*([0-9]*\.?[0-9]+(?:[eE][+\-]?\d+)?)\s*\*\s*\(\s*x\s*([+-])\s*(0x[0-9A-Fa-f]+|\d+)\s*\)\s*$)");
+	std::regex PatternCup1Title(R"(\s*(?!#)Tytuł pierwszego kubka:\s*(.+)\s*$)");
+	std::regex PatternCup2Title(R"(\s*(?!#)Tytuł drugiego kubka:\s*(.+)\s*$)");
+	std::regex PatternCup3Title(R"(\s*(?!#)Tytuł trzeciego kubka:\s*(.+)\s*$)");
+	std::regex PatternMaxPropagationTime(R"(\s*(?!#)Limit czasu propagacji sygnału z krańcówki:\s*(\d+)\s*$)");
+	std::regex PatternFaradayCupsNumber(R"(\s*(?!#)Liczba kubków Faradaya do obsłużenia:\s*(\d+)\s*$)");
 
-    int LineNumber = 1;
-    std::string Line;
-    while (std::getline(MyConfigurationFile, Line)) {
-        if (VerboseMode){
-        	std::cout << " Linijka " << LineNumber << '\n';
-        }
+	int LineNumber = 1;
+	std::string Line;
+	while (std::getline(MyConfigurationFile, Line)) {
+		if (VerboseMode) {
+			std::cout << " Linijka " << LineNumber << '\n';
+		}
 
-        Result = parseSerialPortName( &PatternSerialPort, &Line );
-        if (FailureCodes::NO_FAILURE != Result){
-        	return Result;
-        }
+		Result = parseSerialPortName(&PatternSerialPort, &Line);
+		if (FailureCodes::NO_FAILURE != Result) {
+			return Result;
+		}
 
-        Result = parseFunctionFormula( &PatternCup1FunctionFormula, &Line, 0 );
-        if (FailureCodes::NO_FAILURE != Result){
-        	return Result;
-        }
+		Result = parseFunctionFormula(&PatternCup1FunctionFormula, &Line, 0);
+		if (FailureCodes::NO_FAILURE != Result) {
+			return Result;
+		}
 
-        Result = parseFunctionFormula( &PatternCup2FunctionFormula, &Line, 1 );
-        if (FailureCodes::NO_FAILURE != Result){
-        	return Result;
-        }
+		Result = parseFunctionFormula(&PatternCup2FunctionFormula, &Line, 1);
+		if (FailureCodes::NO_FAILURE != Result) {
+			return Result;
+		}
 
-        Result = parseFunctionFormula( &PatternCup3FunctionFormula, &Line, 2 );
-        if (FailureCodes::NO_FAILURE != Result){
-        	return Result;
-        }
+		Result = parseFunctionFormula(&PatternCup3FunctionFormula, &Line, 2);
+		if (FailureCodes::NO_FAILURE != Result) {
+			return Result;
+		}
 
-        Result = parseCupName( &PatternCup1Title, &Line, 0 );
-        if (FailureCodes::NO_FAILURE != Result){
-        	return Result;
-        }
+		Result = parseCupName(&PatternCup1Title, &Line, 0);
+		if (FailureCodes::NO_FAILURE != Result) {
+			return Result;
+		}
 
-        Result = parseCupName( &PatternCup2Title, &Line, 1 );
-        if (FailureCodes::NO_FAILURE != Result){
-        	return Result;
-        }
+		Result = parseCupName(&PatternCup2Title, &Line, 1);
+		if (FailureCodes::NO_FAILURE != Result) {
+			return Result;
+		}
 
-        Result = parseCupName( &PatternCup3Title, &Line, 2 );
-        if (FailureCodes::NO_FAILURE != Result){
-        	return Result;
-        }
+		Result = parseCupName(&PatternCup3Title, &Line, 2);
+		if (FailureCodes::NO_FAILURE != Result) {
+			return Result;
+		}
 
-        Result = parseSingleInteger( &PatternMaxPropagationTime, &Line, &MaximumPropagationTime,
-									 MAX_PROPAGATION_TIME_LOWER_LIMIT, MAX_PROPAGATION_TIME_UPPER_LIMIT,
-									 "maks. czas propagacji" );
-        if (FailureCodes::NO_FAILURE != Result){
-        	return Result;
-        }
+		Result = parseSingleInteger(&PatternMaxPropagationTime, &Line, &MaximumPropagationTime, MAX_PROPAGATION_TIME_LOWER_LIMIT,
+		                            MAX_PROPAGATION_TIME_UPPER_LIMIT, "maks. czas propagacji");
+		if (FailureCodes::NO_FAILURE != Result) {
+			return Result;
+		}
 
-        Result = parseSingleInteger( &PatternFaradayCupsNumber, &Line, &NumberOfFaradayCupsToBeOperated,
-									 1, CUPS_NUMBER, "Liczba kubków Faradaya do obsłużenia" );
-        if (FailureCodes::NO_FAILURE != Result){
-        	return Result;
-        }
+		Result = parseSingleInteger(&PatternFaradayCupsNumber, &Line, &NumberOfFaradayCupsToBeOperated, 1, CUPS_NUMBER,
+		                            "Liczba kubków Faradaya do obsłużenia");
+		if (FailureCodes::NO_FAILURE != Result) {
+			return Result;
+		}
 
-        LineNumber++;
-    }
+		LineNumber++;
+	}
 
-    Result = finalTest();
+	Result = finalTest();
 
-    return Result;
+	return Result;
 }
 
-static FailureCodes initializations(){
+static FailureCodes initializations() {
 	SerialPortRequestedNamePtr = nullptr;
-    for (int J=0; J<CUPS_NUMBER; J++){
-    	FormulaIsDefined[J] = false;
-    	CupDescriptionPtr[J][0] = 0;
-    }
+	for (int J = 0; J < CUPS_NUMBER; J++) {
+		FormulaIsDefined[J] = false;
+		CupDescriptionPtr[J][0] = 0;
+	}
 
-    NumberOfFaradayCupsToBeOperated = -1;
-    MaximumPropagationTime = -1;
+	NumberOfFaradayCupsToBeOperated = -1;
+	MaximumPropagationTime = -1;
 
-    // the configuration file is looked for in the directory where the executable is located, rather than in the working directory
+	// the configuration file is looked for in the directory where the executable is located, rather than in the working directory
 	*ConfigurationFilePathPtr += "/";
 	*ConfigurationFilePathPtr += CONFIGURATION_FILE_NAME;
 
 	// Check if the configuration file exists
-	MyConfigurationFile.open( ConfigurationFilePathPtr->c_str() ); // open file
-    if (!MyConfigurationFile.is_open()) {
-        std::cout << "Nie można otworzyć pliku: " << CONFIGURATION_FILE_NAME << '\n';
-        return FailureCodes::ERROR_SETTINGS_OPENING_FILE;
-    }
-    if (VerboseMode){
-    	std::cout << "Plik: " << CONFIGURATION_FILE_NAME << '\n';
-    }
-    return FailureCodes::NO_FAILURE;
+	MyConfigurationFile.open(ConfigurationFilePathPtr->c_str()); // open file
+	if (!MyConfigurationFile.is_open()) {
+		std::cout << "Nie można otworzyć pliku: " << CONFIGURATION_FILE_NAME << '\n';
+		return FailureCodes::ERROR_SETTINGS_OPENING_FILE;
+	}
+	if (VerboseMode) {
+		std::cout << "Plik: " << CONFIGURATION_FILE_NAME << '\n';
+	}
+	return FailureCodes::NO_FAILURE;
 }
 
-static FailureCodes parseSerialPortName( const std::regex *PatternPtr, std::string *LinePtr ){
-    std::smatch Matches;
-    if (std::regex_match( *LinePtr, Matches, *PatternPtr )) {
-    	if (nullptr == SerialPortRequestedNamePtr){
-        	SerialPortRequestedName = Matches[1];
-        	SerialPortRequestedNamePtr = &SerialPortRequestedName;
-            if (VerboseMode){
-            	std::cout << "  Opis portu szeregowego: [" << SerialPortRequestedName << "] w linii: [" << *LinePtr << "]" << '\n';
-            }
-    	}
-    	else{
-        	std::cout << "  Nadmiarowy opis portu szeregowego w linii: [" << *LinePtr << "]" << '\n';
-            return FailureCodes::ERROR_SETTINGS_EXCESSIVE_PORT_NAME;
-    	}
-    }
-    return FailureCodes::NO_FAILURE;
+static FailureCodes parseSerialPortName(const std::regex *PatternPtr, std::string *LinePtr) {
+	std::smatch Matches;
+	if (std::regex_match(*LinePtr, Matches, *PatternPtr)) {
+		if (nullptr == SerialPortRequestedNamePtr) {
+			SerialPortRequestedName = Matches[1];
+			SerialPortRequestedNamePtr = &SerialPortRequestedName;
+			if (VerboseMode) {
+				std::cout << "  Opis portu szeregowego: [" << SerialPortRequestedName << "] w linii: [" << *LinePtr << "]" << '\n';
+			}
+		}
+		else {
+			std::cout << "  Nadmiarowy opis portu szeregowego w linii: [" << *LinePtr << "]" << '\n';
+			return FailureCodes::ERROR_SETTINGS_EXCESSIVE_PORT_NAME;
+		}
+	}
+	return FailureCodes::NO_FAILURE;
 }
 
+static FailureCodes parseFunctionFormula(const std::regex *PatternPtr, std::string *LinePtr, int CupIndex) {
+	std::smatch Matches;
+	assert(CupIndex < CUPS_NUMBER);
+	if (std::regex_match(*LinePtr, Matches, *PatternPtr)) {
+		if (!FormulaIsDefined[CupIndex]) {
+			FormulaIsDefined[CupIndex] = true;
 
-static FailureCodes parseFunctionFormula( const std::regex *PatternPtr, std::string *LinePtr, int CupIndex ){
-    std::smatch Matches;
-    assert( CupIndex < CUPS_NUMBER );
-    if (std::regex_match(*LinePtr, Matches, *PatternPtr)) {
-    	if (!FormulaIsDefined[CupIndex]){
-    		FormulaIsDefined[CupIndex] = true;
+			std::string CoefficientText = Matches[1]; // floating point
+			std::string SignText = Matches[2];        // '+' or '-'
+			std::string OffsetText = Matches[3];      // decimal or hexadecimal 0x...
 
-    		std::string CoefficientText  = Matches[1]; // floating point
-    		std::string SignText         = Matches[2]; // '+' or '-'
-    		std::string OffsetText       = Matches[3]; // decimal or hexadecimal 0x...
+			FailureCodes Result = readDirectionalCoefficient(CoefficientText, CupIndex);
+			if (FailureCodes::NO_FAILURE != Result) {
+				return Result;
+			}
 
-    	    FailureCodes Result = readDirectionalCoefficient( CoefficientText, CupIndex );
-            if (FailureCodes::NO_FAILURE != Result){
-            	return Result;
-            }
+			Result = readOffsetCoefficient(SignText, OffsetText, CupIndex);
+			if (FailureCodes::NO_FAILURE != Result) {
+				return Result;
+			}
 
-            Result = readOffsetCoefficient( SignText, OffsetText, CupIndex );
-            if (FailureCodes::NO_FAILURE != Result){
-            	return Result;
-            }
-
-    		if (VerboseMode){
-    			if (OffsetForZeroCurrent[CupIndex] >= 0){
-    				std::cout << "  Formuła konwersji: I = " << DirectionalCoefficient[CupIndex] << " *(x" << "+" << OffsetForZeroCurrent[CupIndex] << ")  w linii: [" << *LinePtr << "]" << '\n';
-    			}
-    			else{
-    				std::cout << "  Formuła konwersji: I = " << DirectionalCoefficient[CupIndex] << " *(x"        << OffsetForZeroCurrent[CupIndex] << ")  w linii: [" << *LinePtr << "]" << '\n';
-    			}
-            }
-    	}
-    	else{
-        	std::cout << "  Nadmiarowa formuła konwersji w linii: [" << *LinePtr << "]" << '\n';
-            return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
-    	}
-    }
-    return FailureCodes::NO_FAILURE;
+			if (VerboseMode) {
+				if (OffsetForZeroCurrent[CupIndex] >= 0) {
+					std::cout << "  Formuła konwersji: I = " << DirectionalCoefficient[CupIndex] << " *(x" << "+" << OffsetForZeroCurrent[CupIndex]
+					          << ")  w linii: [" << *LinePtr << "]" << '\n';
+				}
+				else {
+					std::cout << "  Formuła konwersji: I = " << DirectionalCoefficient[CupIndex] << " *(x" << OffsetForZeroCurrent[CupIndex]
+					          << ")  w linii: [" << *LinePtr << "]" << '\n';
+				}
+			}
+		}
+		else {
+			std::cout << "  Nadmiarowa formuła konwersji w linii: [" << *LinePtr << "]" << '\n';
+			return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
+		}
+	}
+	return FailureCodes::NO_FAILURE;
 }
 
-static FailureCodes readDirectionalCoefficient( const std::string& InputText, int WhichCup){
+static FailureCodes readDirectionalCoefficient(const std::string &InputText, int WhichCup) {
 	try {
-		DirectionalCoefficient[WhichCup] = std::stod( InputText );
+		DirectionalCoefficient[WhichCup] = std::stod(InputText);
+	} catch (const std::invalid_argument &) {
+		std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << '\n';
+		return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
+	} catch (const std::out_of_range &) {
+		std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << '\n';
+		return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
 	}
-	catch (const std::invalid_argument&) {
-       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << '\n';
-       	return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
-	}
-	catch (const std::out_of_range&) {
-       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << '\n';
-       	return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
-	}
-    return FailureCodes::NO_FAILURE;
+	return FailureCodes::NO_FAILURE;
 }
 
-static FailureCodes readOffsetCoefficient( const std::string& SignText, const std::string& NumberText, int WhichCup){
+static FailureCodes readOffsetCoefficient(const std::string &SignText, const std::string &NumberText, int WhichCup) {
 	bool ChangeSign;
-	if (SignText == "+"){
+	if (SignText == "+") {
 		ChangeSign = false;
 	}
-	else if (SignText == "-"){
+	else if (SignText == "-") {
 		ChangeSign = true;
 	}
-	else{
-       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << '\n';
-       	return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
+	else {
+		std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << '\n';
+		return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
 	}
 
 	try {
-		OffsetForZeroCurrent[WhichCup] = std::stoi( NumberText, nullptr, 0 );
+		OffsetForZeroCurrent[WhichCup] = std::stoi(NumberText, nullptr, 0);
+	} catch (const std::invalid_argument &) {
+		std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << '\n';
+		return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
+	} catch (const std::out_of_range &) {
+		std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << '\n';
+		return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
 	}
-	catch (const std::invalid_argument&) {
-       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << '\n';
-       	return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
-	}
-	catch (const std::out_of_range&) {
-       	std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << '\n';
-       	return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
-	}
-	if (ChangeSign){
+	if (ChangeSign) {
 		OffsetForZeroCurrent[WhichCup] = -OffsetForZeroCurrent[WhichCup];
 	}
-    return FailureCodes::NO_FAILURE;
+	return FailureCodes::NO_FAILURE;
 }
 
-static FailureCodes parseCupName( const std::regex *PatternPtr, std::string *LinePtr, int CupIndex ){
-    std::smatch Matches;
-    assert( CupIndex < CUPS_NUMBER );
-    if (std::regex_match(*LinePtr, Matches, *PatternPtr)) {
-    	if (0 == CupDescriptionPtr[CupIndex][0]){
-   			std::string CupDescription = Matches[1];
-    		strncpy( CupDescriptionPtr[CupIndex], CupDescription.c_str(), sizeof(CupDescriptionPtr[0])-1 );
-    		if (VerboseMode){
-                	std::cout << "  Tytuł kubka " << CupIndex+1 << ": [" << CupDescriptionPtr[CupIndex] << "] w linii: [" << *LinePtr << "]" << '\n';
-            }
-    	}
-    	else{
-            	std::cout << "  Nadmiarowy tytuł kubka w linii: [" << *LinePtr << "]" << '\n';
-                return FailureCodes::ERROR_SETTINGS_EXCESSIVE_CUP_NAME;
-    	}
-    }
-    return FailureCodes::NO_FAILURE;
+static FailureCodes parseCupName(const std::regex *PatternPtr, std::string *LinePtr, int CupIndex) {
+	std::smatch Matches;
+	assert(CupIndex < CUPS_NUMBER);
+	if (std::regex_match(*LinePtr, Matches, *PatternPtr)) {
+		if (0 == CupDescriptionPtr[CupIndex][0]) {
+			std::string CupDescription = Matches[1];
+			strncpy(CupDescriptionPtr[CupIndex], CupDescription.c_str(), sizeof(CupDescriptionPtr[0]) - 1);
+			if (VerboseMode) {
+				std::cout << "  Tytuł kubka " << CupIndex + 1 << ": [" << CupDescriptionPtr[CupIndex] << "] w linii: [" << *LinePtr << "]" << '\n';
+			}
+		}
+		else {
+			std::cout << "  Nadmiarowy tytuł kubka w linii: [" << *LinePtr << "]" << '\n';
+			return FailureCodes::ERROR_SETTINGS_EXCESSIVE_CUP_NAME;
+		}
+	}
+	return FailureCodes::NO_FAILURE;
 }
 
-
-static FailureCodes parseSingleInteger( const std::regex *PatternPtr, std::string *LinePtr, int *OutputValue,
-										int LowerLimit, int UpperLimit, const char* ParameterName )
-{
-    std::smatch Matches;
-    if (std::regex_match(*LinePtr, Matches, *PatternPtr)) {
-    	if (*OutputValue < 0){
-			std::string ParameterText  = Matches[1]; // integer
+static FailureCodes parseSingleInteger(const std::regex *PatternPtr, std::string *LinePtr, int *OutputValue, int LowerLimit, int UpperLimit,
+                                       const char *ParameterName) {
+	std::smatch Matches;
+	if (std::regex_match(*LinePtr, Matches, *PatternPtr)) {
+		if (*OutputValue < 0) {
+			std::string ParameterText = Matches[1]; // integer
 
 			try {
-					*OutputValue = std::stoi(ParameterText, nullptr, 0);
-			}
-			catch (const std::invalid_argument&) {
+				*OutputValue = std::stoi(ParameterText, nullptr, 0);
+			} catch (const std::invalid_argument &) {
+				std::cout << "  Błąd konwersji na liczbę " << ParameterName << " (patrz " << __LINE__ << ")" << '\n';
+				return FailureCodes::ERROR_SETTINGS_CONVERTION_SINGLE_INTEGER;
+			} catch (const std::out_of_range &) {
 				std::cout << "  Błąd konwersji na liczbę " << ParameterName << " (patrz " << __LINE__ << ")" << '\n';
 				return FailureCodes::ERROR_SETTINGS_CONVERTION_SINGLE_INTEGER;
 			}
-			catch (const std::out_of_range&) {
-					std::cout << "  Błąd konwersji na liczbę " << ParameterName << " (patrz " << __LINE__ << ")" << '\n';
-				return FailureCodes::ERROR_SETTINGS_CONVERTION_SINGLE_INTEGER;
-			}
-			if ((*OutputValue < LowerLimit) || (*OutputValue > UpperLimit)){
+			if ((*OutputValue < LowerLimit) || (*OutputValue > UpperLimit)) {
 				*OutputValue = -1;
 				return FailureCodes::ERROR_SETTINGS_IMPROPER_SINGLE_INTEGER;
 			}
 
-			if (VerboseMode){
+			if (VerboseMode) {
 				std::cout << "  Odczytano parametr " << ParameterName << ": " << *OutputValue << ", w linii: [" << *LinePtr << "]" << '\n';
 			}
-    	}
-    	else{
-        	std::cout << "  Nadmiarowa deklaracja parametru " << ParameterName << ": [" << *LinePtr << "]" << '\n';
-            return FailureCodes::ERROR_SETTINGS_EXCESSIVE_PARAMETER;
-    	}
-    }
-    return FailureCodes::NO_FAILURE;
+		}
+		else {
+			std::cout << "  Nadmiarowa deklaracja parametru " << ParameterName << ": [" << *LinePtr << "]" << '\n';
+			return FailureCodes::ERROR_SETTINGS_EXCESSIVE_PARAMETER;
+		}
+	}
+	return FailureCodes::NO_FAILURE;
 }
 
-static FailureCodes finalTest(){
-    if (nullptr == SerialPortRequestedNamePtr){
-       	std::cout << " Nie znaleziono opisu portu szeregowego" << '\n';
-        return FailureCodes::ERROR_SETTINGS_PORT_NAME;
-    }
-    for (int J=0; J<CUPS_NUMBER; J++){
-    	if (!FormulaIsDefined[J]){
-           	std::cout << " Nie znaleziono formuły konwersji dla kubka " << J+1 << '\n';
-            return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
-    	}
-    }
-    for (int J=0; J<CUPS_NUMBER; J++){
-    	if (0 == CupDescriptionPtr[J][0]){
-       		snprintf( CupDescriptionPtr[J], sizeof(CupDescriptionPtr[0])-1, "Kubek nr %d", J+1 );
-       		if (VerboseMode){
-       			std::cout << " Nie znaleziono tytułu kubka " << J+1 << "; nadano tytuł zastępczy" << '\n';
-       		}
-    	}
-    }
-	if (VerboseMode){
+static FailureCodes finalTest() {
+	if (nullptr == SerialPortRequestedNamePtr) {
+		std::cout << " Nie znaleziono opisu portu szeregowego" << '\n';
+		return FailureCodes::ERROR_SETTINGS_PORT_NAME;
+	}
+	for (int J = 0; J < CUPS_NUMBER; J++) {
+		if (!FormulaIsDefined[J]) {
+			std::cout << " Nie znaleziono formuły konwersji dla kubka " << J + 1 << '\n';
+			return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
+		}
+	}
+	for (int J = 0; J < CUPS_NUMBER; J++) {
+		if (0 == CupDescriptionPtr[J][0]) {
+			snprintf(CupDescriptionPtr[J], sizeof(CupDescriptionPtr[0]) - 1, "Kubek nr %d", J + 1);
+			if (VerboseMode) {
+				std::cout << " Nie znaleziono tytułu kubka " << J + 1 << "; nadano tytuł zastępczy" << '\n';
+			}
+		}
+	}
+	if (VerboseMode) {
 		std::cout << " Koniec pliku konfiguracyjnego " << '\n';
 	}
 
 	// redundant assertions
-	assert( NumberOfFaradayCupsToBeOperated > 0 );
-	assert( NumberOfFaradayCupsToBeOperated <= CUPS_NUMBER );
+	assert(NumberOfFaradayCupsToBeOperated > 0);
+	assert(NumberOfFaradayCupsToBeOperated <= CUPS_NUMBER);
 
 	return FailureCodes::NO_FAILURE;
 }
-

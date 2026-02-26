@@ -5,7 +5,6 @@
 
 #include "config.h"
 
-
 //.................................................................................................
 // Function prototypes
 //.................................................................................................
@@ -16,9 +15,9 @@ void serialCommunicationStart();
 
 void serialCommunicationExit();
 
-char * getTransmissionQualityIndicatorTextForGui();
+char *getTransmissionQualityIndicatorTextForGui();
 
-char * getTransmissionQualityIndicatorTextForDebugging();
+char *getTransmissionQualityIndicatorTextForDebugging();
 
 bool isTransmissionCorrect();
 

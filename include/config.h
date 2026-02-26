@@ -7,20 +7,19 @@
 // Preprocessor directives
 //.................................................................................................
 
-#define CUPS_NUMBER							3
-#define VALUES_PER_DISC						5
-#define VISIBLE_VALUES_PER_DISC				3
+#define CUPS_NUMBER 3
+#define VALUES_PER_DISC 5
+#define VISIBLE_VALUES_PER_DISC 3
 
-#define CONFIGURATION_FILE_NAME				"PomiarWiązki.cfg"
+#define CONFIGURATION_FILE_NAME "PomiarWiązki.cfg"
 
-#define PERIPHERAL_THREAD_LOOP_DURATION		50	// milliseconds
-#define DELAY_MULTIPLIER_ON_ERROR			10
+#define PERIPHERAL_THREAD_LOOP_DURATION 50 // milliseconds
+#define DELAY_MULTIPLIER_ON_ERROR 10
 
-#define MODBUS_RESPONSE_TIMEOUT				40	// milliseconds
+#define MODBUS_RESPONSE_TIMEOUT 40 // milliseconds
 
-enum class FailureCodes
-{
-    NO_FAILURE,
+enum class FailureCodes {
+	NO_FAILURE,
 	ERROR_COMMAND_SYNTAX,
 	ERROR_SETTINGS_PATH,
 	ERROR_SETTINGS_OPENING_FILE,
@@ -48,6 +47,5 @@ extern bool VerboseMode;
 extern bool VeryVerboseMode;
 
 extern int StatusLevelForGui;
-
 
 #endif // SOURCE_CONFIG_H_

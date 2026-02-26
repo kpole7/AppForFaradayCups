@@ -11,7 +11,7 @@ FailureCodes readInputRegisters();
 
 FailureCodes readCoils();
 
-FailureCodes writeSingleCoil( uint16_t CoilAddress, bool NewValue );
+FailureCodes writeSingleCoil(uint16_t CoilAddress, bool NewValue);
 
 void closeModbus();
 

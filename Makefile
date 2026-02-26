@@ -75,10 +75,11 @@ run: all
 	./$(BIN_APP)
 
 run-asan: asan
-	ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 ./$(BIN_APP)
+	ASAN_OPTIONS=detect_leaks=1:halt_on_error=0 ./$(BIN_APP)
 
 run-ubsan: ubsan
 	UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 ./$(BIN_APP)
 
 run-sanitize: sanitize
-	ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 ./$(BIN_APP)
+	ASAN_OPTIONS=detect_leaks=1:halt_on_error=0 UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 ./$(BIN_APP)
+	

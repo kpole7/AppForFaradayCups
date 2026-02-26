@@ -3,14 +3,14 @@
 #ifndef SOURCE_SETTINGS_FILE_H_
 #define SOURCE_SETTINGS_FILE_H_
 
-#include <string>
 #include "config.h"
+#include <string>
 
 //.................................................................................................
 // Global variables
 //.................................................................................................
 
-extern std::string * SerialPortRequestedNamePtr;
+extern std::string *SerialPortRequestedNamePtr;
 
 extern double DirectionalCoefficient[CUPS_NUMBER];
 
@@ -28,7 +28,7 @@ extern int NumberOfFaradayCupsToBeOperated;
 // Global function prototypes
 //.................................................................................................
 
-FailureCodes determineApplicationPath( char* Argv0 );
+FailureCodes determineApplicationPath(char *Argv0);
 
 FailureCodes configurationFileParsing();
 

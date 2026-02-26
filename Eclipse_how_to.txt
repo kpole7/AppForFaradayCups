@@ -1,3 +1,12 @@
 File > Import > Existing code as Makefile project
 C++
 GNU Autotools Tolchain
+
+
+Properties
+    C/C++ General
+        Path and Symbols
+            Includes
+                /usr/include/modbus
+                /home/krzysztof/LocalSoftware/AppForFaradayCups/include
+
