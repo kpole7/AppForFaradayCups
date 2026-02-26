@@ -1,0 +1,1149 @@
+krzysztof:~/LocalSoftware/AppForFaradayCups$ make clean
+rm -rf build
+krzysztof:~/LocalSoftware/AppForFaradayCups$ make run-asan
+rm -rf build
+mkdir -p build/source/
+g++ -g -rdynamic -Wall -Wextra -Wpedantic -Iinclude -I/usr/include/modbus -MMD -MP -O1 -fno-omit-frame-pointer -fsanitize=address -o build/source/main.o -c source/main.cpp
+mkdir -p build/source/
+g++ -g -rdynamic -Wall -Wextra -Wpedantic -Iinclude -I/usr/include/modbus -MMD -MP -O1 -fno-omit-frame-pointer -fsanitize=address -o build/source/peripheral_thread.o -c source/peripheral_thread.cpp
+mkdir -p build/source/
+g++ -g -rdynamic -Wall -Wextra -Wpedantic -Iinclude -I/usr/include/modbus -MMD -MP -O1 -fno-omit-frame-pointer -fsanitize=address -o build/source/shared_data.o -c source/shared_data.cpp
+mkdir -p build/source/
+g++ -g -rdynamic -Wall -Wextra -Wpedantic -Iinclude -I/usr/include/modbus -MMD -MP -O1 -fno-omit-frame-pointer -fsanitize=address -o build/source/modbus_rtu_master.o -c source/modbus_rtu_master.cpp
+mkdir -p build/source/
+g++ -g -rdynamic -Wall -Wextra -Wpedantic -Iinclude -I/usr/include/modbus -MMD -MP -O1 -fno-omit-frame-pointer -fsanitize=address -o build/source/gui_widgets.o -c source/gui_widgets.cpp
+mkdir -p build/source/
+g++ -g -rdynamic -Wall -Wextra -Wpedantic -Iinclude -I/usr/include/modbus -MMD -MP -O1 -fno-omit-frame-pointer -fsanitize=address -o build/source/settings_file.o -c source/settings_file.cpp
+In file included from /usr/include/c++/13/regex:50,
+                 from source/settings_file.cpp:8:
+In constructor ‘std::function<_Res(_ArgTypes ...)>::function(std::function<_Res(_ArgTypes ...)>&&) [with _Res = bool; _ArgTypes = {char}]’,
+    inlined from ‘std::__detail::_State<_Char_type>::_State(std::__detail::_State<_Char_type>&&) [with _Char_type = char]’ at /usr/include/c++/13/bits/regex_automaton.h:149:4,
+    inlined from ‘std::__detail::_StateIdT std::__detail::_NFA<_TraitsT>::_M_insert_subexpr_end() [with _TraitsT = std::__cxx11::regex_traits<char>]’ at /usr/include/c++/13/bits/regex_automaton.h:290:24:
+/usr/include/c++/13/bits/std_function.h:405:42: warning: ‘*(std::function<bool(char)>*)((char*)&__tmp + offsetof(std::__detail::_StateT, std::__detail::_State<char>::<unnamed>.std::__detail::_State_base::<unnamed>)).std::function<bool(char)>::_M_invoker’ may be used uninitialized [-Wmaybe-uninitialized]
+  405 |       : _Function_base(), _M_invoker(__x._M_invoker)
+      |                                      ~~~~^~~~~~~~~~
+In file included from /usr/include/c++/13/regex:65:
+/usr/include/c++/13/bits/regex_automaton.h: In member function ‘std::__detail::_StateIdT std::__detail::_NFA<_TraitsT>::_M_insert_subexpr_end() [with _TraitsT = std::__cxx11::regex_traits<char>]’:
+/usr/include/c++/13/bits/regex_automaton.h:287:17: note: ‘__tmp’ declared here
+  287 |         _StateT __tmp(_S_opcode_subexpr_end);
+      |                 ^~~~~
+In member function ‘bool std::_Function_base::_M_empty() const’,
+    inlined from ‘std::function<_Res(_ArgTypes ...)>::operator bool() const [with _Res = bool; _ArgTypes = {char}]’ at /usr/include/c++/13/bits/std_function.h:574:25,
+    inlined from ‘std::function<_Res(_ArgTypes ...)>::function(std::function<_Res(_ArgTypes ...)>&&) [with _Res = bool; _ArgTypes = {char}]’ at /usr/include/c++/13/bits/std_function.h:407:6,
+    inlined from ‘std::__detail::_State<_Char_type>::_State(std::__detail::_State<_Char_type>&&) [with _Char_type = char]’ at /usr/include/c++/13/bits/regex_automaton.h:149:4,
+    inlined from ‘std::__detail::_StateIdT std::__detail::_NFA<_TraitsT>::_M_insert_subexpr_end() [with _TraitsT = std::__cxx11::regex_traits<char>]’ at /usr/include/c++/13/bits/regex_automaton.h:290:24:
+/usr/include/c++/13/bits/std_function.h:247:37: warning: ‘*(const std::_Function_base*)((char*)&__tmp + offsetof(std::__detail::_StateT, std::__detail::_State<char>::<unnamed>.std::__detail::_State_base::<unnamed>)).std::_Function_base::_M_manager’ may be used uninitialized [-Wmaybe-uninitialized]
+  247 |     bool _M_empty() const { return !_M_manager; }
+      |                                     ^~~~~~~~~~
+/usr/include/c++/13/bits/regex_automaton.h: In member function ‘std::__detail::_StateIdT std::__detail::_NFA<_TraitsT>::_M_insert_subexpr_end() [with _TraitsT = std::__cxx11::regex_traits<char>]’:
+/usr/include/c++/13/bits/regex_automaton.h:287:17: note: ‘__tmp’ declared here
+  287 |         _StateT __tmp(_S_opcode_subexpr_end);
+      |                 ^~~~~
+In constructor ‘std::function<_Res(_ArgTypes ...)>::function(std::function<_Res(_ArgTypes ...)>&&) [with _Res = bool; _ArgTypes = {char}]’,
+    inlined from ‘std::__detail::_State<_Char_type>::_State(std::__detail::_State<_Char_type>&&) [with _Char_type = char]’ at /usr/include/c++/13/bits/regex_automaton.h:149:4,
+    inlined from ‘std::__detail::_StateIdT std::__detail::_NFA<_TraitsT>::_M_insert_subexpr_begin() [with _TraitsT = std::__cxx11::regex_traits<char>]’ at /usr/include/c++/13/bits/regex_automaton.h:281:24:
+/usr/include/c++/13/bits/std_function.h:405:42: warning: ‘*(std::function<bool(char)>*)((char*)&__tmp + offsetof(std::__detail::_StateT, std::__detail::_State<char>::<unnamed>.std::__detail::_State_base::<unnamed>)).std::function<bool(char)>::_M_invoker’ may be used uninitialized [-Wmaybe-uninitialized]
+  405 |       : _Function_base(), _M_invoker(__x._M_invoker)
+      |                                      ~~~~^~~~~~~~~~
+/usr/include/c++/13/bits/regex_automaton.h: In member function ‘std::__detail::_StateIdT std::__detail::_NFA<_TraitsT>::_M_insert_subexpr_begin() [with _TraitsT = std::__cxx11::regex_traits<char>]’:
+/usr/include/c++/13/bits/regex_automaton.h:279:17: note: ‘__tmp’ declared here
+  279 |         _StateT __tmp(_S_opcode_subexpr_begin);
+      |                 ^~~~~
+In member function ‘bool std::_Function_base::_M_empty() const’,
+    inlined from ‘std::function<_Res(_ArgTypes ...)>::operator bool() const [with _Res = bool; _ArgTypes = {char}]’ at /usr/include/c++/13/bits/std_function.h:574:25,
+    inlined from ‘std::function<_Res(_ArgTypes ...)>::function(std::function<_Res(_ArgTypes ...)>&&) [with _Res = bool; _ArgTypes = {char}]’ at /usr/include/c++/13/bits/std_function.h:407:6,
+    inlined from ‘std::__detail::_State<_Char_type>::_State(std::__detail::_State<_Char_type>&&) [with _Char_type = char]’ at /usr/include/c++/13/bits/regex_automaton.h:149:4,
+    inlined from ‘std::__detail::_StateIdT std::__detail::_NFA<_TraitsT>::_M_insert_subexpr_begin() [with _TraitsT = std::__cxx11::regex_traits<char>]’ at /usr/include/c++/13/bits/regex_automaton.h:281:24:
+/usr/include/c++/13/bits/std_function.h:247:37: warning: ‘*(const std::_Function_base*)((char*)&__tmp + offsetof(std::__detail::_StateT, std::__detail::_State<char>::<unnamed>.std::__detail::_State_base::<unnamed>)).std::_Function_base::_M_manager’ may be used uninitialized [-Wmaybe-uninitialized]
+  247 |     bool _M_empty() const { return !_M_manager; }
+      |                                     ^~~~~~~~~~
+/usr/include/c++/13/bits/regex_automaton.h: In member function ‘std::__detail::_StateIdT std::__detail::_NFA<_TraitsT>::_M_insert_subexpr_begin() [with _TraitsT = std::__cxx11::regex_traits<char>]’:
+/usr/include/c++/13/bits/regex_automaton.h:279:17: note: ‘__tmp’ declared here
+  279 |         _StateT __tmp(_S_opcode_subexpr_begin);
+      |                 ^~~~~
+In constructor ‘std::function<_Res(_ArgTypes ...)>::function(std::function<_Res(_ArgTypes ...)>&&) [with _Res = bool; _ArgTypes = {char}]’,
+    inlined from ‘std::__detail::_State<_Char_type>::_State(std::__detail::_State<_Char_type>&&) [with _Char_type = char]’ at /usr/include/c++/13/bits/regex_automaton.h:149:4,
+    inlined from ‘std::__detail::_StateIdT std::__detail::_NFA<_TraitsT>::_M_insert_backref(std::size_t) [with _TraitsT = std::__cxx11::regex_traits<char>]’ at /usr/include/c++/13/bits/regex_automaton.tcc:173:29:
+/usr/include/c++/13/bits/std_function.h:405:42: warning: ‘*(std::function<bool(char)>*)((char*)&__tmp + offsetof(std::__detail::_StateT, std::__detail::_State<char>::<unnamed>.std::__detail::_State_base::<unnamed>)).std::function<bool(char)>::_M_invoker’ may be used uninitialized [-Wmaybe-uninitialized]
+  405 |       : _Function_base(), _M_invoker(__x._M_invoker)
+      |                                      ~~~~^~~~~~~~~~
+In file included from /usr/include/c++/13/bits/regex_automaton.h:400:
+/usr/include/c++/13/bits/regex_automaton.tcc: In member function ‘std::__detail::_StateIdT std::__detail::_NFA<_TraitsT>::_M_insert_backref(std::size_t) [with _TraitsT = std::__cxx11::regex_traits<char>]’:
+/usr/include/c++/13/bits/regex_automaton.tcc:171:15: note: ‘__tmp’ declared here
+  171 |       _StateT __tmp(_S_opcode_backref);
+      |               ^~~~~
+In member function ‘bool std::_Function_base::_M_empty() const’,
+    inlined from ‘std::function<_Res(_ArgTypes ...)>::operator bool() const [with _Res = bool; _ArgTypes = {char}]’ at /usr/include/c++/13/bits/std_function.h:574:25,
+    inlined from ‘std::function<_Res(_ArgTypes ...)>::function(std::function<_Res(_ArgTypes ...)>&&) [with _Res = bool; _ArgTypes = {char}]’ at /usr/include/c++/13/bits/std_function.h:407:6,
+    inlined from ‘std::__detail::_State<_Char_type>::_State(std::__detail::_State<_Char_type>&&) [with _Char_type = char]’ at /usr/include/c++/13/bits/regex_automaton.h:149:4,
+    inlined from ‘std::__detail::_StateIdT std::__detail::_NFA<_TraitsT>::_M_insert_backref(std::size_t) [with _TraitsT = std::__cxx11::regex_traits<char>]’ at /usr/include/c++/13/bits/regex_automaton.tcc:173:29:
+/usr/include/c++/13/bits/std_function.h:247:37: warning: ‘*(const std::_Function_base*)((char*)&__tmp + offsetof(std::__detail::_StateT, std::__detail::_State<char>::<unnamed>.std::__detail::_State_base::<unnamed>)).std::_Function_base::_M_manager’ may be used uninitialized [-Wmaybe-uninitialized]
+  247 |     bool _M_empty() const { return !_M_manager; }
+      |                                     ^~~~~~~~~~
+/usr/include/c++/13/bits/regex_automaton.tcc: In member function ‘std::__detail::_StateIdT std::__detail::_NFA<_TraitsT>::_M_insert_backref(std::size_t) [with _TraitsT = std::__cxx11::regex_traits<char>]’:
+/usr/include/c++/13/bits/regex_automaton.tcc:171:15: note: ‘__tmp’ declared here
+  171 |       _StateT __tmp(_S_opcode_backref);
+      |               ^~~~~
+In constructor ‘std::function<_Res(_ArgTypes ...)>::function(std::function<_Res(_ArgTypes ...)>&&) [with _Res = bool; _ArgTypes = {char}]’,
+    inlined from ‘std::__detail::_State<_Char_type>::_State(std::__detail::_State<_Char_type>&&) [with _Char_type = char]’ at /usr/include/c++/13/bits/regex_automaton.h:149:4,
+    inlined from ‘std::__detail::_StateIdT std::__detail::_NFA<_TraitsT>::_M_insert_repeat(std::__detail::_StateIdT, std::__detail::_StateIdT, bool) [with _TraitsT = std::__cxx11::regex_traits<char>]’ at /usr/include/c++/13/bits/regex_automaton.h:263:24:
+/usr/include/c++/13/bits/std_function.h:405:42: warning: ‘*(std::function<bool(char)>*)((char*)&__tmp + offsetof(std::__detail::_StateT, std::__detail::_State<char>::<unnamed>.std::__detail::_State_base::<unnamed>)).std::function<bool(char)>::_M_invoker’ may be used uninitialized [-Wmaybe-uninitialized]
+  405 |       : _Function_base(), _M_invoker(__x._M_invoker)
+      |                                      ~~~~^~~~~~~~~~
+/usr/include/c++/13/bits/regex_automaton.h: In member function ‘std::__detail::_StateIdT std::__detail::_NFA<_TraitsT>::_M_insert_repeat(std::__detail::_StateIdT, std::__detail::_StateIdT, bool) [with _TraitsT = std::__cxx11::regex_traits<char>]’:
+/usr/include/c++/13/bits/regex_automaton.h:257:17: note: ‘__tmp’ declared here
+  257 |         _StateT __tmp(_S_opcode_repeat);
+      |                 ^~~~~
+In member function ‘bool std::_Function_base::_M_empty() const’,
+    inlined from ‘std::function<_Res(_ArgTypes ...)>::operator bool() const [with _Res = bool; _ArgTypes = {char}]’ at /usr/include/c++/13/bits/std_function.h:574:25,
+    inlined from ‘std::function<_Res(_ArgTypes ...)>::function(std::function<_Res(_ArgTypes ...)>&&) [with _Res = bool; _ArgTypes = {char}]’ at /usr/include/c++/13/bits/std_function.h:407:6,
+    inlined from ‘std::__detail::_State<_Char_type>::_State(std::__detail::_State<_Char_type>&&) [with _Char_type = char]’ at /usr/include/c++/13/bits/regex_automaton.h:149:4,
+    inlined from ‘std::__detail::_StateIdT std::__detail::_NFA<_TraitsT>::_M_insert_repeat(std::__detail::_StateIdT, std::__detail::_StateIdT, bool) [with _TraitsT = std::__cxx11::regex_traits<char>]’ at /usr/include/c++/13/bits/regex_automaton.h:263:24:
+/usr/include/c++/13/bits/std_function.h:247:37: warning: ‘*(const std::_Function_base*)((char*)&__tmp + offsetof(std::__detail::_StateT, std::__detail::_State<char>::<unnamed>.std::__detail::_State_base::<unnamed>)).std::_Function_base::_M_manager’ may be used uninitialized [-Wmaybe-uninitialized]
+  247 |     bool _M_empty() const { return !_M_manager; }
+      |                                     ^~~~~~~~~~
+/usr/include/c++/13/bits/regex_automaton.h: In member function ‘std::__detail::_StateIdT std::__detail::_NFA<_TraitsT>::_M_insert_repeat(std::__detail::_StateIdT, std::__detail::_StateIdT, bool) [with _TraitsT = std::__cxx11::regex_traits<char>]’:
+/usr/include/c++/13/bits/regex_automaton.h:257:17: note: ‘__tmp’ declared here
+  257 |         _StateT __tmp(_S_opcode_repeat);
+      |                 ^~~~~
+In constructor ‘std::function<_Res(_ArgTypes ...)>::function(std::function<_Res(_ArgTypes ...)>&&) [with _Res = bool; _ArgTypes = {char}]’,
+    inlined from ‘std::__detail::_State<_Char_type>::_State(std::__detail::_State<_Char_type>&&) [with _Char_type = char]’ at /usr/include/c++/13/bits/regex_automaton.h:149:4,
+    inlined from ‘std::__detail::_StateIdT std::__detail::_NFA<_TraitsT>::_M_insert_alt(std::__detail::_StateIdT, std::__detail::_StateIdT, bool) [with _TraitsT = std::__cxx11::regex_traits<char>]’ at /usr/include/c++/13/bits/regex_automaton.h:251:24,
+    inlined from ‘void std::__detail::_Compiler<_TraitsT>::_M_disjunction() [with _TraitsT = std::__cxx11::regex_traits<char>]’ at /usr/include/c++/13/bits/regex_compiler.tcc:103:18:
+/usr/include/c++/13/bits/std_function.h:405:42: warning: ‘*(std::function<bool(char)>*)((char*)&__tmp + offsetof(std::__detail::_StateT, std::__detail::_State<char>::<unnamed>.std::__detail::_State_base::<unnamed>)).std::function<bool(char)>::_M_invoker’ may be used uninitialized [-Wmaybe-uninitialized]
+  405 |       : _Function_base(), _M_invoker(__x._M_invoker)
+      |                                      ~~~~^~~~~~~~~~
+/usr/include/c++/13/bits/regex_automaton.h: In member function ‘void std::__detail::_Compiler<_TraitsT>::_M_disjunction() [with _TraitsT = std::__cxx11::regex_traits<char>]’:
+/usr/include/c++/13/bits/regex_automaton.h:246:17: note: ‘__tmp’ declared here
+  246 |         _StateT __tmp(_S_opcode_alternative);
+      |                 ^~~~~
+In member function ‘bool std::_Function_base::_M_empty() const’,
+    inlined from ‘std::function<_Res(_ArgTypes ...)>::operator bool() const [with _Res = bool; _ArgTypes = {char}]’ at /usr/include/c++/13/bits/std_function.h:574:25,
+    inlined from ‘std::function<_Res(_ArgTypes ...)>::function(std::function<_Res(_ArgTypes ...)>&&) [with _Res = bool; _ArgTypes = {char}]’ at /usr/include/c++/13/bits/std_function.h:407:6,
+    inlined from ‘std::__detail::_State<_Char_type>::_State(std::__detail::_State<_Char_type>&&) [with _Char_type = char]’ at /usr/include/c++/13/bits/regex_automaton.h:149:4,
+    inlined from ‘std::__detail::_StateIdT std::__detail::_NFA<_TraitsT>::_M_insert_alt(std::__detail::_StateIdT, std::__detail::_StateIdT, bool) [with _TraitsT = std::__cxx11::regex_traits<char>]’ at /usr/include/c++/13/bits/regex_automaton.h:251:24,
+    inlined from ‘void std::__detail::_Compiler<_TraitsT>::_M_disjunction() [with _TraitsT = std::__cxx11::regex_traits<char>]’ at /usr/include/c++/13/bits/regex_compiler.tcc:103:18:
+/usr/include/c++/13/bits/std_function.h:247:37: warning: ‘*(const std::_Function_base*)((char*)&__tmp + offsetof(std::__detail::_StateT, std::__detail::_State<char>::<unnamed>.std::__detail::_State_base::<unnamed>)).std::_Function_base::_M_manager’ may be used uninitialized [-Wmaybe-uninitialized]
+  247 |     bool _M_empty() const { return !_M_manager; }
+      |                                     ^~~~~~~~~~
+/usr/include/c++/13/bits/regex_automaton.h: In member function ‘void std::__detail::_Compiler<_TraitsT>::_M_disjunction() [with _TraitsT = std::__cxx11::regex_traits<char>]’:
+/usr/include/c++/13/bits/regex_automaton.h:246:17: note: ‘__tmp’ declared here
+  246 |         _StateT __tmp(_S_opcode_alternative);
+      |                 ^~~~~
+In constructor ‘std::function<_Res(_ArgTypes ...)>::function(std::function<_Res(_ArgTypes ...)>&&) [with _Res = bool; _ArgTypes = {char}]’,
+    inlined from ‘std::__detail::_State<_Char_type>::_State(std::__detail::_State<_Char_type>&&) [with _Char_type = char]’ at /usr/include/c++/13/bits/regex_automaton.h:149:4,
+    inlined from ‘std::__detail::_StateIdT std::__detail::_NFA<_TraitsT>::_M_insert_word_bound(bool) [with _TraitsT = std::__cxx11::regex_traits<char>]’ at /usr/include/c++/13/bits/regex_automaton.h:309:24,
+    inlined from ‘bool std::__detail::_Compiler<_TraitsT>::_M_assertion() [with _TraitsT = std::__cxx11::regex_traits<char>]’ at /usr/include/c++/13/bits/regex_compiler.tcc:153:16:
+/usr/include/c++/13/bits/std_function.h:405:42: warning: ‘*(std::function<bool(char)>*)((char*)&__tmp + offsetof(std::__detail::_StateT, std::__detail::_State<char>::<unnamed>.std::__detail::_State_base::<unnamed>)).std::function<bool(char)>::_M_invoker’ may be used uninitialized [-Wmaybe-uninitialized]
+  405 |       : _Function_base(), _M_invoker(__x._M_invoker)
+      |                                      ~~~~^~~~~~~~~~
+/usr/include/c++/13/bits/regex_automaton.h: In member function ‘bool std::__detail::_Compiler<_TraitsT>::_M_assertion() [with _TraitsT = std::__cxx11::regex_traits<char>]’:
+/usr/include/c++/13/bits/regex_automaton.h:307:17: note: ‘__tmp’ declared here
+  307 |         _StateT __tmp(_S_opcode_word_boundary);
+      |                 ^~~~~
+In member function ‘bool std::_Function_base::_M_empty() const’,
+    inlined from ‘std::function<_Res(_ArgTypes ...)>::operator bool() const [with _Res = bool; _ArgTypes = {char}]’ at /usr/include/c++/13/bits/std_function.h:574:25,
+    inlined from ‘std::function<_Res(_ArgTypes ...)>::function(std::function<_Res(_ArgTypes ...)>&&) [with _Res = bool; _ArgTypes = {char}]’ at /usr/include/c++/13/bits/std_function.h:407:6,
+    inlined from ‘std::__detail::_State<_Char_type>::_State(std::__detail::_State<_Char_type>&&) [with _Char_type = char]’ at /usr/include/c++/13/bits/regex_automaton.h:149:4,
+    inlined from ‘std::__detail::_StateIdT std::__detail::_NFA<_TraitsT>::_M_insert_word_bound(bool) [with _TraitsT = std::__cxx11::regex_traits<char>]’ at /usr/include/c++/13/bits/regex_automaton.h:309:24,
+    inlined from ‘bool std::__detail::_Compiler<_TraitsT>::_M_assertion() [with _TraitsT = std::__cxx11::regex_traits<char>]’ at /usr/include/c++/13/bits/regex_compiler.tcc:153:16:
+/usr/include/c++/13/bits/std_function.h:247:37: warning: ‘*(const std::_Function_base*)((char*)&__tmp + offsetof(std::__detail::_StateT, std::__detail::_State<char>::<unnamed>.std::__detail::_State_base::<unnamed>)).std::_Function_base::_M_manager’ may be used uninitialized [-Wmaybe-uninitialized]
+  247 |     bool _M_empty() const { return !_M_manager; }
+      |                                     ^~~~~~~~~~
+/usr/include/c++/13/bits/regex_automaton.h: In member function ‘bool std::__detail::_Compiler<_TraitsT>::_M_assertion() [with _TraitsT = std::__cxx11::regex_traits<char>]’:
+/usr/include/c++/13/bits/regex_automaton.h:307:17: note: ‘__tmp’ declared here
+  307 |         _StateT __tmp(_S_opcode_word_boundary);
+      |                 ^~~~~
+In constructor ‘std::function<_Res(_ArgTypes ...)>::function(std::function<_Res(_ArgTypes ...)>&&) [with _Res = bool; _ArgTypes = {char}]’,
+    inlined from ‘std::__detail::_State<_Char_type>::_State(std::__detail::_State<_Char_type>&&) [with _Char_type = char]’ at /usr/include/c++/13/bits/regex_automaton.h:149:4,
+    inlined from ‘std::__detail::_StateIdT std::__detail::_NFA<_TraitsT>::_M_insert_lookahead(std::__detail::_StateIdT, bool) [with _TraitsT = std::__cxx11::regex_traits<char>]’ at /usr/include/c++/13/bits/regex_automaton.h:318:24,
+    inlined from ‘bool std::__detail::_Compiler<_TraitsT>::_M_assertion() [with _TraitsT = std::__cxx11::regex_traits<char>]’ at /usr/include/c++/13/bits/regex_compiler.tcc:164:8:
+/usr/include/c++/13/bits/std_function.h:405:42: warning: ‘*(std::function<bool(char)>*)((char*)&__tmp + offsetof(std::__detail::_StateT, std::__detail::_State<char>::<unnamed>.std::__detail::_State_base::<unnamed>)).std::function<bool(char)>::_M_invoker’ may be used uninitialized [-Wmaybe-uninitialized]
+  405 |       : _Function_base(), _M_invoker(__x._M_invoker)
+      |                                      ~~~~^~~~~~~~~~
+/usr/include/c++/13/bits/regex_automaton.h: In member function ‘bool std::__detail::_Compiler<_TraitsT>::_M_assertion() [with _TraitsT = std::__cxx11::regex_traits<char>]’:
+/usr/include/c++/13/bits/regex_automaton.h:315:17: note: ‘__tmp’ declared here
+  315 |         _StateT __tmp(_S_opcode_subexpr_lookahead);
+      |                 ^~~~~
+In member function ‘bool std::_Function_base::_M_empty() const’,
+    inlined from ‘std::function<_Res(_ArgTypes ...)>::operator bool() const [with _Res = bool; _ArgTypes = {char}]’ at /usr/include/c++/13/bits/std_function.h:574:25,
+    inlined from ‘std::function<_Res(_ArgTypes ...)>::function(std::function<_Res(_ArgTypes ...)>&&) [with _Res = bool; _ArgTypes = {char}]’ at /usr/include/c++/13/bits/std_function.h:407:6,
+    inlined from ‘std::__detail::_State<_Char_type>::_State(std::__detail::_State<_Char_type>&&) [with _Char_type = char]’ at /usr/include/c++/13/bits/regex_automaton.h:149:4,
+    inlined from ‘std::__detail::_StateIdT std::__detail::_NFA<_TraitsT>::_M_insert_lookahead(std::__detail::_StateIdT, bool) [with _TraitsT = std::__cxx11::regex_traits<char>]’ at /usr/include/c++/13/bits/regex_automaton.h:318:24,
+    inlined from ‘bool std::__detail::_Compiler<_TraitsT>::_M_assertion() [with _TraitsT = std::__cxx11::regex_traits<char>]’ at /usr/include/c++/13/bits/regex_compiler.tcc:164:8:
+/usr/include/c++/13/bits/std_function.h:247:37: warning: ‘*(const std::_Function_base*)((char*)&__tmp + offsetof(std::__detail::_StateT, std::__detail::_State<char>::<unnamed>.std::__detail::_State_base::<unnamed>)).std::_Function_base::_M_manager’ may be used uninitialized [-Wmaybe-uninitialized]
+  247 |     bool _M_empty() const { return !_M_manager; }
+      |                                     ^~~~~~~~~~
+/usr/include/c++/13/bits/regex_automaton.h: In member function ‘bool std::__detail::_Compiler<_TraitsT>::_M_assertion() [with _TraitsT = std::__cxx11::regex_traits<char>]’:
+/usr/include/c++/13/bits/regex_automaton.h:315:17: note: ‘__tmp’ declared here
+  315 |         _StateT __tmp(_S_opcode_subexpr_lookahead);
+      |                 ^~~~~
+g++ -o build/appForFaradayCups build/source/main.o build/source/peripheral_thread.o build/source/shared_data.o build/source/modbus_rtu_master.o build/source/gui_widgets.o build/source/settings_file.o -g -rdynamic -lfltk -lX11 -lpthread -lmodbus -lfltk_images -lpng -lz -O1 -fno-omit-frame-pointer -fsanitize=address
+cp PomiarWiązki.cfg build
+cp doc/*.pdf build
+ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 ./build/appForFaradayCups
+
+=================================================================
+==33938==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 3072 byte(s) in 3 object(s) allocated from:
+    #0 0x78de42cfc778 in realloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:85
+    #1 0x78de428af8aa  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x228aa) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428be6ca  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x316ca) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b911b in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c11b) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #5 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #6 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b82fc6 in fl_normal_label(Fl_Label const*, int, int, int, int, unsigned int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdfc6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b8311d in Fl_Widget::draw_label(int, int, int, int, unsigned int) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbe11d) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #17 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #18 0x642c3bebd5f4 in main source/main.cpp:139
+    #19 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #20 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #21 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Direct leak of 1024 byte(s) in 1 object(s) allocated from:
+    #0 0x78de42cfc778 in realloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:85
+    #1 0x78de428af8aa  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x228aa) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428be6ca  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x316ca) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b911b in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c11b) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #5 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #6 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b82fc6 in fl_normal_label(Fl_Label const*, int, int, int, int, unsigned int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdfc6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b8311d in Fl_Widget::draw_label(int, int, int, int, unsigned int) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbe11d) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x642c3bebd5f4 in main source/main.cpp:139
+    #17 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #18 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #19 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Direct leak of 1024 byte(s) in 1 object(s) allocated from:
+    #0 0x78de42cfc778 in realloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:85
+    #1 0x78de428af8aa  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x228aa) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428be6ca  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x316ca) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b911b in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c11b) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #5 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #6 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b82f0e in fl_normal_measure(Fl_Label const*, int&, int&) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdf0e) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b37e96 in Fl_Menu_Item::measure(int*, Fl_Menu_ const*) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x72e96) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b3bae6 in Fl_Menu_Bar::draw() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x76ae6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #17 0x642c3bebd5f4 in main source/main.cpp:139
+    #18 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #19 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #20 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Direct leak of 256 byte(s) in 1 object(s) allocated from:
+    #0 0x78de42cfd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x78de428af7fc  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x227fc) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428b3ed8  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x26ed8) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428c2331  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x35331) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de4243793f  (/lib/x86_64-linux-gnu/libexpat.so.1+0xa93f) (BuildId: 6634bb422dbd36f2476c855381ab1020a2455eb4)
+    #5 0x78de42438772  (/lib/x86_64-linux-gnu/libexpat.so.1+0xb772) (BuildId: 6634bb422dbd36f2476c855381ab1020a2455eb4)
+    #6 0x78de42439747  (/lib/x86_64-linux-gnu/libexpat.so.1+0xc747) (BuildId: 6634bb422dbd36f2476c855381ab1020a2455eb4)
+    #7 0x78de4243bf70  (/lib/x86_64-linux-gnu/libexpat.so.1+0xef70) (BuildId: 6634bb422dbd36f2476c855381ab1020a2455eb4)
+    #8 0x78de4243146e  (/lib/x86_64-linux-gnu/libexpat.so.1+0x446e) (BuildId: 6634bb422dbd36f2476c855381ab1020a2455eb4)
+    #9 0x78de4243e43d in XML_ParseBuffer (/lib/x86_64-linux-gnu/libexpat.so.1+0x1143d) (BuildId: 6634bb422dbd36f2476c855381ab1020a2455eb4)
+    #10 0x78de428bc83d  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2f83d) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #11 0x78de428bd22c  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x3022c) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #12 0x78de428bd478  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x30478) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #13 0x78de428c0436  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x33436) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #14 0x78de4243793f  (/lib/x86_64-linux-gnu/libexpat.so.1+0xa93f) (BuildId: 6634bb422dbd36f2476c855381ab1020a2455eb4)
+    #15 0x78de42438772  (/lib/x86_64-linux-gnu/libexpat.so.1+0xb772) (BuildId: 6634bb422dbd36f2476c855381ab1020a2455eb4)
+    #16 0x78de42439747  (/lib/x86_64-linux-gnu/libexpat.so.1+0xc747) (BuildId: 6634bb422dbd36f2476c855381ab1020a2455eb4)
+    #17 0x78de4243bf70  (/lib/x86_64-linux-gnu/libexpat.so.1+0xef70) (BuildId: 6634bb422dbd36f2476c855381ab1020a2455eb4)
+    #18 0x78de4243146e  (/lib/x86_64-linux-gnu/libexpat.so.1+0x446e) (BuildId: 6634bb422dbd36f2476c855381ab1020a2455eb4)
+    #19 0x78de4243e43d in XML_ParseBuffer (/lib/x86_64-linux-gnu/libexpat.so.1+0x1143d) (BuildId: 6634bb422dbd36f2476c855381ab1020a2455eb4)
+    #20 0x78de428bc83d  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2f83d) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #21 0x78de428bd22c  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x3022c) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #22 0x78de428a43b5  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x173b5) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #23 0x78de4289f1c0  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x121c0) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #24 0x78de428a46bc in FcInit (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x176bc) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #25 0x78de428f669a in XftInit (/lib/x86_64-linux-gnu/libXft.so.2+0x1169a) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #26 0x78de428f66d1 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x116d1) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #27 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #28 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #29 0x78de42b82f0e in fl_normal_measure(Fl_Label const*, int&, int&) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdf0e) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+
+Direct leak of 256 byte(s) in 1 object(s) allocated from:
+    #0 0x78de42cfd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x78de428af7fc  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x227fc) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428b3ed8  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x26ed8) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428ec557  (/lib/x86_64-linux-gnu/libXft.so.2+0x7557) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #4 0x78de428ec67b  (/lib/x86_64-linux-gnu/libXft.so.2+0x767b) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #5 0x78de428edfa5 in XftDefaultHasRender (/lib/x86_64-linux-gnu/libXft.so.2+0x8fa5) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #6 0x78de428ee437 in XftDefaultSubstitute (/lib/x86_64-linux-gnu/libXft.so.2+0x9437) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #7 0x78de428f671d in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x1171d) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #8 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b82f0e in fl_normal_measure(Fl_Label const*, int&, int&) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdf0e) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b37e96 in Fl_Menu_Item::measure(int*, Fl_Menu_ const*) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x72e96) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b3bae6 in Fl_Menu_Bar::draw() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x76ae6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #17 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #18 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #19 0x642c3bebd5f4 in main source/main.cpp:139
+    #20 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #21 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #22 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 2016 byte(s) in 63 object(s) allocated from:
+    #0 0x78de42cfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x78de428af287  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x22287) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428b9108 in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c108) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #5 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #6 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b82fc6 in fl_normal_label(Fl_Label const*, int, int, int, int, unsigned int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdfc6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b8311d in Fl_Widget::draw_label(int, int, int, int, unsigned int) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbe11d) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #17 0x642c3bebd5f4 in main source/main.cpp:139
+    #18 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #19 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #20 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 1280 byte(s) in 40 object(s) allocated from:
+    #0 0x78de42cfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x78de428af287  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x22287) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428b93de in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c3de) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #5 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #6 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b82fc6 in fl_normal_label(Fl_Label const*, int, int, int, int, unsigned int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdfc6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b8311d in Fl_Widget::draw_label(int, int, int, int, unsigned int) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbe11d) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #17 0x642c3bebd5f4 in main source/main.cpp:139
+    #18 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #19 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #20 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 864 byte(s) in 27 object(s) allocated from:
+    #0 0x78de42cfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x78de428b3e6f  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x26e6f) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428b9270 in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c270) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #5 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #6 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b82fc6 in fl_normal_label(Fl_Label const*, int, int, int, int, unsigned int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdfc6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b8311d in Fl_Widget::draw_label(int, int, int, int, unsigned int) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbe11d) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #17 0x642c3bebd5f4 in main source/main.cpp:139
+    #18 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #19 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #20 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 672 byte(s) in 21 object(s) allocated from:
+    #0 0x78de42cfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x78de428af287  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x22287) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428b9108 in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c108) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #5 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #6 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b82fc6 in fl_normal_label(Fl_Label const*, int, int, int, int, unsigned int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdfc6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b8311d in Fl_Widget::draw_label(int, int, int, int, unsigned int) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbe11d) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x642c3bebd5f4 in main source/main.cpp:139
+    #16 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #17 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #18 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 672 byte(s) in 21 object(s) allocated from:
+    #0 0x78de42cfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x78de428af287  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x22287) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428b9108 in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c108) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #5 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #6 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b82f0e in fl_normal_measure(Fl_Label const*, int&, int&) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdf0e) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b37e96 in Fl_Menu_Item::measure(int*, Fl_Menu_ const*) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x72e96) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b3bae6 in Fl_Menu_Bar::draw() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x76ae6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x642c3bebd5f4 in main source/main.cpp:139
+    #17 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #18 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #19 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 448 byte(s) in 14 object(s) allocated from:
+    #0 0x78de42cfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x78de428af287  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x22287) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428b93de in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c3de) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #5 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #6 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b82fc6 in fl_normal_label(Fl_Label const*, int, int, int, int, unsigned int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdfc6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b8311d in Fl_Widget::draw_label(int, int, int, int, unsigned int) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbe11d) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x642c3bebd5f4 in main source/main.cpp:139
+    #16 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #17 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #18 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 446 byte(s) in 18 object(s) allocated from:
+    #0 0x78de42cf74e8 in strdup ../../../../src/libsanitizer/asan/asan_interceptors.cpp:578
+    #1 0x78de428aeff7 in FcValueSave (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x21ff7) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428af23e  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2223e) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b93de in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c3de) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #5 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #6 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b82fc6 in fl_normal_label(Fl_Label const*, int, int, int, int, unsigned int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdfc6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b8311d in Fl_Widget::draw_label(int, int, int, int, unsigned int) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbe11d) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #17 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #18 0x642c3bebd5f4 in main source/main.cpp:139
+    #19 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #20 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #21 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 416 byte(s) in 13 object(s) allocated from:
+    #0 0x78de42cfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x78de428af287  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x22287) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428b93de in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c3de) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #5 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #6 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b82f0e in fl_normal_measure(Fl_Label const*, int&, int&) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdf0e) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b37e96 in Fl_Menu_Item::measure(int*, Fl_Menu_ const*) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x72e96) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b3bae6 in Fl_Menu_Bar::draw() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x76ae6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x642c3bebd5f4 in main source/main.cpp:139
+    #17 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #18 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #19 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 288 byte(s) in 9 object(s) allocated from:
+    #0 0x78de42cfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x78de428af11f  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2211f) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428b8f9b in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2bf9b) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #5 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #6 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b82fc6 in fl_normal_label(Fl_Label const*, int, int, int, int, unsigned int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdfc6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b8311d in Fl_Widget::draw_label(int, int, int, int, unsigned int) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbe11d) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #17 0x642c3bebd5f4 in main source/main.cpp:139
+    #18 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #19 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #20 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 288 byte(s) in 9 object(s) allocated from:
+    #0 0x78de42cfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x78de428af11f  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2211f) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428b8f7b in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2bf7b) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #5 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #6 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b82fc6 in fl_normal_label(Fl_Label const*, int, int, int, int, unsigned int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdfc6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b8311d in Fl_Widget::draw_label(int, int, int, int, unsigned int) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbe11d) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #17 0x642c3bebd5f4 in main source/main.cpp:139
+    #18 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #19 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #20 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 288 byte(s) in 9 object(s) allocated from:
+    #0 0x78de42cfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x78de428b3e6f  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x26e6f) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428b9270 in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c270) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #5 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #6 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b82f0e in fl_normal_measure(Fl_Label const*, int&, int&) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdf0e) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b37e96 in Fl_Menu_Item::measure(int*, Fl_Menu_ const*) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x72e96) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b3bae6 in Fl_Menu_Bar::draw() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x76ae6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x642c3bebd5f4 in main source/main.cpp:139
+    #17 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #18 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #19 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 288 byte(s) in 9 object(s) allocated from:
+    #0 0x78de42cfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x78de428b3e6f  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x26e6f) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428b9270 in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c270) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #5 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #6 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b82fc6 in fl_normal_label(Fl_Label const*, int, int, int, int, unsigned int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdfc6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b8311d in Fl_Widget::draw_label(int, int, int, int, unsigned int) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbe11d) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x642c3bebd5f4 in main source/main.cpp:139
+    #16 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #17 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #18 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 170 byte(s) in 6 object(s) allocated from:
+    #0 0x78de42cf74e8 in strdup ../../../../src/libsanitizer/asan/asan_interceptors.cpp:578
+    #1 0x78de428aeff7 in FcValueSave (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x21ff7) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428af23e  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2223e) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b93de in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c3de) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #5 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #6 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b82fc6 in fl_normal_label(Fl_Label const*, int, int, int, int, unsigned int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdfc6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b8311d in Fl_Widget::draw_label(int, int, int, int, unsigned int) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbe11d) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x642c3bebd5f4 in main source/main.cpp:139
+    #17 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #18 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #19 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 144 byte(s) in 6 object(s) allocated from:
+    #0 0x78de42cf74e8 in strdup ../../../../src/libsanitizer/asan/asan_interceptors.cpp:578
+    #1 0x78de428aeff7 in FcValueSave (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x21ff7) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428af23e  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2223e) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b93de in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c3de) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #5 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #6 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b82f0e in fl_normal_measure(Fl_Label const*, int&, int&) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdf0e) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b37e96 in Fl_Menu_Item::measure(int*, Fl_Menu_ const*) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x72e96) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b3bae6 in Fl_Menu_Bar::draw() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x76ae6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #17 0x642c3bebd5f4 in main source/main.cpp:139
+    #18 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #19 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #20 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 144 byte(s) in 3 object(s) allocated from:
+    #0 0x78de42cfd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x78de428a4dca in FcLangSetCopy (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x17dca) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428af0a9 in FcValueSave (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x220a9) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b3e86  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x26e86) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428b9270 in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c270) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #5 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #6 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #7 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b82fc6 in fl_normal_label(Fl_Label const*, int, int, int, int, unsigned int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdfc6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b8311d in Fl_Widget::draw_label(int, int, int, int, unsigned int) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbe11d) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #17 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #18 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #19 0x642c3bebd5f4 in main source/main.cpp:139
+    #20 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #21 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #22 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 129 byte(s) in 12 object(s) allocated from:
+    #0 0x78de42cf74e8 in strdup ../../../../src/libsanitizer/asan/asan_interceptors.cpp:578
+    #1 0x78de428aeff7 in FcValueSave (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x21ff7) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428af23e  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2223e) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b9108 in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c108) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #5 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #6 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b82fc6 in fl_normal_label(Fl_Label const*, int, int, int, int, unsigned int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdfc6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b8311d in Fl_Widget::draw_label(int, int, int, int, unsigned int) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbe11d) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #17 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #18 0x642c3bebd5f4 in main source/main.cpp:139
+    #19 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #20 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #21 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 99 byte(s) in 9 object(s) allocated from:
+    #0 0x78de42cf74e8 in strdup ../../../../src/libsanitizer/asan/asan_interceptors.cpp:578
+    #1 0x78de428aeff7 in FcValueSave (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x21ff7) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428af132  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x22132) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b8f7b in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2bf7b) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #5 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #6 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b82fc6 in fl_normal_label(Fl_Label const*, int, int, int, int, unsigned int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdfc6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b8311d in Fl_Widget::draw_label(int, int, int, int, unsigned int) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbe11d) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #17 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #18 0x642c3bebd5f4 in main source/main.cpp:139
+    #19 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #20 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #21 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 96 byte(s) in 3 object(s) allocated from:
+    #0 0x78de42cfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x78de428af11f  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2211f) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428b8f9b in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2bf9b) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #5 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #6 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b82fc6 in fl_normal_label(Fl_Label const*, int, int, int, int, unsigned int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdfc6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b8311d in Fl_Widget::draw_label(int, int, int, int, unsigned int) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbe11d) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x642c3bebd5f4 in main source/main.cpp:139
+    #16 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #17 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #18 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 96 byte(s) in 3 object(s) allocated from:
+    #0 0x78de42cfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x78de428af11f  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2211f) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428b8f7b in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2bf7b) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #5 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #6 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b82fc6 in fl_normal_label(Fl_Label const*, int, int, int, int, unsigned int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdfc6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b8311d in Fl_Widget::draw_label(int, int, int, int, unsigned int) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbe11d) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x642c3bebd5f4 in main source/main.cpp:139
+    #16 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #17 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #18 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 96 byte(s) in 3 object(s) allocated from:
+    #0 0x78de42cfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x78de428af11f  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2211f) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428b8f9b in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2bf9b) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #5 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #6 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b82f0e in fl_normal_measure(Fl_Label const*, int&, int&) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdf0e) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b37e96 in Fl_Menu_Item::measure(int*, Fl_Menu_ const*) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x72e96) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b3bae6 in Fl_Menu_Bar::draw() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x76ae6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x642c3bebd5f4 in main source/main.cpp:139
+    #17 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #18 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #19 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 96 byte(s) in 3 object(s) allocated from:
+    #0 0x78de42cfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x78de428af11f  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2211f) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428b8f7b in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2bf7b) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #5 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #6 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b82f0e in fl_normal_measure(Fl_Label const*, int&, int&) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdf0e) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b37e96 in Fl_Menu_Item::measure(int*, Fl_Menu_ const*) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x72e96) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b3bae6 in Fl_Menu_Bar::draw() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x76ae6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x642c3bebd5f4 in main source/main.cpp:139
+    #17 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #18 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #19 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 64 byte(s) in 2 object(s) allocated from:
+    #0 0x78de42cfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x78de428b3e6f  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x26e6f) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428c2331  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x35331) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de4243793f  (/lib/x86_64-linux-gnu/libexpat.so.1+0xa93f) (BuildId: 6634bb422dbd36f2476c855381ab1020a2455eb4)
+    #4 0x78de42438772  (/lib/x86_64-linux-gnu/libexpat.so.1+0xb772) (BuildId: 6634bb422dbd36f2476c855381ab1020a2455eb4)
+    #5 0x78de42439747  (/lib/x86_64-linux-gnu/libexpat.so.1+0xc747) (BuildId: 6634bb422dbd36f2476c855381ab1020a2455eb4)
+    #6 0x78de4243bf70  (/lib/x86_64-linux-gnu/libexpat.so.1+0xef70) (BuildId: 6634bb422dbd36f2476c855381ab1020a2455eb4)
+    #7 0x78de4243146e  (/lib/x86_64-linux-gnu/libexpat.so.1+0x446e) (BuildId: 6634bb422dbd36f2476c855381ab1020a2455eb4)
+    #8 0x78de4243e43d in XML_ParseBuffer (/lib/x86_64-linux-gnu/libexpat.so.1+0x1143d) (BuildId: 6634bb422dbd36f2476c855381ab1020a2455eb4)
+    #9 0x78de428bc83d  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2f83d) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #10 0x78de428bd22c  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x3022c) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #11 0x78de428bd478  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x30478) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #12 0x78de428c0436  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x33436) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #13 0x78de4243793f  (/lib/x86_64-linux-gnu/libexpat.so.1+0xa93f) (BuildId: 6634bb422dbd36f2476c855381ab1020a2455eb4)
+    #14 0x78de42438772  (/lib/x86_64-linux-gnu/libexpat.so.1+0xb772) (BuildId: 6634bb422dbd36f2476c855381ab1020a2455eb4)
+    #15 0x78de42439747  (/lib/x86_64-linux-gnu/libexpat.so.1+0xc747) (BuildId: 6634bb422dbd36f2476c855381ab1020a2455eb4)
+    #16 0x78de4243bf70  (/lib/x86_64-linux-gnu/libexpat.so.1+0xef70) (BuildId: 6634bb422dbd36f2476c855381ab1020a2455eb4)
+    #17 0x78de4243146e  (/lib/x86_64-linux-gnu/libexpat.so.1+0x446e) (BuildId: 6634bb422dbd36f2476c855381ab1020a2455eb4)
+    #18 0x78de4243e43d in XML_ParseBuffer (/lib/x86_64-linux-gnu/libexpat.so.1+0x1143d) (BuildId: 6634bb422dbd36f2476c855381ab1020a2455eb4)
+    #19 0x78de428bc83d  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2f83d) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #20 0x78de428bd22c  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x3022c) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #21 0x78de428a43b5  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x173b5) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #22 0x78de4289f1c0  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x121c0) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #23 0x78de428a46bc in FcInit (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x176bc) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #24 0x78de428f669a in XftInit (/lib/x86_64-linux-gnu/libXft.so.2+0x1169a) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #25 0x78de428f66d1 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x116d1) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #26 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #27 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #28 0x78de42b82f0e in fl_normal_measure(Fl_Label const*, int&, int&) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdf0e) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #29 0x78de42b37e96 in Fl_Menu_Item::measure(int*, Fl_Menu_ const*) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x72e96) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+
+Indirect leak of 48 byte(s) in 1 object(s) allocated from:
+    #0 0x78de42cfd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x78de428a4dca in FcLangSetCopy (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x17dca) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428af0a9 in FcValueSave (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x220a9) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b3e86  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x26e86) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428b9270 in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c270) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #5 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #6 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #7 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b82fc6 in fl_normal_label(Fl_Label const*, int, int, int, int, unsigned int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdfc6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b8311d in Fl_Widget::draw_label(int, int, int, int, unsigned int) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbe11d) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #17 0x642c3bebd5f4 in main source/main.cpp:139
+    #18 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #19 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #20 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 48 byte(s) in 1 object(s) allocated from:
+    #0 0x78de42cfd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x78de428a4dca in FcLangSetCopy (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x17dca) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428af0a9 in FcValueSave (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x220a9) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b3e86  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x26e86) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428b9270 in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c270) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #5 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #6 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #7 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b82f0e in fl_normal_measure(Fl_Label const*, int&, int&) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdf0e) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b37e96 in Fl_Menu_Item::measure(int*, Fl_Menu_ const*) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x72e96) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b3bae6 in Fl_Menu_Bar::draw() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x76ae6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #17 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #18 0x642c3bebd5f4 in main source/main.cpp:139
+    #19 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #20 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #21 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 43 byte(s) in 4 object(s) allocated from:
+    #0 0x78de42cf74e8 in strdup ../../../../src/libsanitizer/asan/asan_interceptors.cpp:578
+    #1 0x78de428aeff7 in FcValueSave (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x21ff7) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428af23e  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2223e) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b9108 in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c108) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #5 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #6 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b82f0e in fl_normal_measure(Fl_Label const*, int&, int&) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdf0e) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b37e96 in Fl_Menu_Item::measure(int*, Fl_Menu_ const*) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x72e96) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b3bae6 in Fl_Menu_Bar::draw() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x76ae6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #17 0x642c3bebd5f4 in main source/main.cpp:139
+    #18 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #19 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #20 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 43 byte(s) in 4 object(s) allocated from:
+    #0 0x78de42cf74e8 in strdup ../../../../src/libsanitizer/asan/asan_interceptors.cpp:578
+    #1 0x78de428aeff7 in FcValueSave (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x21ff7) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428af23e  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2223e) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b9108 in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c108) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #5 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #6 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b82fc6 in fl_normal_label(Fl_Label const*, int, int, int, int, unsigned int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdfc6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b8311d in Fl_Widget::draw_label(int, int, int, int, unsigned int) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbe11d) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x642c3bebd5f4 in main source/main.cpp:139
+    #17 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #18 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #19 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 39 byte(s) in 3 object(s) allocated from:
+    #0 0x78de42cf74e8 in strdup ../../../../src/libsanitizer/asan/asan_interceptors.cpp:578
+    #1 0x78de428aeff7 in FcValueSave (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x21ff7) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428af132  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x22132) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b8f7b in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2bf7b) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #5 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #6 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b82fc6 in fl_normal_label(Fl_Label const*, int, int, int, int, unsigned int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdfc6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b8311d in Fl_Widget::draw_label(int, int, int, int, unsigned int) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbe11d) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x642c3bebd5f4 in main source/main.cpp:139
+    #17 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #18 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #19 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 36 byte(s) in 3 object(s) allocated from:
+    #0 0x78de42cf74e8 in strdup ../../../../src/libsanitizer/asan/asan_interceptors.cpp:578
+    #1 0x78de428aeff7 in FcValueSave (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x21ff7) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428af132  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x22132) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b8f7b in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2bf7b) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #5 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #6 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b82f0e in fl_normal_measure(Fl_Label const*, int&, int&) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdf0e) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b37e96 in Fl_Menu_Item::measure(int*, Fl_Menu_ const*) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x72e96) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b3bae6 in Fl_Menu_Bar::draw() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x76ae6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #17 0x642c3bebd5f4 in main source/main.cpp:139
+    #18 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #19 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #20 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 32 byte(s) in 1 object(s) allocated from:
+    #0 0x78de42cfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x78de428b3e6f  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x26e6f) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428ec24d  (/lib/x86_64-linux-gnu/libXft.so.2+0x724d) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #3 0x78de428ec446  (/lib/x86_64-linux-gnu/libXft.so.2+0x7446) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #4 0x78de428ec67b  (/lib/x86_64-linux-gnu/libXft.so.2+0x767b) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #5 0x78de428edfa5 in XftDefaultHasRender (/lib/x86_64-linux-gnu/libXft.so.2+0x8fa5) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #6 0x78de428ee437 in XftDefaultSubstitute (/lib/x86_64-linux-gnu/libXft.so.2+0x9437) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #7 0x78de428f671d in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x1171d) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #8 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b82f0e in fl_normal_measure(Fl_Label const*, int&, int&) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdf0e) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b37e96 in Fl_Menu_Item::measure(int*, Fl_Menu_ const*) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x72e96) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b3bae6 in Fl_Menu_Bar::draw() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x76ae6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #17 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #18 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #19 0x642c3bebd5f4 in main source/main.cpp:139
+    #20 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #21 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #22 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 32 byte(s) in 1 object(s) allocated from:
+    #0 0x78de42cfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x78de428b3e6f  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x26e6f) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428ec557  (/lib/x86_64-linux-gnu/libXft.so.2+0x7557) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #3 0x78de428ec67b  (/lib/x86_64-linux-gnu/libXft.so.2+0x767b) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #4 0x78de428edfa5 in XftDefaultHasRender (/lib/x86_64-linux-gnu/libXft.so.2+0x8fa5) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #5 0x78de428ee437 in XftDefaultSubstitute (/lib/x86_64-linux-gnu/libXft.so.2+0x9437) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #6 0x78de428f671d in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x1171d) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #7 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b82f0e in fl_normal_measure(Fl_Label const*, int&, int&) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdf0e) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b37e96 in Fl_Menu_Item::measure(int*, Fl_Menu_ const*) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x72e96) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b3bae6 in Fl_Menu_Bar::draw() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x76ae6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #17 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #18 0x642c3bebd5f4 in main source/main.cpp:139
+    #19 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #20 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #21 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 32 byte(s) in 1 object(s) allocated from:
+    #0 0x78de42cfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x78de428b3e6f  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x26e6f) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428ec4da  (/lib/x86_64-linux-gnu/libXft.so.2+0x74da) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #3 0x78de428ec67b  (/lib/x86_64-linux-gnu/libXft.so.2+0x767b) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #4 0x78de428edfa5 in XftDefaultHasRender (/lib/x86_64-linux-gnu/libXft.so.2+0x8fa5) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #5 0x78de428ee437 in XftDefaultSubstitute (/lib/x86_64-linux-gnu/libXft.so.2+0x9437) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #6 0x78de428f671d in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x1171d) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #7 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b82f0e in fl_normal_measure(Fl_Label const*, int&, int&) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdf0e) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b37e96 in Fl_Menu_Item::measure(int*, Fl_Menu_ const*) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x72e96) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b3bae6 in Fl_Menu_Bar::draw() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x76ae6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #17 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #18 0x642c3bebd5f4 in main source/main.cpp:139
+    #19 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #20 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #21 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 32 byte(s) in 1 object(s) allocated from:
+    #0 0x78de42cfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x78de428b3e6f  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x26e6f) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428ec24d  (/lib/x86_64-linux-gnu/libXft.so.2+0x724d) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #3 0x78de428ec4c4  (/lib/x86_64-linux-gnu/libXft.so.2+0x74c4) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #4 0x78de428ec67b  (/lib/x86_64-linux-gnu/libXft.so.2+0x767b) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #5 0x78de428edfa5 in XftDefaultHasRender (/lib/x86_64-linux-gnu/libXft.so.2+0x8fa5) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #6 0x78de428ee437 in XftDefaultSubstitute (/lib/x86_64-linux-gnu/libXft.so.2+0x9437) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #7 0x78de428f671d in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x1171d) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #8 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b82f0e in fl_normal_measure(Fl_Label const*, int&, int&) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdf0e) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b37e96 in Fl_Menu_Item::measure(int*, Fl_Menu_ const*) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x72e96) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b3bae6 in Fl_Menu_Bar::draw() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x76ae6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #17 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #18 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #19 0x642c3bebd5f4 in main source/main.cpp:139
+    #20 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #21 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #22 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 32 byte(s) in 1 object(s) allocated from:
+    #0 0x78de42cfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x78de428b3e6f  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x26e6f) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428ec47a  (/lib/x86_64-linux-gnu/libXft.so.2+0x747a) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #3 0x78de428ec67b  (/lib/x86_64-linux-gnu/libXft.so.2+0x767b) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #4 0x78de428edfa5 in XftDefaultHasRender (/lib/x86_64-linux-gnu/libXft.so.2+0x8fa5) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #5 0x78de428ee437 in XftDefaultSubstitute (/lib/x86_64-linux-gnu/libXft.so.2+0x9437) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #6 0x78de428f671d in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x1171d) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #7 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b82f0e in fl_normal_measure(Fl_Label const*, int&, int&) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdf0e) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b37e96 in Fl_Menu_Item::measure(int*, Fl_Menu_ const*) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x72e96) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b3bae6 in Fl_Menu_Bar::draw() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x76ae6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #17 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #18 0x642c3bebd5f4 in main source/main.cpp:139
+    #19 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #20 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #21 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 27 byte(s) in 9 object(s) allocated from:
+    #0 0x78de42cf74e8 in strdup ../../../../src/libsanitizer/asan/asan_interceptors.cpp:578
+    #1 0x78de428aeff7 in FcValueSave (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x21ff7) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428af132  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x22132) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b8f9b in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2bf9b) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #5 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #6 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b82fc6 in fl_normal_label(Fl_Label const*, int, int, int, int, unsigned int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdfc6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b8311d in Fl_Widget::draw_label(int, int, int, int, unsigned int) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbe11d) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #17 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #18 0x642c3bebd5f4 in main source/main.cpp:139
+    #19 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #20 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #21 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 9 byte(s) in 3 object(s) allocated from:
+    #0 0x78de42cf74e8 in strdup ../../../../src/libsanitizer/asan/asan_interceptors.cpp:578
+    #1 0x78de428aeff7 in FcValueSave (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x21ff7) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428af132  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x22132) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b8f9b in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2bf9b) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #5 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #6 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b82fc6 in fl_normal_label(Fl_Label const*, int, int, int, int, unsigned int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdfc6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b8311d in Fl_Widget::draw_label(int, int, int, int, unsigned int) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbe11d) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x642c3bebd5f4 in main source/main.cpp:139
+    #17 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #18 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #19 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+Indirect leak of 9 byte(s) in 3 object(s) allocated from:
+    #0 0x78de42cf74e8 in strdup ../../../../src/libsanitizer/asan/asan_interceptors.cpp:578
+    #1 0x78de428aeff7 in FcValueSave (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x21ff7) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #2 0x78de428af132  (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x22132) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #3 0x78de428b8f9b in FcFontRenderPrepare (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2bf9b) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #4 0x78de428b98ac in FcFontMatch (/lib/x86_64-linux-gnu/libfontconfig.so.1+0x2c8ac) (BuildId: 9ea8985291d6ca9e904a796a5767d191039d813d)
+    #5 0x78de428f6737 in XftFontMatch (/lib/x86_64-linux-gnu/libXft.so.2+0x11737) (BuildId: 18daad8558a541281b33a9045b7758daa2dea473)
+    #6 0x78de42b7ffbf in Fl_Font_Descriptor::Fl_Font_Descriptor(char const*, int, int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbafbf) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #7 0x78de42b802e3  (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbb2e3) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #8 0x78de42b82f0e in fl_normal_measure(Fl_Label const*, int&, int&) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0xbdf0e) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #9 0x78de42b37e96 in Fl_Menu_Item::measure(int*, Fl_Menu_ const*) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x72e96) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #10 0x78de42b3bae6 in Fl_Menu_Bar::draw() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x76ae6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #11 0x78de42b259dc in Fl_Group::draw_child(Fl_Widget&) const (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x609dc) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #12 0x78de42b25c21 in Fl_Group::draw_children() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x60c21) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #13 0x78de42b1dca6 in Fl_Double_Window::flush(int) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x58ca6) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #14 0x78de42b0bd98 in Fl::flush() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x46d98) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #15 0x78de42b0cf77 in Fl::wait(double) (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x47f77) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #16 0x78de42b0d05c in Fl::run() (/lib/x86_64-linux-gnu/libfltk.so.1.3+0x4805c) (BuildId: d6cc174c92df879b364b9e8fbd9260b34da1cc9b)
+    #17 0x642c3bebd5f4 in main source/main.cpp:139
+    #18 0x78de4222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #19 0x78de4222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #20 0x642c3bebb484 in _start (/home/krzysztof/LocalSoftware/AppForFaradayCups/build/appForFaradayCups+0x1a484) (BuildId: 3dc4f7145add50c5344df93a7cb4500b0e131a15)
+
+SUMMARY: AddressSanitizer: 15194 byte(s) leaked in 346 allocation(s).
+make: *** [Makefile:78: run-asan] Error 1
+krzysztof:~/LocalSoftware/AppForFaradayCups$ 
