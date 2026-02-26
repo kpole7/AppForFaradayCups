@@ -24,6 +24,8 @@ extern int MaximumPropagationTime;
 
 extern int NumberOfFaradayCupsToBeOperated;
 
+extern int ModbusSlaveAddress;
+
 //.................................................................................................
 // Global function prototypes
 //.................................................................................................

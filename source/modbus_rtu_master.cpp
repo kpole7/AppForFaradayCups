@@ -10,11 +10,6 @@
 #include "settings_file.h"
 #include "shared_data.h"
 
-//.................................................................................................
-// Preprocessor directives
-//.................................................................................................
-
-#define SLAVE_ID 1
 
 //...............................................................................................
 // Local variables
@@ -46,7 +41,7 @@ FailureCodes initializeModbus() {
 	}
 
 	// Set slave id (Unit ID)
-	if (modbus_set_slave(Context, SLAVE_ID) == -1) {
+	if (modbus_set_slave(Context, ModbusSlaveAddress) == -1) {
 		std::cout << "Błąd ustawienia slave id: " << modbus_strerror(errno) << '\n';
 		modbus_free(Context);
 		return FailureCodes::ERROR_MODBUS_INITIALIZATION_2;

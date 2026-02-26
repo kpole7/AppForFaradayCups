@@ -19,6 +19,8 @@
 #define MAX_PROPAGATION_TIME_UPPER_LIMIT 10000 // in milliseconds
 #define MAX_PROPAGATION_TIME_LOWER_LIMIT 100   // in milliseconds
 
+#define MODBUS_SLAVE_ADDRESS_MAX 247 // defined in the Modbus standard
+
 //.................................................................................................
 // Global variables
 //.................................................................................................
@@ -45,6 +47,8 @@ int MaximumPropagationTime;
 
 /// This is the number of Faraday cups that must be taken into account in Modbus communication and in the GUI
 int NumberOfFaradayCupsToBeOperated;
+
+int ModbusSlaveAddress;
 
 //.................................................................................................
 // Local variables
@@ -125,6 +129,7 @@ FailureCodes configurationFileParsing() {
 	std::regex PatternCup3Title(R"(\s*(?!#)Tytuł trzeciego kubka:\s*(.+)\s*$)");
 	std::regex PatternMaxPropagationTime(R"(\s*(?!#)Limit czasu propagacji sygnału z krańcówki:\s*(\d+)\s*$)");
 	std::regex PatternFaradayCupsNumber(R"(\s*(?!#)Liczba kubków Faradaya do obsłużenia:\s*(\d+)\s*$)");
+	std::regex PatternModebusSlaveAddress(R"(\s*(?!#)Adres mobusowy slave'a:\s*(\d+)\s*$)");
 
 	int LineNumber = 1;
 	std::string Line;
@@ -180,6 +185,12 @@ FailureCodes configurationFileParsing() {
 			return Result;
 		}
 
+		Result = parseSingleInteger(&PatternModebusSlaveAddress, &Line, &ModbusSlaveAddress, 1, MODBUS_SLAVE_ADDRESS_MAX,
+		                            "Adres urządzenia modbusowego");
+		if (FailureCodes::NO_FAILURE != Result) {
+			return Result;
+		}
+
 		LineNumber++;
 	}
 
@@ -196,6 +207,7 @@ static FailureCodes initializations() {
 	}
 
 	NumberOfFaradayCupsToBeOperated = -1;
+	ModbusSlaveAddress = -1;
 	MaximumPropagationTime = -1;
 
 	// the configuration file is looked for in the directory where the executable is located, rather than in the working directory
