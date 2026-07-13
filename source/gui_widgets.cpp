@@ -25,7 +25,7 @@
 #define DISC2_RADIUS 85 // assume disc1 radius = 128
 #define DISC3_RADIUS 40
 #define DISC_VALUE1_Y 30
-#define DISC_VALUE2_Y 80
+#define DISC_VALUE2_Y 60
 #define DISC_TEXTS_SPACE 10
 #define DISC_SLIT_WIDTH 8
 
@@ -178,7 +178,7 @@ void initializeGraphicWidgets() {
 #endif
 
 	for (int J = 0; J < CUPS_NUMBER; J++) {
-		CupGroupPtr[J] = new CupGuiGroup(0, MAIN_MENU_HEIGHT + 10 + J * DISC_SPACE_Y, MAIN_WINDOW_WIDTH, 300);
+		CupGroupPtr[J] = new CupGuiGroup(0, MAIN_MENU_HEIGHT + 10 + (CUPS_NUMBER-1-J) * DISC_SPACE_Y, MAIN_WINDOW_WIDTH, 300);
 		CupGroupPtr[J]->configure(J);
 		if (J >= NumberOfFaradayCupsToBeOperated) {
 			CupGroupPtr[J]->hide();
@@ -312,7 +312,7 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 	TripleDisc->hide();
 
 	for (int J = 0; J < VALUES_PER_DISC; J++) {
-		CupValueLabelPtr[J] = new Fl_Box(X + 20, Y + DISC_VALUE1_Y + J * (DISC_VALUE2_Y - DISC_VALUE1_Y), 256, 30, "?");
+		CupValueLabelPtr[J] = new Fl_Box(X + 20, Y + DISC_VALUE1_Y + (VALUES_PER_DISC-J-2) * (DISC_VALUE2_Y - DISC_VALUE1_Y), 256, 30, "?");
 		CupValueLabelPtr[J]->labelfont(FL_HELVETICA_BOLD);
 		CupValueLabelPtr[J]->labelsize(26);
 		CupValueLabelPtr[J]->hide();
@@ -401,16 +401,14 @@ void CupGuiGroup::redrawTripleDisc() {
 
 void CupGuiGroup::redrawLabelsValues() {
 	if (isTransmissionCorrect() &&
-	    atomic_load_explicit(&ModbusCoilsReadout[COIL_OFFSET_IS_SWITCH_PRESSED + CupId * MODBUS_COILS_PER_CUP], std::memory_order_acquire)) {
+	    atomic_load_explicit(&ModbusCoilsReadout[COIL_OFFSET_IS_SWITCH_PRESSED + CupId * MODBUS_COILS_PER_CUP], std::memory_order_acquire)) 
+		{
 		for (int J = 0; J < VISIBLE_VALUES_PER_DISC; J++) {
 			int TemporaryRegisterIndex = CupId * VALUES_PER_DISC + J;
 			assert(TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER);
 			uint16_t TemporaryValue = atomic_load_explicit(&ModbusInputRegisters[TemporaryRegisterIndex], std::memory_order_acquire);
 
-			if (J >= 3) {
-				std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "0x%04X", (unsigned)TemporaryValue);
-			}
-			else if (0x8000 > TemporaryValue) {
+			if (0x8000 > TemporaryValue) {
 				double TemporaryFloatingPoint = DirectionalCoefficient[CupId] * ((double)TemporaryValue + OffsetForZeroCurrent[CupId]);
 				std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "%.1fμA", TemporaryFloatingPoint);
 				if (strcmp(ValueLabelBuffer[CupId][J], "-0.0μA") == 0) {

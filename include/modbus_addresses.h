@@ -8,7 +8,7 @@
 //.................................................................................................
 
 #define MODBUS_INPUTS_PER_CUP 5
-#define MODBUS_COILS_PER_CUP 3
+#define MODBUS_COILS_PER_CUP 4
 
 #define MODBUS_INPUTS_NUMBER (MODBUS_INPUTS_PER_CUP * CUPS_NUMBER)
 #define MODBUS_INPUTS_ADDRESS 3001

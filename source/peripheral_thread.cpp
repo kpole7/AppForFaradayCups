@@ -27,7 +27,7 @@
 #define LOW_LEVEL_MODBUS_RESET_LIMIT 22      // condition for attempting low level reset of Modbus
 #define LOW_LEVEL_CONTINUOUS_COUNTING_MAX (LOW_LEVEL_CONTINUOUS_ERRORS_LIMIT * 5)
 
-#define TRANSMISSION_CORRECTNESS_LIMIT ((LOW_LEVEL_CONTINUOUS_COUNTING_MAX * 3) / 4)
+#define TRANSMISSION_CORRECTNESS_LIMIT ((LOW_LEVEL_CONTINUOUS_COUNTING_MAX * 1) / 2)
 
 //...............................................................................................
 // Types definitions
