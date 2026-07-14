@@ -38,6 +38,10 @@ enum class ModbusFsmStates {
 	READING_INPUT_REGISTERS,
 	READING_COILS,
 	WRITING_COIL,
+	RECOVERY1_PAUSE,
+	RECOVERY2_CLOSE,
+	RECOVERY3_PAUSE,
+	RECOVERY4_PAUSE,
 };
 
 //...............................................................................................
@@ -196,24 +200,23 @@ static void peripheralThreadHandler() {
 
 		peripheralThreadTiming();
 
-		// essential action
-		// normal mode of operation
-		bool IsEssentialActionDone = false;
-		FailureCodes Result;
+		FailureCodes Result = FailureCodes::NO_FAILURE;
 
-		if (ModbusFsmStates::OPEN == FsmState) {
+		switch (FsmState) {
+		case ModbusFsmStates::OPEN:
 			FsmState = ModbusFsmStates::READING_INPUT_REGISTERS;
 			Result = readInputRegisters();
-			IsEssentialActionDone = true;
-		}
-
-		if (!IsEssentialActionDone && (ModbusFsmStates::READING_INPUT_REGISTERS == FsmState)) {
+			break;
+		case ModbusFsmStates::READING_INPUT_REGISTERS:
 			FsmState = ModbusFsmStates::READING_COILS;
 			Result = readCoils();
-			IsEssentialActionDone = true;
-		}
 
-		if (!IsEssentialActionDone && (ModbusFsmStates::READING_COILS == FsmState)) {
+			Fl::awake(refreshGui, nullptr);
+
+			break;
+		case ModbusFsmStates::READING_COILS:
+		{
+			bool IsActionDone = false;
 			for (int J = 0; J < NumberOfFaradayCupsToBeOperated; J++) {
 				if (atomic_load_explicit(&ModbusCoilChangeReqest[J], std::memory_order_acquire)) {
 					FsmState = ModbusFsmStates::WRITING_COIL;
@@ -222,25 +225,39 @@ static void peripheralThreadHandler() {
 					Result = writeSingleCoil(MODBUS_COILS_ADDRESS + COIL_OFFSET_IS_CUP_FORCED + J * MODBUS_COILS_PER_CUP,
 					                         atomic_load_explicit(&ModbusCoilRequestedValue[J], std::memory_order_acquire));
 
-					IsEssentialActionDone = true;
-					break;
+					IsActionDone = true;
+					//break;
+					J = NumberOfFaradayCupsToBeOperated;
 				}
 			}
+			if (!IsActionDone) {
+				FsmState = ModbusFsmStates::READING_INPUT_REGISTERS;
+				Result = readInputRegisters();
+			}
 		}
-
-		if (!IsEssentialActionDone && (ModbusFsmStates::READING_COILS == FsmState)) {
+			break;
+		case ModbusFsmStates::WRITING_COIL:
 			FsmState = ModbusFsmStates::READING_INPUT_REGISTERS;
 			Result = readInputRegisters();
-			IsEssentialActionDone = true;
+			break;
+		case ModbusFsmStates::RECOVERY1_PAUSE:
+			closeModbus();
+			FsmState = ModbusFsmStates::RECOVERY2_CLOSE;
+			break;
+		case ModbusFsmStates::RECOVERY2_CLOSE:
+			FsmState = ModbusFsmStates::RECOVERY3_PAUSE;
+			break;
+		case ModbusFsmStates::RECOVERY3_PAUSE:
+			FsmState = ModbusFsmStates::RECOVERY4_PAUSE;
+			break;
+		case ModbusFsmStates::RECOVERY4_PAUSE:
+			initializeModbus();
+			FsmState = ModbusFsmStates::OPEN;
+			break;
+		default:
+			assert(false);
+			break;
 		}
-
-		if (!IsEssentialActionDone && (ModbusFsmStates::WRITING_COIL == FsmState)) {
-			FsmState = ModbusFsmStates::READING_INPUT_REGISTERS;
-			Result = readInputRegisters();
-			//				IsEssentialActionDone = true;
-		}
-
-		determineTransmissionQuality(Result);
 
 #if 0 // debugging
 		std::chrono::high_resolution_clock::time_point TimeAfter = std::chrono::high_resolution_clock::now();
@@ -248,11 +265,16 @@ static void peripheralThreadHandler() {
 		std::cout << "Peripheral thread " << PeripheralThreadTimeInMilliseconds << "  " << ProcessingTime.count() << '\n';
 #endif
 
-		if (ModbusFsmStates::READING_INPUT_REGISTERS == FsmState) {
-			Fl::awake(refreshGui, nullptr);
+		determineTransmissionQuality(Result);
+
+		if (FailureCodes::NO_FAILURE != Result) {
+			if (VerboseMode) {
+				std::cout << "Próba resetu Modbus" << '\n';
+			}
+			FsmState = ModbusFsmStates::RECOVERY1_PAUSE;
 		}
 
-#if 0 // debugging
+#if 1 // debugging
 		static int DebugFsmStatesPrintoutCounter;
 		std::cout << "[" << (int)FsmState  << "] ";
 		if (((ModbusFsmStates::READING_COILS != FsmState) && (ModbusFsmStates::READING_INPUT_REGISTERS != FsmState)) ||
