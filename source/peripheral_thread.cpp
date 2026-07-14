@@ -23,11 +23,9 @@
 #define SHUT_DOWN_LOOP_DELAY 20 // milliseconds
 #define SHUT_DOWN_COUNT_DOWN (SHUT_DOWN_TIMEOUT / SHUT_DOWN_LOOP_DELAY)
 
-#define LOW_LEVEL_CONTINUOUS_ERRORS_LIMIT 20 // condition for attempting recovery
-#define LOW_LEVEL_MODBUS_RESET_LIMIT 22      // condition for attempting low level reset of Modbus
-#define LOW_LEVEL_CONTINUOUS_COUNTING_MAX (LOW_LEVEL_CONTINUOUS_ERRORS_LIMIT * 5)
+#define LOW_LEVEL_CONTINUOUS_COUNTING_MAX 100
 
-#define TRANSMISSION_CORRECTNESS_LIMIT ((LOW_LEVEL_CONTINUOUS_COUNTING_MAX * 1) / 2)
+#define TRANSMISSION_CORRECTNESS_LIMIT ((LOW_LEVEL_CONTINUOUS_COUNTING_MAX * 9) / 10) // 90%
 
 //...............................................................................................
 // Types definitions
@@ -59,7 +57,6 @@ static std::thread peripheralThread;
 static std::chrono::high_resolution_clock::time_point PeripheralThreadLoopStart;
 static std::chrono::high_resolution_clock::time_point TimeNow;
 static int64_t PeripheralThreadTimeInMilliseconds;
-static int DelayMultiplierOnError;
 
 static uint16_t LowLevelContinuousErrors, LowLevelSuccessfulTransmission;
 
@@ -118,14 +115,7 @@ void serialCommunicationExit() {
 
 static void peripheralThreadTiming() {
 	// timing
-	if (LOW_LEVEL_CONTINUOUS_ERRORS_LIMIT <= LowLevelContinuousErrors) {
-		PeripheralThreadTimeInMilliseconds += (uint32_t)(DELAY_MULTIPLIER_ON_ERROR * PERIPHERAL_THREAD_LOOP_DURATION);
-		DelayMultiplierOnError = DELAY_MULTIPLIER_ON_ERROR;
-	}
-	else {
-		PeripheralThreadTimeInMilliseconds += PERIPHERAL_THREAD_LOOP_DURATION;
-		DelayMultiplierOnError = 1;
-	}
+	PeripheralThreadTimeInMilliseconds += PERIPHERAL_THREAD_LOOP_DURATION;
 	TimeNow = std::chrono::high_resolution_clock::now();
 	std::chrono::milliseconds DurationTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - PeripheralThreadLoopStart);
 	while (DurationTime.count() < PeripheralThreadTimeInMilliseconds) {
@@ -166,7 +156,7 @@ static void peripheralThreadTiming() {
 static void determineTransmissionQuality(FailureCodes EssentialActionResult) {
 	if (FailureCodes::NO_FAILURE == EssentialActionResult) {
 		if (LOW_LEVEL_CONTINUOUS_COUNTING_MAX > LowLevelSuccessfulTransmission) {
-			LowLevelSuccessfulTransmission += DelayMultiplierOnError;
+			LowLevelSuccessfulTransmission++;
 			if (LowLevelSuccessfulTransmission > LOW_LEVEL_CONTINUOUS_COUNTING_MAX) {
 				LowLevelSuccessfulTransmission = LOW_LEVEL_CONTINUOUS_COUNTING_MAX;
 			}
@@ -177,8 +167,8 @@ static void determineTransmissionQuality(FailureCodes EssentialActionResult) {
 		if (LOW_LEVEL_CONTINUOUS_COUNTING_MAX > LowLevelContinuousErrors) {
 			LowLevelContinuousErrors++;
 		}
-		if (LowLevelSuccessfulTransmission > DelayMultiplierOnError) {
-			LowLevelSuccessfulTransmission -= DelayMultiplierOnError;
+		if (LowLevelSuccessfulTransmission > 0) {
+			LowLevelSuccessfulTransmission--;
 		}
 		else {
 			LowLevelSuccessfulTransmission = 0;
@@ -206,10 +196,12 @@ static void peripheralThreadHandler() {
 		case ModbusFsmStates::OPEN:
 			FsmState = ModbusFsmStates::READING_INPUT_REGISTERS;
 			Result = readInputRegisters();
+			determineTransmissionQuality(Result);
 			break;
 		case ModbusFsmStates::READING_INPUT_REGISTERS:
 			FsmState = ModbusFsmStates::READING_COILS;
 			Result = readCoils();
+			determineTransmissionQuality(Result);
 
 			Fl::awake(refreshGui, nullptr);
 
@@ -224,7 +216,8 @@ static void peripheralThreadHandler() {
 					atomic_store_explicit(&ModbusCoilChangeReqest[J], false, std::memory_order_release);
 					Result = writeSingleCoil(MODBUS_COILS_ADDRESS + COIL_OFFSET_IS_CUP_FORCED + J * MODBUS_COILS_PER_CUP,
 					                         atomic_load_explicit(&ModbusCoilRequestedValue[J], std::memory_order_acquire));
-
+					determineTransmissionQuality(Result);
+					
 					IsActionDone = true;
 					//break;
 					J = NumberOfFaradayCupsToBeOperated;
@@ -233,12 +226,14 @@ static void peripheralThreadHandler() {
 			if (!IsActionDone) {
 				FsmState = ModbusFsmStates::READING_INPUT_REGISTERS;
 				Result = readInputRegisters();
+				determineTransmissionQuality(Result);
 			}
 		}
 			break;
 		case ModbusFsmStates::WRITING_COIL:
 			FsmState = ModbusFsmStates::READING_INPUT_REGISTERS;
 			Result = readInputRegisters();
+			determineTransmissionQuality(Result);
 			break;
 		case ModbusFsmStates::RECOVERY1_PAUSE:
 			closeModbus();
@@ -246,6 +241,9 @@ static void peripheralThreadHandler() {
 			break;
 		case ModbusFsmStates::RECOVERY2_CLOSE:
 			FsmState = ModbusFsmStates::RECOVERY3_PAUSE;
+
+			Fl::awake(refreshGui, nullptr);
+
 			break;
 		case ModbusFsmStates::RECOVERY3_PAUSE:
 			FsmState = ModbusFsmStates::RECOVERY4_PAUSE;
@@ -264,8 +262,6 @@ static void peripheralThreadHandler() {
 		std::chrono::milliseconds ProcessingTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeAfter - TimeNow);
 		std::cout << "Peripheral thread " << PeripheralThreadTimeInMilliseconds << "  " << ProcessingTime.count() << '\n';
 #endif
-
-		determineTransmissionQuality(Result);
 
 		if (FailureCodes::NO_FAILURE != Result) {
 			if (VerboseMode) {

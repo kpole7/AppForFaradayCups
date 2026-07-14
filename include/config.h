@@ -14,7 +14,6 @@
 #define CONFIGURATION_FILE_NAME "PomiarWiązki.cfg"
 
 #define PERIPHERAL_THREAD_LOOP_DURATION 50 // milliseconds
-#define DELAY_MULTIPLIER_ON_ERROR 10
 
 #define MODBUS_RESPONSE_TIMEOUT 40 // milliseconds
 
