@@ -29,14 +29,6 @@
 /// (CONFIGURATION_FILE_NAME) or nullptr if there is no definition
 std::string *SerialPortRequestedNamePtr;
 
-/// The value of the Modbus register is converted to current in uA using a linear
-/// function I=DirectionalCoefficient[.]*x+OffsetForZeroCurrent[.]; here we have directional coefficients
-double DirectionalCoefficient[CUPS_NUMBER];
-
-/// The value of the Modbus register is converted to current in uA using a linear
-/// function I=DirectionalCoefficient[.]*x+OffsetForZeroCurrent[.]; here we have offsets
-int OffsetForZeroCurrent[CUPS_NUMBER];
-
 char CupDescriptionPtr[CUPS_NUMBER][101];
 
 std::string ThisApplicationDirectory;
@@ -61,7 +53,7 @@ static std::ifstream MyConfigurationFile;
 
 static std::string SerialPortRequestedName;
 
-static bool FormulaIsDefined[CUPS_NUMBER];
+static bool CalibrationDataIsDefined[CUPS_NUMBER];
 
 static std::string ConfigurationFilePath;
 
@@ -71,9 +63,6 @@ static std::string ConfigurationFilePath;
 
 static FailureCodes initializations();
 static FailureCodes parseSerialPortName(const std::regex *PatternPtr, std::string *LinePtr);
-static FailureCodes parseFunctionFormula(const std::regex *PatternPtr, std::string *LinePtr, int CupIndex);
-static FailureCodes readDirectionalCoefficient(const std::string &InputText, int WhichCup);
-static FailureCodes readOffsetCoefficient(const std::string &SignText, const std::string &NumberText, int WhichCup);
 static FailureCodes parseCupName(const std::regex *PatternPtr, std::string *LinePtr, int CupIndex);
 static FailureCodes parseSingleInteger(const std::regex *PatternPtr, std::string *LinePtr, int *OutputValue, int LowerLimit, int UpperLimit,
                                        const char *ParameterName);
@@ -143,21 +132,6 @@ FailureCodes configurationFileParsing() {
 			return Result;
 		}
 
-		Result = parseFunctionFormula(&PatternCup1FunctionFormula, &Line, 0);
-		if (FailureCodes::NO_FAILURE != Result) {
-			return Result;
-		}
-
-		Result = parseFunctionFormula(&PatternCup2FunctionFormula, &Line, 1);
-		if (FailureCodes::NO_FAILURE != Result) {
-			return Result;
-		}
-
-		Result = parseFunctionFormula(&PatternCup3FunctionFormula, &Line, 2);
-		if (FailureCodes::NO_FAILURE != Result) {
-			return Result;
-		}
-
 		Result = parseCupName(&PatternCup1Title, &Line, 0);
 		if (FailureCodes::NO_FAILURE != Result) {
 			return Result;
@@ -202,7 +176,7 @@ FailureCodes configurationFileParsing() {
 static FailureCodes initializations() {
 	SerialPortRequestedNamePtr = nullptr;
 	for (int J = 0; J < CUPS_NUMBER; J++) {
-		FormulaIsDefined[J] = false;
+		CalibrationDataIsDefined[J] = false;
 		CupDescriptionPtr[J][0] = 0;
 	}
 
@@ -240,87 +214,6 @@ static FailureCodes parseSerialPortName(const std::regex *PatternPtr, std::strin
 			std::cout << "  Nadmiarowy opis portu szeregowego w linii: [" << *LinePtr << "]" << '\n';
 			return FailureCodes::ERROR_SETTINGS_EXCESSIVE_PORT_NAME;
 		}
-	}
-	return FailureCodes::NO_FAILURE;
-}
-
-static FailureCodes parseFunctionFormula(const std::regex *PatternPtr, std::string *LinePtr, int CupIndex) {
-	std::smatch Matches;
-	assert(CupIndex < CUPS_NUMBER);
-	if (std::regex_match(*LinePtr, Matches, *PatternPtr)) {
-		if (!FormulaIsDefined[CupIndex]) {
-			FormulaIsDefined[CupIndex] = true;
-
-			std::string CoefficientText = Matches[1]; // floating point
-			std::string SignText = Matches[2];        // '+' or '-'
-			std::string OffsetText = Matches[3];      // decimal or hexadecimal 0x...
-
-			FailureCodes Result = readDirectionalCoefficient(CoefficientText, CupIndex);
-			if (FailureCodes::NO_FAILURE != Result) {
-				return Result;
-			}
-
-			Result = readOffsetCoefficient(SignText, OffsetText, CupIndex);
-			if (FailureCodes::NO_FAILURE != Result) {
-				return Result;
-			}
-
-			if (VerboseMode) {
-				if (OffsetForZeroCurrent[CupIndex] >= 0) {
-					std::cout << "  Formuła konwersji: I = " << DirectionalCoefficient[CupIndex] << " *(x" << "+" << OffsetForZeroCurrent[CupIndex]
-					          << ")  w linii: [" << *LinePtr << "]" << '\n';
-				}
-				else {
-					std::cout << "  Formuła konwersji: I = " << DirectionalCoefficient[CupIndex] << " *(x" << OffsetForZeroCurrent[CupIndex]
-					          << ")  w linii: [" << *LinePtr << "]" << '\n';
-				}
-			}
-		}
-		else {
-			std::cout << "  Nadmiarowa formuła konwersji w linii: [" << *LinePtr << "]" << '\n';
-			return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
-		}
-	}
-	return FailureCodes::NO_FAILURE;
-}
-
-static FailureCodes readDirectionalCoefficient(const std::string &InputText, int WhichCup) {
-	try {
-		DirectionalCoefficient[WhichCup] = std::stod(InputText);
-	} catch (const std::invalid_argument &) {
-		std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << '\n';
-		return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
-	} catch (const std::out_of_range &) {
-		std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << '\n';
-		return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
-	}
-	return FailureCodes::NO_FAILURE;
-}
-
-static FailureCodes readOffsetCoefficient(const std::string &SignText, const std::string &NumberText, int WhichCup) {
-	bool ChangeSign;
-	if (SignText == "+") {
-		ChangeSign = false;
-	}
-	else if (SignText == "-") {
-		ChangeSign = true;
-	}
-	else {
-		std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << '\n';
-		return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
-	}
-
-	try {
-		OffsetForZeroCurrent[WhichCup] = std::stoi(NumberText, nullptr, 0);
-	} catch (const std::invalid_argument &) {
-		std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << '\n';
-		return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
-	} catch (const std::out_of_range &) {
-		std::cout << "  Błąd konwersji na liczbę (patrz " << __LINE__ << ")" << '\n';
-		return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
-	}
-	if (ChangeSign) {
-		OffsetForZeroCurrent[WhichCup] = -OffsetForZeroCurrent[WhichCup];
 	}
 	return FailureCodes::NO_FAILURE;
 }
@@ -382,12 +275,14 @@ static FailureCodes finalTest() {
 		std::cout << " Nie znaleziono opisu portu szeregowego" << '\n';
 		return FailureCodes::ERROR_SETTINGS_PORT_NAME;
 	}
+#if 0
 	for (int J = 0; J < CUPS_NUMBER; J++) {
-		if (!FormulaIsDefined[J]) {
-			std::cout << " Nie znaleziono formuły konwersji dla kubka " << J + 1 << '\n';
-			return FailureCodes::ERROR_SETTINGS_CONVERTION_FORMULA;
+		if (!CalibrationDataIsDefined[J]) {
+			std::cout << " Nie znaleziono danych kalibracyjnych dla kubka " << J + 1 << '\n';
+			return FailureCodes::ERROR_SETTINGS_CALIBRATION_DATA;
 		}
 	}
+#endif
 	for (int J = 0; J < CUPS_NUMBER; J++) {
 		if (0 == CupDescriptionPtr[J][0]) {
 			snprintf(CupDescriptionPtr[J], sizeof(CupDescriptionPtr[0]) - 1, "Kubek nr %d", J + 1);

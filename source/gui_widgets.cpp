@@ -173,7 +173,7 @@ void initializeGraphicWidgets() {
 	GeneralStatusTextBoxPtr->labelcolor(FL_BLACK);
 	GeneralStatusTextBoxPtr->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 #if 0 // debugging
-	GeneralStatusTextBoxPtr->color( FL_YELLOW );
+	GeneralStatusTextBoxPtr->color(  );
 	GeneralStatusTextBoxPtr->box(FL_FLAT_BOX);
 #endif
 
@@ -299,7 +299,7 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 	memset(ValueLabelBuffer, 0, sizeof(ValueLabelBuffer));
 	memset(StatusText, 0, sizeof(StatusText));
 
-	TitleTextBoxPtr = new Fl_Box(X + 0, Y, 296, 20, "Tytuł");
+	TitleTextBoxPtr = new Fl_Box(X + 0, Y, 400, 20, "Tytuł");
 	TitleTextBoxPtr->labelfont(ORDINARY_TEXT_FONT);
 	TitleTextBoxPtr->labelsize(ORDINARY_TEXT_SIZE);
 #if 0
@@ -308,7 +308,7 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 #endif
 	TitleTextBoxPtr->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
-	TripleDisc = new TripleDiscWidgetWithNoSlit(X + 20, Y + 20, 256, 256);
+	TripleDisc = new TripleDiscWidgetWithNoSlit(X + 20, Y + 30, 256, 256);
 	TripleDisc->hide();
 
 	for (int J = 0; J < VALUES_PER_DISC; J++) {
@@ -409,7 +409,7 @@ void CupGuiGroup::redrawLabelsValues() {
 			uint16_t TemporaryValue = atomic_load_explicit(&ModbusInputRegisters[TemporaryRegisterIndex], std::memory_order_acquire);
 
 			if (0x8000 > TemporaryValue) {
-				double TemporaryFloatingPoint = DirectionalCoefficient[CupId] * ((double)TemporaryValue + OffsetForZeroCurrent[CupId]);
+				double TemporaryFloatingPoint = 0.01 * (double)TemporaryValue;
 				std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "%.1fμA", TemporaryFloatingPoint);
 				if (strcmp(ValueLabelBuffer[CupId][J], "-0.0μA") == 0) {
 					std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "0.0μA");
