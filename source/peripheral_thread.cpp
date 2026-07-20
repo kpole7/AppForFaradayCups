@@ -33,9 +33,15 @@
 
 enum class ModbusFsmStates {
 	OPEN,
+	// The following states are used in the initialization phase of the application
+	READING_DEVICE_NAME,
+	READING_DEVICE_VERSION,
+	WRITING_CONFIGURATION_DATA,
+	// The following states are used in the normal operation
 	READING_INPUT_REGISTERS,
 	READING_COILS,
 	WRITING_COIL,
+	// The following states are used in the case of communication errors and are used to recover from them
 	RECOVERY1_PAUSE,
 	RECOVERY2_CLOSE,
 	RECOVERY3_PAUSE,
@@ -257,7 +263,7 @@ static void peripheralThreadHandler() {
 			break;
 		}
 
-#if 0 // debugging
+#if 1 // debugging
 		std::chrono::high_resolution_clock::time_point TimeAfter = std::chrono::high_resolution_clock::now();
 		std::chrono::milliseconds ProcessingTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeAfter - TimeNow);
 		std::cout << "Peripheral thread " << PeripheralThreadTimeInMilliseconds << "  " << ProcessingTime.count() << '\n';
