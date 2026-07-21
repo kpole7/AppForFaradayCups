@@ -9,6 +9,7 @@
 #include <libgen.h> // for dirname
 #include <regex>
 #include <stdexcept>
+#include <stdint.h>
 
 #include "settings_file.h"
 
@@ -20,6 +21,10 @@
 #define MAX_PROPAGATION_TIME_LOWER_LIMIT 100   // in milliseconds
 
 #define MODBUS_SLAVE_ADDRESS_MAX 247 // defined in the Modbus standard
+
+#define CALIBRATION_CURRENTS_NUMBER 4
+#define CALIBRATION_ADC_READINGS_NUMBER 24 // 3 cups * 4 channels * 2 gains
+#define CONFIGURATION_CURRENT_MAX 30000 // in microamperes
 
 //.................................................................................................
 // Global variables
@@ -42,6 +47,17 @@ int NumberOfFaradayCupsToBeOperated;
 
 int ModbusSlaveAddress;
 
+/// Currents values used to calibration; UINT16_MAX is an illegal value
+uint16_t CalibrationCurrents[CALIBRATION_CURRENTS_NUMBER] = { UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX }; 
+
+/// The array contains the values of ADC readings for each cup, channel and gain for the currents defined in CalibrationCurrents;
+/// the data order is the same as in the Modbus register list (Cup1Channel1GainLowPoint1, ...Cup3Channel4GainHighPoint4);
+/// UINT16_MAX is an illegal value;
+uint16_t CalibrationData[CALIBRATION_ADC_READINGS_NUMBER] = 
+	{ UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX,
+	  UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX,
+	  UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX };
+
 //.................................................................................................
 // Local variables
 //.................................................................................................
@@ -52,8 +68,6 @@ static std::string *ConfigurationFilePathPtr;
 static std::ifstream MyConfigurationFile;
 
 static std::string SerialPortRequestedName;
-
-static bool CalibrationDataIsDefined[CUPS_NUMBER];
 
 static std::string ConfigurationFilePath;
 
@@ -66,6 +80,7 @@ static FailureCodes parseSerialPortName(const std::regex *PatternPtr, std::strin
 static FailureCodes parseCupName(const std::regex *PatternPtr, std::string *LinePtr, int CupIndex);
 static FailureCodes parseSingleInteger(const std::regex *PatternPtr, std::string *LinePtr, int *OutputValue, int LowerLimit, int UpperLimit,
                                        const char *ParameterName);
+static FailureCodes parseCalibrationCurrents(const std::regex *PatternPtr, std::string *LinePtr, uint16_t CurrentsArray[CALIBRATION_CURRENTS_NUMBER]);
 static FailureCodes finalTest();
 
 //........................................................................................................
@@ -107,18 +122,15 @@ FailureCodes configurationFileParsing() {
 	}
 
 	std::regex PatternSerialPort(R"(\s*(?!#)Port szeregowy:\s*([^\s]+)\s*$)");
-	std::regex PatternCup1FunctionFormula(
-	    R"(\s*(?!#)Wzór na prądy w pierwszym kubku:\s*I\s*=\s*([0-9]*\.?[0-9]+(?:[eE][+\-]?\d+)?)\s*\*\s*\(\s*x\s*([+-])\s*(0x[0-9A-Fa-f]+|\d+)\s*\)\s*$)");
-	std::regex PatternCup2FunctionFormula(
-	    R"(\s*(?!#)Wzór na prądy w drugim kubku:\s*I\s*=\s*([0-9]*\.?[0-9]+(?:[eE][+\-]?\d+)?)\s*\*\s*\(\s*x\s*([+-])\s*(0x[0-9A-Fa-f]+|\d+)\s*\)\s*$)");
-	std::regex PatternCup3FunctionFormula(
-	    R"(\s*(?!#)Wzór na prądy w trzecim kubku:\s*I\s*=\s*([0-9]*\.?[0-9]+(?:[eE][+\-]?\d+)?)\s*\*\s*\(\s*x\s*([+-])\s*(0x[0-9A-Fa-f]+|\d+)\s*\)\s*$)");
 	std::regex PatternCup1Title(R"(\s*(?!#)Tytuł pierwszego kubka:\s*(.+)\s*$)");
 	std::regex PatternCup2Title(R"(\s*(?!#)Tytuł drugiego kubka:\s*(.+)\s*$)");
 	std::regex PatternCup3Title(R"(\s*(?!#)Tytuł trzeciego kubka:\s*(.+)\s*$)");
 	std::regex PatternMaxPropagationTime(R"(\s*(?!#)Limit czasu propagacji sygnału z krańcówki:\s*(\d+)\s*$)");
 	std::regex PatternFaradayCupsNumber(R"(\s*(?!#)Liczba kubków Faradaya do obsłużenia:\s*(\d+)\s*$)");
-	std::regex PatternModebusSlaveAddress(R"(\s*(?!#)Adres mobusowy slave'a:\s*(\d+)\s*$)");
+	std::regex PatternModbusSlaveAddress(R"(\s*(?!#)Adres mobusowy slave'a:\s*(\d+)\s*$)");
+	std::regex PatternCalibrationCurrents(R"(\s*(?!#)Prądy kalibracyjne:\s*I1\s*=\s*(\d+)\s*uA/100,\s*I2\s*=\s*(\d+)\s*uA/100,\s*I3\s*=\s*(\d+)\s*uA/100,\s*I4\s*=\s*(\d+)\s*uA/100\s*$)");
+	std::regex PatternCalibrationSmall(R"(\s*(?!#)Odczyty ADC dla kubka (\d+), kanału (\d+), wzmocnienia małego: Y(I1) = (\d+), Y(I2) = (\d+), Y(I3) = (\d+)\s*$)");
+	std::regex PatternCalibrationLarge(R"(\s*(?!#)Odczyty ADC dla kubka (\d+), kanału (\d+), wzmocnienia dużego: Y(I2) = (\d+), Y(I3) = (\d+), Y(I4) = (\d+)\s*$)");
 
 	int LineNumber = 1;
 	std::string Line;
@@ -159,11 +171,18 @@ FailureCodes configurationFileParsing() {
 			return Result;
 		}
 
-		Result = parseSingleInteger(&PatternModebusSlaveAddress, &Line, &ModbusSlaveAddress, 1, MODBUS_SLAVE_ADDRESS_MAX,
+		Result = parseSingleInteger(&PatternModbusSlaveAddress, &Line, &ModbusSlaveAddress, 1, MODBUS_SLAVE_ADDRESS_MAX,
 		                            "Adres urządzenia modbusowego");
 		if (FailureCodes::NO_FAILURE != Result) {
 			return Result;
 		}
+
+		Result = parseCalibrationCurrents(&PatternCalibrationCurrents, &Line, CalibrationCurrents);
+		if (FailureCodes::NO_FAILURE != Result) {
+			return Result;
+		}
+
+
 
 		LineNumber++;
 	}
@@ -176,7 +195,6 @@ FailureCodes configurationFileParsing() {
 static FailureCodes initializations() {
 	SerialPortRequestedNamePtr = nullptr;
 	for (int J = 0; J < CUPS_NUMBER; J++) {
-		CalibrationDataIsDefined[J] = false;
 		CupDescriptionPtr[J][0] = 0;
 	}
 
@@ -270,19 +288,46 @@ static FailureCodes parseSingleInteger(const std::regex *PatternPtr, std::string
 	return FailureCodes::NO_FAILURE;
 }
 
+static FailureCodes parseCalibrationCurrents(const std::regex *PatternPtr, std::string *LinePtr, uint16_t CurrentsArray[CALIBRATION_CURRENTS_NUMBER]) {
+	std::smatch Matches;
+	if (std::regex_match(*LinePtr, Matches, *PatternPtr)) {
+		for (int I = 0; I < CALIBRATION_CURRENTS_NUMBER; I++) {
+			if (UINT16_MAX != CurrentsArray[I]) {
+				std::cout << "  Nadmiarowa deklaracja prądu kalibracyjnego w linii: [" << *LinePtr << "]" << '\n';
+				return FailureCodes::ERROR_SETTINGS_EXCESSIVE_CURRENT_DEFINITION;
+			}
+			CurrentsArray[I] = static_cast<uint16_t>(std::stoi(Matches[I + 1]));
+			if (CurrentsArray[I] > CONFIGURATION_CURRENT_MAX) {
+				std::cout << "  Prąd kalibracyjny przekracza maksymalną wartość w linii: [" << *LinePtr << "]" << '\n';
+				return FailureCodes::ERROR_SETTINGS_IMPROPER_CURRENT_DEFINITION;
+			}
+		}
+
+		if (VerboseMode) {
+			std::cout << "  Prądy kalibracyjne: ";
+			for (int I = 0; I < CALIBRATION_CURRENTS_NUMBER; I++) {
+				std::cout << CurrentsArray[I];
+				if (I < CALIBRATION_CURRENTS_NUMBER - 1) {
+					std::cout << ", ";
+				}
+			}
+			std::cout << "  w linii: [" << *LinePtr << "]" << '\n';
+		}
+	}
+	return FailureCodes::NO_FAILURE;
+}
+
 static FailureCodes finalTest() {
 	if (nullptr == SerialPortRequestedNamePtr) {
 		std::cout << " Nie znaleziono opisu portu szeregowego" << '\n';
 		return FailureCodes::ERROR_SETTINGS_PORT_NAME;
 	}
-#if 0
-	for (int J = 0; J < CUPS_NUMBER; J++) {
-		if (!CalibrationDataIsDefined[J]) {
-			std::cout << " Nie znaleziono danych kalibracyjnych dla kubka " << J + 1 << '\n';
+	for (int J = 0; J < CALIBRATION_CURRENTS_NUMBER; J++) {
+		if (UINT16_MAX == CalibrationCurrents[J]) {
+			std::cout << " Nie znaleziono definicji prądów kalibracyjnych" << '\n';
 			return FailureCodes::ERROR_SETTINGS_CALIBRATION_DATA;
 		}
 	}
-#endif
 	for (int J = 0; J < CUPS_NUMBER; J++) {
 		if (0 == CupDescriptionPtr[J][0]) {
 			snprintf(CupDescriptionPtr[J], sizeof(CupDescriptionPtr[0]) - 1, "Kubek nr %d", J + 1);
