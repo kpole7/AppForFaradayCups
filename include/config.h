@@ -39,6 +39,8 @@ enum class FailureCodes {
 	ERROR_MODBUS_READING,
 	ERROR_MODBUS_WRITING,
 	ERROR_MODBUS_FRAME_READ,
+	ERROR_DEVICE_NAME_MISMATCH,
+	ERROR_DEVICE_TIME_STAMP_MISMATCH,
 };
 
 //.................................................................................................

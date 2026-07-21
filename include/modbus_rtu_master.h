@@ -13,6 +13,10 @@ FailureCodes readCoils();
 
 FailureCodes writeSingleCoil(uint16_t CoilAddress, bool NewValue);
 
+FailureCodes readSlaveName();
+
+FailureCodes readSlaveTimeStamp();
+
 void closeModbus();
 
 #endif // SOURCE_MODBUS_RTU_MASTER_H_

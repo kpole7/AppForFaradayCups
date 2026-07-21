@@ -11,6 +11,15 @@
 #include "shared_data.h"
 
 
+#define NAME_REGISTERS_NUMBER 7
+#define TIME_STAMP_REGISTERS_NUMBER 11
+
+//...............................................................................................
+// Global variables
+//...............................................................................................
+
+char TimeStampText[22]; // "Jul 21 2026, 13:08:28"
+
 //...............................................................................................
 // Local variables
 //...............................................................................................
@@ -57,6 +66,82 @@ FailureCodes initializeModbus() {
 		std::cout << "Błąd połączenia Modbus: " << modbus_strerror(errno) << '\n';
 		modbus_free(Context);
 		return FailureCodes::ERROR_MODBUS_OPENING;
+	}
+	return FailureCodes::NO_FAILURE;
+}
+
+FailureCodes readSlaveName() {
+	const char DeviceName[] = "Kubki Faradaya";
+	uint16_t RegistersTable[NAME_REGISTERS_NUMBER]; // 125 max
+
+	int ReceivedRegisters = modbus_read_registers(Context, MODBUS_ADDR_DEVICE_NAME01, NAME_REGISTERS_NUMBER, RegistersTable);
+	if (ReceivedRegisters == -1) {
+		// Communication / protocol error (CRC, timeout, invalid response)
+		if (VerboseMode) {
+			std::cout << getTokenCharacter() << getTransmissionQualityIndicatorTextForDebugging() << " Błąd odczytu (1): " << modbus_strerror(errno)
+			          << '\n';
+		}
+		return FailureCodes::ERROR_MODBUS_READING;
+	}
+
+	if (ReceivedRegisters != NAME_REGISTERS_NUMBER) {
+		if (VerboseMode) {
+			std::cout << "Nieoczekiwana liczba rejestrów: otrzymano " << ReceivedRegisters << ", oczekiwano " << NAME_REGISTERS_NUMBER
+				<< " Numer linii w pliku źródłowym: " << __LINE__ << '\n';
+		}
+		return FailureCodes::ERROR_MODBUS_FRAME_READ;
+	}
+	for (int i = 0; i < NAME_REGISTERS_NUMBER; ++i) {
+		if (RegistersTable[i] != (uint16_t)((DeviceName[2*i] << 8) | (DeviceName[2*i + 1]))) {
+			if (VerboseMode) {
+				std::cout << "Nieoczekiwana wartość rejestru nr " << MODBUS_ADDR_DEVICE_NAME01+i << '\n';
+			}
+			return FailureCodes::ERROR_DEVICE_NAME_MISMATCH;
+		}
+	}
+
+	if (VerboseMode) {
+		std::cout << "  Odczytano prawidłową nazwę slave'a po Modbusie" << '\n';
+	}
+	return FailureCodes::NO_FAILURE;
+}
+
+FailureCodes readSlaveTimeStamp() {
+	uint16_t RegistersTable[TIME_STAMP_REGISTERS_NUMBER]; // 125 max
+
+	int ReceivedRegisters = modbus_read_registers(Context, MODBUS_ADDR_COMPILATION_TIME01, TIME_STAMP_REGISTERS_NUMBER, RegistersTable);
+	if (ReceivedRegisters == -1) {
+		// Communication / protocol error (CRC, timeout, invalid response)
+		if (VerboseMode) {
+			std::cout << getTokenCharacter() << getTransmissionQualityIndicatorTextForDebugging() << " Błąd odczytu (1): " << modbus_strerror(errno)
+			          << '\n';
+		}
+		return FailureCodes::ERROR_MODBUS_READING;
+	}
+
+	if (ReceivedRegisters != TIME_STAMP_REGISTERS_NUMBER) {
+		if (VerboseMode) {
+			std::cout << "Nieoczekiwana liczba rejestrów: otrzymano " << ReceivedRegisters << ", oczekiwano " << TIME_STAMP_REGISTERS_NUMBER
+				<< " Numer linii w pliku źródłowym: " << __LINE__ << '\n';
+		}
+		return FailureCodes::ERROR_MODBUS_FRAME_READ;
+	}
+	for (int i = 0; i < TIME_STAMP_REGISTERS_NUMBER; ++i) {
+		TimeStampText[2*i] = (char)(RegistersTable[i] >> 8);
+		TimeStampText[2*i + 1] = (char)(RegistersTable[i] & 0xFF);
+	}
+	if ((TimeStampText[3] != ' ') || (TimeStampText[6] != ' ') || (TimeStampText[11] != ',') || (TimeStampText[12] != ' ') || 
+		(TimeStampText[15] != ':')|| (TimeStampText[18] != ':') || (TimeStampText[21] != '\0'))
+	{
+		if (VerboseMode) {
+			std::cout << "Nieoczekiwany format znacznika czasu slave'a: " << TimeStampText << '\n';
+		}
+		return FailureCodes::ERROR_DEVICE_TIME_STAMP_MISMATCH;
+	}
+	TimeStampText[sizeof(TimeStampText) - 1] = '\0'; // Ensure null-termination
+
+	if (VerboseMode) {
+		std::cout << "  Odczytano prawidłowy znacznik czasu slave'a po Modbusie: " << TimeStampText << '\n';
 	}
 	return FailureCodes::NO_FAILURE;
 }

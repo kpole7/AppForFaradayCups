@@ -35,7 +35,7 @@ enum class ModbusFsmStates {
 	OPEN,
 	// The following states are used in the initialization phase of the application
 	READING_DEVICE_NAME,
-	READING_DEVICE_VERSION,
+	READING_SLAVE_TIME_STAMP,
 	WRITING_CONFIGURATION_DATA,
 	// The following states are used in the normal operation
 	READING_INPUT_REGISTERS,
@@ -67,6 +67,8 @@ static int64_t PeripheralThreadTimeInMilliseconds;
 static uint16_t LowLevelContinuousErrors, LowLevelSuccessfulTransmission;
 
 static std::atomic<int> TransmissionQualityLowLevelIndicator;
+
+static uint16_t ModbusRepeatsCounter;
 
 //.................................................................................................
 // Local function prototypes
@@ -200,10 +202,25 @@ static void peripheralThreadHandler() {
 
 		switch (FsmState) {
 		case ModbusFsmStates::OPEN:
+			FsmState = ModbusFsmStates::READING_DEVICE_NAME;
+			Result = readSlaveName();
+			determineTransmissionQuality(Result);
+			break;
+		case ModbusFsmStates::READING_DEVICE_NAME:
+			FsmState = ModbusFsmStates::READING_SLAVE_TIME_STAMP;
+			Result = readSlaveTimeStamp();
+			determineTransmissionQuality(Result);
+			break;
+		case ModbusFsmStates::READING_SLAVE_TIME_STAMP:
 			FsmState = ModbusFsmStates::READING_INPUT_REGISTERS;
 			Result = readInputRegisters();
 			determineTransmissionQuality(Result);
 			break;
+
+
+
+
+
 		case ModbusFsmStates::READING_INPUT_REGISTERS:
 			FsmState = ModbusFsmStates::READING_COILS;
 			Result = readCoils();
