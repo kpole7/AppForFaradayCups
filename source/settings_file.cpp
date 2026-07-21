@@ -17,14 +17,18 @@
 // Preprocessor directives
 //.................................................................................................
 
+#define CHANNELS_PER_CUP 4
+
 #define MAX_PROPAGATION_TIME_UPPER_LIMIT 10000 // in milliseconds
 #define MAX_PROPAGATION_TIME_LOWER_LIMIT 100   // in milliseconds
 
 #define MODBUS_SLAVE_ADDRESS_MAX 247 // defined in the Modbus standard
 
 #define CALIBRATION_CURRENTS_NUMBER 4
-#define CALIBRATION_ADC_READINGS_NUMBER 24 // 3 cups * 4 channels * 2 gains
 #define CONFIGURATION_CURRENT_MAX 30000 // in microamperes
+
+#define CALIBRATION_ADC_READINGS_NUMBER 72 // 3 cups * 4 channels * 2 gains * 3 calibration currents
+#define CONFIGURATION_ADC_MAX 3000
 
 //.................................................................................................
 // Global variables
@@ -47,16 +51,14 @@ int NumberOfFaradayCupsToBeOperated;
 
 int ModbusSlaveAddress;
 
-/// Currents values used to calibration; UINT16_MAX is an illegal value
-uint16_t CalibrationCurrents[CALIBRATION_CURRENTS_NUMBER] = { UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX }; 
+/// Currents values used to calibration; 
+/// UINT16_MAX is an illegal value and is used to indicate that the current has not been initialized yet
+uint16_t CalibrationCurrents[CALIBRATION_CURRENTS_NUMBER]; 
 
-/// The array contains the values of ADC readings for each cup, channel and gain for the currents defined in CalibrationCurrents;
+/// The array contains the values of ADC readings for each cup, channel and gain for the selected currents defined in CalibrationCurrents;
 /// the data order is the same as in the Modbus register list (Cup1Channel1GainLowPoint1, ...Cup3Channel4GainHighPoint4);
-/// UINT16_MAX is an illegal value;
-uint16_t CalibrationData[CALIBRATION_ADC_READINGS_NUMBER] = 
-	{ UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX,
-	  UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX,
-	  UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX };
+/// UINT16_MAX is an illegal value and is used to indicate that the current has not been initialized yet
+uint16_t CalibrationAdcOutputs[CALIBRATION_ADC_READINGS_NUMBER];
 
 //.................................................................................................
 // Local variables
@@ -81,6 +83,8 @@ static FailureCodes parseCupName(const std::regex *PatternPtr, std::string *Line
 static FailureCodes parseSingleInteger(const std::regex *PatternPtr, std::string *LinePtr, int *OutputValue, int LowerLimit, int UpperLimit,
                                        const char *ParameterName);
 static FailureCodes parseCalibrationCurrents(const std::regex *PatternPtr, std::string *LinePtr, uint16_t CurrentsArray[CALIBRATION_CURRENTS_NUMBER]);
+static FailureCodes parseCalibrationAdcOutputs(bool IsLowGain, const std::regex *PatternPtr, std::string *LinePtr, 
+											   uint16_t AdcOutputsArray[CALIBRATION_ADC_READINGS_NUMBER]);
 static FailureCodes finalTest();
 
 //........................................................................................................
@@ -129,8 +133,8 @@ FailureCodes configurationFileParsing() {
 	std::regex PatternFaradayCupsNumber(R"(\s*(?!#)Liczba kubków Faradaya do obsłużenia:\s*(\d+)\s*$)");
 	std::regex PatternModbusSlaveAddress(R"(\s*(?!#)Adres mobusowy slave'a:\s*(\d+)\s*$)");
 	std::regex PatternCalibrationCurrents(R"(\s*(?!#)Prądy kalibracyjne:\s*I1\s*=\s*(\d+)\s*uA/100,\s*I2\s*=\s*(\d+)\s*uA/100,\s*I3\s*=\s*(\d+)\s*uA/100,\s*I4\s*=\s*(\d+)\s*uA/100\s*$)");
-	std::regex PatternCalibrationSmall(R"(\s*(?!#)Odczyty ADC dla kubka (\d+), kanału (\d+), wzmocnienia małego: Y(I1) = (\d+), Y(I2) = (\d+), Y(I3) = (\d+)\s*$)");
-	std::regex PatternCalibrationLarge(R"(\s*(?!#)Odczyty ADC dla kubka (\d+), kanału (\d+), wzmocnienia dużego: Y(I2) = (\d+), Y(I3) = (\d+), Y(I4) = (\d+)\s*$)");
+	std::regex PatternCalibrationLowGain( R"(\s*(?!#)Odczyty ADC dla kubka (\d+), kanału (\d+), wzmocnienia małego: Y\(I1\) = (\d+), Y\(I2\) = (\d+), Y\(I3\) = (\d+)\s*$)");
+	std::regex PatternCalibrationHighGain(R"(\s*(?!#)Odczyty ADC dla kubka (\d+), kanału (\d+), wzmocnienia dużego: Y\(I2\) = (\d+), Y\(I3\) = (\d+), Y\(I4\) = (\d+)\s*$)");
 
 	int LineNumber = 1;
 	std::string Line;
@@ -182,7 +186,14 @@ FailureCodes configurationFileParsing() {
 			return Result;
 		}
 
-
+		Result = parseCalibrationAdcOutputs(true, &PatternCalibrationLowGain, &Line, CalibrationAdcOutputs);
+		if (FailureCodes::NO_FAILURE != Result) {
+			return Result;
+		}
+		Result = parseCalibrationAdcOutputs(false, &PatternCalibrationHighGain, &Line, CalibrationAdcOutputs);
+		if (FailureCodes::NO_FAILURE != Result) {
+			return Result;
+		}
 
 		LineNumber++;
 	}
@@ -196,6 +207,14 @@ static FailureCodes initializations() {
 	SerialPortRequestedNamePtr = nullptr;
 	for (int J = 0; J < CUPS_NUMBER; J++) {
 		CupDescriptionPtr[J][0] = 0;
+	}
+
+	for (int I = 0; I < CALIBRATION_CURRENTS_NUMBER; I++) {
+		CalibrationCurrents[I] = UINT16_MAX;
+	}
+
+	for (int I = 0; I < CALIBRATION_ADC_READINGS_NUMBER; I++) {
+		CalibrationAdcOutputs[I] = UINT16_MAX;
 	}
 
 	NumberOfFaradayCupsToBeOperated = -1;
@@ -317,16 +336,54 @@ static FailureCodes parseCalibrationCurrents(const std::regex *PatternPtr, std::
 	return FailureCodes::NO_FAILURE;
 }
 
+static FailureCodes parseCalibrationAdcOutputs(bool IsLowGain, const std::regex *PatternPtr, std::string *LinePtr, 
+	uint16_t AdcOutputsArray[CALIBRATION_ADC_READINGS_NUMBER]) 
+	{
+	std::smatch Matches;
+	if (std::regex_match(*LinePtr, Matches, *PatternPtr)) {
+		uint16_t MyCupIndex = static_cast<uint16_t>(std::stoi(Matches[1]));
+		uint16_t MyChannelIndex = static_cast<uint16_t>(std::stoi(Matches[2]));
+		if ((MyCupIndex < 1) || (MyCupIndex > CUPS_NUMBER) || (MyChannelIndex < 1) || (MyChannelIndex > CHANNELS_PER_CUP)) {
+			std::cout << "  Nieprawidłowy indeks kubka lub kanału w linii: [" << *LinePtr << "]" << '\n';
+			return FailureCodes::ERROR_SETTINGS_IMPROPER_ADC_OUTPUTS_DEFINITION;
+		}
+		uint16_t GainsPerChannel = 2; // low and high gain
+		uint16_t CurrentsPerOneGain = 3; // I1, I2, I3 for low gain and I2, I3, I4 for high gain
+		uint16_t MyGainIndex = IsLowGain ? 0 : 1; // low or high gain
+		uint16_t MyLocalIndex = (MyCupIndex - 1) * CHANNELS_PER_CUP + (MyChannelIndex - 1);
+		MyLocalIndex = (MyLocalIndex * GainsPerChannel + MyGainIndex) * CurrentsPerOneGain; // index of the first current for the given cup, channel and gain
+		assert(MyLocalIndex + CurrentsPerOneGain <= CALIBRATION_ADC_READINGS_NUMBER);
+
+		for (int I = 0; I < CurrentsPerOneGain; I++) {
+			if (UINT16_MAX != AdcOutputsArray[MyLocalIndex + I]) {
+				std::cout << "  Nadmiarowa deklaracja odczytu ADC w linii: [" << *LinePtr << "]" << '\n';
+				return FailureCodes::ERROR_SETTINGS_EXCESSIVE_ADC_OUTPUTS_DEFINITION;
+			}
+			AdcOutputsArray[MyLocalIndex + I] = static_cast<uint16_t>(std::stoi(Matches[I + 3]));
+			if (AdcOutputsArray[MyLocalIndex + I] > CONFIGURATION_ADC_MAX) {
+				std::cout << "  Odczyt ADC przekracza maksymalną wartość w linii: [" << *LinePtr << "]" << '\n';
+				return FailureCodes::ERROR_SETTINGS_IMPROPER_ADC_OUTPUTS_DEFINITION;
+			}
+		}
+
+		if (VerboseMode) {
+			std::cout << "  Wartości kalibracyjne ADC dla kubka " << MyCupIndex << ", kanału " << MyChannelIndex << ", wzmocnienia " << (IsLowGain ? "małego" : "dużego") << ": ";
+			for (int I = 0; I < CurrentsPerOneGain; I++) {
+				std::cout << AdcOutputsArray[MyLocalIndex + I];
+				if (I < CurrentsPerOneGain - 1) {
+					std::cout << ", ";
+				}
+			}
+			std::cout << "\n  w linii: [" << *LinePtr << "]" << '\n';
+		}
+	}
+	return FailureCodes::NO_FAILURE;
+}
+
 static FailureCodes finalTest() {
 	if (nullptr == SerialPortRequestedNamePtr) {
 		std::cout << " Nie znaleziono opisu portu szeregowego" << '\n';
 		return FailureCodes::ERROR_SETTINGS_PORT_NAME;
-	}
-	for (int J = 0; J < CALIBRATION_CURRENTS_NUMBER; J++) {
-		if (UINT16_MAX == CalibrationCurrents[J]) {
-			std::cout << " Nie znaleziono definicji prądów kalibracyjnych" << '\n';
-			return FailureCodes::ERROR_SETTINGS_CALIBRATION_DATA;
-		}
 	}
 	for (int J = 0; J < CUPS_NUMBER; J++) {
 		if (0 == CupDescriptionPtr[J][0]) {
@@ -334,6 +391,18 @@ static FailureCodes finalTest() {
 			if (VerboseMode) {
 				std::cout << " Nie znaleziono tytułu kubka " << J + 1 << "; nadano tytuł zastępczy" << '\n';
 			}
+		}
+	}
+	for (int J = 0; J < CALIBRATION_CURRENTS_NUMBER; J++) {
+		if (UINT16_MAX == CalibrationCurrents[J]) {
+			std::cout << " Nie znaleziono definicji prądów kalibracyjnych" << '\n';
+			return FailureCodes::ERROR_SETTINGS_CALIBRATION_DATA;
+		}
+	}
+	for (int J = 0; J < CALIBRATION_ADC_READINGS_NUMBER; J++) {
+		if (UINT16_MAX == CalibrationAdcOutputs[J]) {
+			std::cout << " Nie znaleziono definicji odczytów ADC" << '\n';
+			return FailureCodes::ERROR_SETTINGS_CALIBRATION_DATA;
 		}
 	}
 	if (VerboseMode) {
