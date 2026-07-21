@@ -24,7 +24,7 @@ char TimeStampText[22]; // "Jul 21 2026, 13:08:28"
 // Local variables
 //...............................................................................................
 
-static modbus_t *Context;
+static modbus_t *Context = nullptr;
 
 //...............................................................................................
 // Local function prototypes
@@ -53,6 +53,7 @@ FailureCodes initializeModbus() {
 	if (modbus_set_slave(Context, ModbusSlaveAddress) == -1) {
 		std::cout << "Błąd ustawienia slave id: " << modbus_strerror(errno) << '\n';
 		modbus_free(Context);
+		Context = nullptr;
 		return FailureCodes::ERROR_MODBUS_INITIALIZATION_2;
 	}
 
@@ -65,6 +66,7 @@ FailureCodes initializeModbus() {
 	if (modbus_connect(Context) == -1) {
 		std::cout << "Błąd połączenia Modbus: " << modbus_strerror(errno) << '\n';
 		modbus_free(Context);
+		Context = nullptr;
 		return FailureCodes::ERROR_MODBUS_OPENING;
 	}
 	return FailureCodes::NO_FAILURE;
@@ -247,8 +249,13 @@ FailureCodes writeSingleCoil(uint16_t CoilAddress, bool NewValue) {
 }
 
 void closeModbus() {
+	if (nullptr == Context) {
+		return;
+	}
+
 	modbus_close(Context);
 	modbus_free(Context);
+	Context = nullptr;
 }
 
 static char getTokenCharacter() {

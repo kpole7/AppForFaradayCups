@@ -272,8 +272,14 @@ static void peripheralThreadHandler() {
 			FsmState = ModbusFsmStates::RECOVERY4_PAUSE;
 			break;
 		case ModbusFsmStates::RECOVERY4_PAUSE:
-			initializeModbus();
-			FsmState = ModbusFsmStates::OPEN;
+			Result = initializeModbus();
+			determineTransmissionQuality(Result);
+			if (FailureCodes::NO_FAILURE == Result) {
+				FsmState = ModbusFsmStates::OPEN;
+			}
+			else {
+				FsmState = ModbusFsmStates::RECOVERY1_PAUSE;
+			}
 			break;
 		default:
 			assert(false);
