@@ -203,6 +203,26 @@ FailureCodes configurationFileParsing() {
 	return Result;
 }
 
+int copyCalibrationCurrents( uint16_t *OutputArrayPtr, int Quantity ) {
+	if (Quantity != CALIBRATION_CURRENTS_NUMBER) {
+		return -1;
+	}
+	for (int I = 0; I < CALIBRATION_CURRENTS_NUMBER; I++) {
+		OutputArrayPtr[I] = CalibrationCurrents[I];
+	}
+	return 0;
+}
+
+int copyCalibrationAdcOutputs( uint16_t *OutputArrayPtr, int Quantity ) {
+	if (Quantity != CALIBRATION_ADC_READINGS_NUMBER) {
+		return -1;
+	}
+	for (int I = 0; I < CALIBRATION_ADC_READINGS_NUMBER; I++) {
+		OutputArrayPtr[I] = CalibrationAdcOutputs[I];
+	}
+	return 0;
+}
+
 static FailureCodes initializations() {
 	SerialPortRequestedNamePtr = nullptr;
 	for (int J = 0; J < CUPS_NUMBER; J++) {

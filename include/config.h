@@ -15,7 +15,7 @@
 
 #define PERIPHERAL_THREAD_LOOP_DURATION 50 // milliseconds
 
-#define MODBUS_RESPONSE_TIMEOUT 40 // milliseconds
+#define MODBUS_RESPONSE_TIMEOUT 50 // milliseconds
 
 enum class FailureCodes {
 	NO_FAILURE,

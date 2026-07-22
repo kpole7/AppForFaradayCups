@@ -17,6 +17,8 @@ FailureCodes readSlaveName();
 
 FailureCodes readSlaveTimeStamp();
 
+FailureCodes writeMultipleHoldingRegisters(uint16_t StartAddress, uint16_t Quantity, uint16_t *NewValue);
+
 void closeModbus();
 
 #endif // SOURCE_MODBUS_RTU_MASTER_H_

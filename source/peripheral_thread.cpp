@@ -38,7 +38,11 @@ enum class ModbusFsmStates {
 	// The following states are used in the initialization phase of the application
 	READING_DEVICE_NAME,
 	READING_SLAVE_TIME_STAMP,
-	WRITING_CONFIGURATION_DATA,
+	WRITING_CONFIGURATION_DATA1,
+	WRITING_CONFIGURATION_DATA2,
+	WRITING_CONFIGURATION_DATA3,
+	WRITING_CONFIGURATION_DATA4,
+	WRITING_CONFIGURATION_DATA5,
 	// The following states are used in the normal operation
 	READING_INPUT_REGISTERS,
 	READING_COILS,
@@ -73,6 +77,8 @@ static std::atomic<int> TransmissionQualityLowLevelIndicator;
 
 static uint16_t ModbusRunupRepeatsCounter;
 
+static uint16_t ModbusRegistersToBeWritten[MODBUS_REGISTERS_TO_BE_WRITTEN];
+
 //.................................................................................................
 // Local function prototypes
 //.................................................................................................
@@ -80,6 +86,7 @@ static uint16_t ModbusRunupRepeatsCounter;
 static void peripheralThreadTiming();
 static void determineTransmissionQuality(FailureCodes EssentialActionResult);
 static void peripheralThreadHandler();
+static void setupModbusRegistersToBeWritten();
 
 //.................................................................................................
 // Function definitions
@@ -197,6 +204,7 @@ static void peripheralThreadHandler() {
 	PeripheralThreadLoopStart = std::chrono::high_resolution_clock::now();
 	ModbusFsmStates FsmState = ModbusFsmStates::OPEN;
 	ModbusRunupRepeatsCounter = 0;
+	setupModbusRegistersToBeWritten();
 
 	while (!atomic_load_explicit(&ClosePeripheralsFlag, std::memory_order_acquire)) {
 
@@ -223,6 +231,31 @@ static void peripheralThreadHandler() {
 			determineTransmissionQuality(Result);
 			break;
 		case ModbusFsmStates::READING_SLAVE_TIME_STAMP:
+			FsmState = ModbusFsmStates::WRITING_CONFIGURATION_DATA1;
+			Result = writeMultipleHoldingRegisters(CONFIGURATION_DATA_ADDRESS,    20, ModbusRegistersToBeWritten); // 89=20+20+20+20+9
+			determineTransmissionQuality(Result);
+			break;
+		case ModbusFsmStates::WRITING_CONFIGURATION_DATA1:
+			FsmState = ModbusFsmStates::WRITING_CONFIGURATION_DATA2;
+			Result = writeMultipleHoldingRegisters(CONFIGURATION_DATA_ADDRESS+20, 20, ModbusRegistersToBeWritten+20);
+			determineTransmissionQuality(Result);
+			break;
+		case ModbusFsmStates::WRITING_CONFIGURATION_DATA2:
+			FsmState = ModbusFsmStates::WRITING_CONFIGURATION_DATA3;
+			Result = writeMultipleHoldingRegisters(CONFIGURATION_DATA_ADDRESS+40, 20, ModbusRegistersToBeWritten+40);
+			determineTransmissionQuality(Result);
+			break;
+		case ModbusFsmStates::WRITING_CONFIGURATION_DATA3:
+			FsmState = ModbusFsmStates::WRITING_CONFIGURATION_DATA4;
+			Result = writeMultipleHoldingRegisters(CONFIGURATION_DATA_ADDRESS+60, 20, ModbusRegistersToBeWritten+60);
+			determineTransmissionQuality(Result);
+			break;
+		case ModbusFsmStates::WRITING_CONFIGURATION_DATA4:
+			FsmState = ModbusFsmStates::WRITING_CONFIGURATION_DATA5;
+			Result = writeMultipleHoldingRegisters(CONFIGURATION_DATA_ADDRESS+80,  9, ModbusRegistersToBeWritten+80);
+			determineTransmissionQuality(Result);
+			break;
+		case ModbusFsmStates::WRITING_CONFIGURATION_DATA5:
 			FsmState = ModbusFsmStates::READING_INPUT_REGISTERS;
 			Result = readInputRegisters();
 			determineTransmissionQuality(Result);
@@ -351,4 +384,26 @@ char *getTransmissionQualityIndicatorTextForDebugging() {
 	    (100.0 * atomic_load_explicit(&TransmissionQualityLowLevelIndicator, std::memory_order_acquire)) / (double)LOW_LEVEL_CONTINUOUS_COUNTING_MAX;
 	snprintf(TransmissionQualityIndicatorText, sizeof(TransmissionQualityIndicatorText) - 1, "%5.1f%%", TransmissionQualityIndicatorFactor);
 	return TransmissionQualityIndicatorText;
+}
+
+static void setupModbusRegistersToBeWritten() {
+	// The following values are set in the Modbus registers of the slave device during the initialization phase of the application;
+	// refer to the modbusRegisters.ods
+	ModbusRegistersToBeWritten[0] =  700u; // MODBUS_ADDR_TIME_LIMIT_INSERTING1
+	ModbusRegistersToBeWritten[1] =  700u; // MODBUS_ADDR_TIME_LIMIT_INSERTING2
+	ModbusRegistersToBeWritten[2] = 4000u; // MODBUS_ADDR_TIME_LIMIT_INSERTING3
+	ModbusRegistersToBeWritten[3] =  300u; // MODBUS_ADDR_TIME_LIMIT_WITHDRAWING1
+	ModbusRegistersToBeWritten[4] =  300u; // MODBUS_ADDR_TIME_LIMIT_WITHDRAWING2
+	ModbusRegistersToBeWritten[5] = 4400u; // MODBUS_ADDR_TIME_LIMIT_WITHDRAWING3
+	ModbusRegistersToBeWritten[6] = 3;    // MODBUS_ADDR_INSTALLED_CUPS
+	ModbusRegistersToBeWritten[7] = 4;    // MODBUS_ADDR_ELECTRODES_CUP1
+	ModbusRegistersToBeWritten[8] = 4;    // MODBUS_ADDR_ELECTRODES_CUP2
+	ModbusRegistersToBeWritten[9] = 4;    // MODBUS_ADDR_ELECTRODES_CUP3
+	ModbusRegistersToBeWritten[10] = 0;   // MODBUS_ADDR_CUP1_TYPE
+	ModbusRegistersToBeWritten[11] = 1;   // MODBUS_ADDR_CUP2_TYPE
+	ModbusRegistersToBeWritten[12] = 2;   // MODBUS_ADDR_CUP3_TYPE
+	int Result = copyCalibrationCurrents( ModbusRegistersToBeWritten+(CALIBRATION_CURRENTS_ADDRESS - CONFIGURATION_DATA_ADDRESS), CALIBRATION_CURRENTS_LENGTH);
+	assert(Result == 0);
+	Result = copyCalibrationAdcOutputs( ModbusRegistersToBeWritten + (CALIBRATION_ADC_DATA_ADDRESS - CONFIGURATION_DATA_ADDRESS), CALIBRATION_ADC_DATA_LENGTH);
+	assert(Result == 0);
 }

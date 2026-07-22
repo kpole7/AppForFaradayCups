@@ -30,4 +30,8 @@ FailureCodes determineApplicationPath(char *Argv0);
 
 FailureCodes configurationFileParsing();
 
+int copyCalibrationCurrents( uint16_t *OutputArrayPtr, int Quantity );
+
+int copyCalibrationAdcOutputs( uint16_t *OutputArrayPtr, int Quantity );
+
 #endif // SOURCE_SETTINGS_FILE_H_

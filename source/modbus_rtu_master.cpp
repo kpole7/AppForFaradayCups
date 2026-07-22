@@ -168,6 +168,19 @@ FailureCodes readSlaveTimeStamp() {
 	return FailureCodes::NO_FAILURE;
 }
 
+FailureCodes writeMultipleHoldingRegisters(uint16_t StartAddress, uint16_t Quantity, uint16_t *NewValue) {
+	int WrittenRegisters = modbus_write_registers(Context, StartAddress, Quantity, NewValue);
+	if (WrittenRegisters != Quantity) {
+		// Communication / protocol error (CRC, timeout, invalid response)
+		if (VerboseMode) {
+			std::cout << getTokenCharacter() << getTransmissionQualityIndicatorTextForDebugging() 
+					  << " Błąd zapisu rejestrów: " << modbus_strerror(errno) << " adres: " << StartAddress << '\n';
+		}
+		return FailureCodes::ERROR_MODBUS_WRITING;
+	}
+	return FailureCodes::NO_FAILURE;
+}
+
 FailureCodes readInputRegisters() {
 	static uint16_t RegistersTable[25]; // 125 max
 
