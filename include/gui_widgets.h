@@ -32,6 +32,10 @@ void initializeGraphicWidgets();
 
 void refreshGui(void *Data);
 
-void refreshDisc(void *Data);
+void permanentErrorGuiUpdate(void *Data);
+
+void initializeFailureMessageWidget();
+
+void showFailureMessageWidget();
 
 #endif // SOURCE_GUI_WIDGETS_H_

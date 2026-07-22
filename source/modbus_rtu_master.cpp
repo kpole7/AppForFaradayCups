@@ -2,6 +2,7 @@
 
 #include <cerrno>
 #include <iostream>
+#include <cctype>
 #include <modbus.h>
 
 #include "config.h"
@@ -18,7 +19,7 @@
 // Global variables
 //...............................................................................................
 
-char TimeStampText[22]; // "Jul 21 2026, 13:08:28"
+char TimeStampText[22]; // for example "Jul 21 2026, 13:08:28"
 
 //...............................................................................................
 // Local variables
@@ -80,8 +81,7 @@ FailureCodes readSlaveName() {
 	if (ReceivedRegisters == -1) {
 		// Communication / protocol error (CRC, timeout, invalid response)
 		if (VerboseMode) {
-			std::cout << getTokenCharacter() << getTransmissionQualityIndicatorTextForDebugging() << " Błąd odczytu (1): " << modbus_strerror(errno)
-			          << '\n';
+			std::cout << " Błąd odczytu po Modbusie nazwy slave'a: " << modbus_strerror(errno) << '\n';
 		}
 		return FailureCodes::ERROR_MODBUS_READING;
 	}
@@ -115,8 +115,7 @@ FailureCodes readSlaveTimeStamp() {
 	if (ReceivedRegisters == -1) {
 		// Communication / protocol error (CRC, timeout, invalid response)
 		if (VerboseMode) {
-			std::cout << getTokenCharacter() << getTransmissionQualityIndicatorTextForDebugging() << " Błąd odczytu (1): " << modbus_strerror(errno)
-			          << '\n';
+			std::cout << " Błąd odczytu po Modbusie znacznika czasu slave'a: " << modbus_strerror(errno) << '\n';
 		}
 		return FailureCodes::ERROR_MODBUS_READING;
 	}
@@ -132,8 +131,29 @@ FailureCodes readSlaveTimeStamp() {
 		TimeStampText[2*i] = (char)(RegistersTable[i] >> 8);
 		TimeStampText[2*i + 1] = (char)(RegistersTable[i] & 0xFF);
 	}
-	if ((TimeStampText[3] != ' ') || (TimeStampText[6] != ' ') || (TimeStampText[11] != ',') || (TimeStampText[12] != ' ') || 
-		(TimeStampText[15] != ':')|| (TimeStampText[18] != ':') || (TimeStampText[21] != '\0'))
+	// test the format; for example "Jul 21 2026, 13:08:28"
+	if (!std::isupper(static_cast<unsigned char>(TimeStampText[0])) || 
+		!std::islower(static_cast<unsigned char>(TimeStampText[1])) ||
+		!std::islower(static_cast<unsigned char>(TimeStampText[2])) ||
+		(TimeStampText[3] != ' ') || 
+		!std::isdigit(static_cast<unsigned char>(TimeStampText[4])) ||
+		!std::isdigit(static_cast<unsigned char>(TimeStampText[5])) ||
+		(TimeStampText[6] != ' ') || 
+		!std::isdigit(static_cast<unsigned char>(TimeStampText[7])) ||
+		!std::isdigit(static_cast<unsigned char>(TimeStampText[8])) ||
+		!std::isdigit(static_cast<unsigned char>(TimeStampText[9])) ||
+		!std::isdigit(static_cast<unsigned char>(TimeStampText[10])) ||
+		(TimeStampText[11] != ',') || 
+		(TimeStampText[12] != ' ') || 
+		!std::isdigit(static_cast<unsigned char>(TimeStampText[13])) ||
+		!std::isdigit(static_cast<unsigned char>(TimeStampText[14])) ||
+		(TimeStampText[15] != ':')|| 
+		!std::isdigit(static_cast<unsigned char>(TimeStampText[16])) ||
+		!std::isdigit(static_cast<unsigned char>(TimeStampText[17])) ||
+		(TimeStampText[18] != ':') || 
+		!std::isdigit(static_cast<unsigned char>(TimeStampText[19])) ||
+		!std::isdigit(static_cast<unsigned char>(TimeStampText[20])) ||
+		(TimeStampText[21] != '\0'))
 	{
 		if (VerboseMode) {
 			std::cout << "Nieoczekiwany format znacznika czasu slave'a: " << TimeStampText << '\n';
@@ -156,8 +176,8 @@ FailureCodes readInputRegisters() {
 	if (ReceivedRegisters == -1) {
 		// Communication / protocol error (CRC, timeout, invalid response)
 		if (VerboseMode) {
-			std::cout << getTokenCharacter() << getTransmissionQualityIndicatorTextForDebugging() << " Błąd odczytu (1): " << modbus_strerror(errno)
-			          << '\n';
+			std::cout << getTokenCharacter() << getTransmissionQualityIndicatorTextForDebugging() 
+					  << " Błąd odczytu (input registers): " << modbus_strerror(errno) << '\n';
 		}
 		return FailureCodes::ERROR_MODBUS_READING;
 	}
@@ -195,8 +215,8 @@ FailureCodes readCoils() {
 	if (ReceivedBits == -1) {
 		// Communication / protocol error (CRC, timeout, invalid response)
 		if (VerboseMode) {
-			std::cout << getTokenCharacter() << getTransmissionQualityIndicatorTextForDebugging() << " Błąd odczytu (2): " << modbus_strerror(errno)
-			          << '\n';
+			std::cout << getTokenCharacter() << getTransmissionQualityIndicatorTextForDebugging() 
+					  << " Błąd odczytu (coils): " << modbus_strerror(errno) << '\n';
 		}
 		return FailureCodes::ERROR_MODBUS_READING;
 	}

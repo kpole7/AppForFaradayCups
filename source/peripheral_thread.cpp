@@ -27,6 +27,8 @@
 
 #define TRANSMISSION_CORRECTNESS_LIMIT ((LOW_LEVEL_CONTINUOUS_COUNTING_MAX * 9) / 10) // 90%
 
+#define MODBUS_RUNUP_REPEATS_LIMIT 5
+
 //...............................................................................................
 // Types definitions
 //...............................................................................................
@@ -46,6 +48,7 @@ enum class ModbusFsmStates {
 	RECOVERY2_CLOSE,
 	RECOVERY3_PAUSE,
 	RECOVERY4_PAUSE,
+	PERMANENT_ERROR,
 };
 
 //...............................................................................................
@@ -68,7 +71,7 @@ static uint16_t LowLevelContinuousErrors, LowLevelSuccessfulTransmission;
 
 static std::atomic<int> TransmissionQualityLowLevelIndicator;
 
-static uint16_t ModbusRepeatsCounter;
+static uint16_t ModbusRunupRepeatsCounter;
 
 //.................................................................................................
 // Local function prototypes
@@ -193,6 +196,7 @@ static void peripheralThreadHandler() {
 	PeripheralThreadTimeInMilliseconds = 0;
 	PeripheralThreadLoopStart = std::chrono::high_resolution_clock::now();
 	ModbusFsmStates FsmState = ModbusFsmStates::OPEN;
+	ModbusRunupRepeatsCounter = 0;
 
 	while (!atomic_load_explicit(&ClosePeripheralsFlag, std::memory_order_acquire)) {
 
@@ -202,6 +206,13 @@ static void peripheralThreadHandler() {
 
 		switch (FsmState) {
 		case ModbusFsmStates::OPEN:
+			if (ModbusRunupRepeatsCounter >= MODBUS_RUNUP_REPEATS_LIMIT) {
+
+				Fl::awake(permanentErrorGuiUpdate, nullptr);
+
+				FsmState = ModbusFsmStates::PERMANENT_ERROR;
+				break;
+			}
 			FsmState = ModbusFsmStates::READING_DEVICE_NAME;
 			Result = readSlaveName();
 			determineTransmissionQuality(Result);
@@ -216,9 +227,6 @@ static void peripheralThreadHandler() {
 			Result = readInputRegisters();
 			determineTransmissionQuality(Result);
 			break;
-
-
-
 
 
 		case ModbusFsmStates::READING_INPUT_REGISTERS:
@@ -280,13 +288,19 @@ static void peripheralThreadHandler() {
 			else {
 				FsmState = ModbusFsmStates::RECOVERY1_PAUSE;
 			}
+			if (ModbusRunupRepeatsCounter < MODBUS_RUNUP_REPEATS_LIMIT) {
+				ModbusRunupRepeatsCounter++;
+			}
+			break;
+		case ModbusFsmStates::PERMANENT_ERROR:
+			// Stay in permanent error state
 			break;
 		default:
 			assert(false);
 			break;
 		}
 
-#if 1 // debugging
+#if 0 // debugging
 		std::chrono::high_resolution_clock::time_point TimeAfter = std::chrono::high_resolution_clock::now();
 		std::chrono::milliseconds ProcessingTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeAfter - TimeNow);
 		std::cout << "Peripheral thread " << PeripheralThreadTimeInMilliseconds << "  " << ProcessingTime.count() << '\n';
@@ -299,7 +313,7 @@ static void peripheralThreadHandler() {
 			FsmState = ModbusFsmStates::RECOVERY1_PAUSE;
 		}
 
-#if 1 // debugging
+#if 0 // debugging
 		static int DebugFsmStatesPrintoutCounter;
 		std::cout << "[" << (int)FsmState  << "] ";
 		if (((ModbusFsmStates::READING_COILS != FsmState) && (ModbusFsmStates::READING_INPUT_REGISTERS != FsmState)) ||

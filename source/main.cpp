@@ -60,12 +60,6 @@ WindowEscProof *ApplicationWindow;
 int StatusLevelForGui;
 
 //.................................................................................................
-// Local variables
-//.................................................................................................
-
-static Fl_Box *FailureMessagePtr;
-
-//.................................................................................................
 // Local function prototypes
 //.................................................................................................
 
@@ -114,13 +108,13 @@ int main(int argc, char **argv) {
 
 	StatusLevelForGui = DEFAULT_STATUS_LEVEL;
 
+	initializeFailureMessageWidget();
+
 	if (FailureCodes::NO_FAILURE == ErrorCode) {
 		initializeGraphicWidgets();
 	}
 	else {
-		FailureMessagePtr =
-		    new Fl_Box((MAIN_WINDOW_WIDTH * 1) / 16, 40, (MAIN_WINDOW_WIDTH * 14) / 16, DISC_SPACE_Y,
-		               "Błędy podczas startu aplikacji\nUruchom aplikację z parametrem -v w konsoli\nInformacje o błędach wyświetlą się w konsoli");
+		showFailureMessageWidget();
 	}
 
 	ApplicationWindow->end();

@@ -151,6 +151,8 @@ static Fl_Box *GeneralStatusTextBoxPtr;
 
 static CupGuiGroup *CupGroupPtr[CUPS_NUMBER];
 
+static Fl_Box *FailureMessagePtr;
+
 //.................................................................................................
 // Local function prototypes
 //.................................................................................................
@@ -575,4 +577,27 @@ void refreshGui(void *Data) {
 		         getTransmissionQualityIndicatorTextForGui());
 		GeneralStatusTextBoxPtr->label(GeneralDescriptionText);
 	}
+}
+
+void initializeFailureMessageWidget() {
+	FailureMessagePtr =
+	    new Fl_Box((MAIN_WINDOW_WIDTH * 1) / 16, 40, (MAIN_WINDOW_WIDTH * 14) / 16, DISC_SPACE_Y,
+	                "Błędy podczas startu aplikacji\nUruchom aplikację z parametrem -v w konsoli\nInformacje o błędach wyświetlą się w konsoli");
+	FailureMessagePtr->hide();
+}
+
+void showFailureMessageWidget() {
+	FailureMessagePtr->show();
+}
+
+void permanentErrorGuiUpdate(void *Data){
+	(void)Data; // intentionally unused
+
+	CupGroupPtr[0]->hide();
+	CupGroupPtr[1]->hide();
+	CupGroupPtr[2]->hide();
+
+	GeneralStatusTextBoxPtr->hide();
+
+	showFailureMessageWidget();
 }
