@@ -44,7 +44,7 @@ std::string ThisApplicationDirectory;
 
 /// This the maximum time that may elapse from clicking the "insert / remove cup" button to receiving feedback
 /// from the limit switch; value in milliseconds
-int MaximumPropagationTime;
+int MaximumPropagationTime[CUPS_NUMBER];
 
 /// This is the number of Faraday cups that must be taken into account in Modbus communication and in the GUI
 int NumberOfFaradayCupsToBeOperated;
@@ -129,7 +129,9 @@ FailureCodes configurationFileParsing() {
 	std::regex PatternCup1Title(R"(\s*(?!#)Tytuł pierwszego kubka:\s*(.+)\s*$)");
 	std::regex PatternCup2Title(R"(\s*(?!#)Tytuł drugiego kubka:\s*(.+)\s*$)");
 	std::regex PatternCup3Title(R"(\s*(?!#)Tytuł trzeciego kubka:\s*(.+)\s*$)");
-	std::regex PatternMaxPropagationTime(R"(\s*(?!#)Limit czasu propagacji sygnału z krańcówki:\s*(\d+)\s*$)");
+	std::regex PatternMaxPropagationTime1(R"(\s*(?!#)Limit czasu reakcji krańcówki dla kubka 1:\s*(\d+)\s*$)");
+	std::regex PatternMaxPropagationTime2(R"(\s*(?!#)Limit czasu reakcji krańcówki dla kubka 2:\s*(\d+)\s*$)");
+	std::regex PatternMaxPropagationTime3(R"(\s*(?!#)Limit czasu reakcji krańcówki dla kubka 3:\s*(\d+)\s*$)");
 	std::regex PatternFaradayCupsNumber(R"(\s*(?!#)Liczba kubków Faradaya do obsłużenia:\s*(\d+)\s*$)");
 	std::regex PatternModbusSlaveAddress(R"(\s*(?!#)Adres mobusowy slave'a:\s*(\d+)\s*$)");
 	std::regex PatternCalibrationCurrents(R"(\s*(?!#)Prądy kalibracyjne:\s*I1\s*=\s*(\d+)\s*uA/100,\s*I2\s*=\s*(\d+)\s*uA/100,\s*I3\s*=\s*(\d+)\s*uA/100,\s*I4\s*=\s*(\d+)\s*uA/100\s*$)");
@@ -163,8 +165,20 @@ FailureCodes configurationFileParsing() {
 			return Result;
 		}
 
-		Result = parseSingleInteger(&PatternMaxPropagationTime, &Line, &MaximumPropagationTime, MAX_PROPAGATION_TIME_LOWER_LIMIT,
-		                            MAX_PROPAGATION_TIME_UPPER_LIMIT, "maks. czas propagacji");
+		Result = parseSingleInteger(&PatternMaxPropagationTime1, &Line, &MaximumPropagationTime[0], MAX_PROPAGATION_TIME_LOWER_LIMIT,
+		                            MAX_PROPAGATION_TIME_UPPER_LIMIT, "maks. czas propagacji dla kubka 1");
+		if (FailureCodes::NO_FAILURE != Result) {
+			return Result;
+		}
+
+		Result = parseSingleInteger(&PatternMaxPropagationTime2, &Line, &MaximumPropagationTime[1], MAX_PROPAGATION_TIME_LOWER_LIMIT,
+		                            MAX_PROPAGATION_TIME_UPPER_LIMIT, "maks. czas propagacji dla kubka 2");
+		if (FailureCodes::NO_FAILURE != Result) {
+			return Result;
+		}
+
+		Result = parseSingleInteger(&PatternMaxPropagationTime3, &Line, &MaximumPropagationTime[2], MAX_PROPAGATION_TIME_LOWER_LIMIT,
+		                            MAX_PROPAGATION_TIME_UPPER_LIMIT, "maks. czas propagacji dla kubka 3");
 		if (FailureCodes::NO_FAILURE != Result) {
 			return Result;
 		}
@@ -239,7 +253,9 @@ static FailureCodes initializations() {
 
 	NumberOfFaradayCupsToBeOperated = -1;
 	ModbusSlaveAddress = -1;
-	MaximumPropagationTime = -1;
+	for (int J = 0; J < CUPS_NUMBER; J++) {
+		MaximumPropagationTime[J] = -1;
+	}
 
 	// the configuration file is looked for in the directory where the executable is located, rather than in the working directory
 	*ConfigurationFilePathPtr += "/";

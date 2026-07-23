@@ -21,4 +21,6 @@ char *getTransmissionQualityIndicatorTextForDebugging();
 
 bool isTransmissionCorrect();
 
+uint16_t getConfigurationRegisterValue(uint16_t Address);
+
 #endif // SOURCE_PERIPHERAL_THREAD_H_

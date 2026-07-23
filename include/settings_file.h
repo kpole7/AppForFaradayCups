@@ -6,6 +6,13 @@
 #include "config.h"
 #include <string>
 
+
+//.................................................................................................
+// Preprocessor directives
+//.................................................................................................
+
+#define MOTORIZED_CUP_TYPE 2
+
 //.................................................................................................
 // Global variables
 //.................................................................................................
@@ -16,7 +23,7 @@ extern char CupDescriptionPtr[CUPS_NUMBER][101];
 
 extern std::string ThisApplicationDirectory;
 
-extern int MaximumPropagationTime;
+extern int MaximumPropagationTime[CUPS_NUMBER];
 
 extern int NumberOfFaradayCupsToBeOperated;
 

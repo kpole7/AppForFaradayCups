@@ -17,6 +17,7 @@
 #include "png_graphics.h"
 #include "settings_file.h"
 #include "shared_data.h"
+#include "modbus_addresses.h"
 
 //.................................................................................................
 // Preprocessor directives
@@ -267,7 +268,7 @@ static void cupInsertionButtonCallback(Fl_Widget *Widget, void *Data) {
 	std::chrono::milliseconds DurationTime;
 	DurationTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - CupInsertionOrRemovalStartTime[DiscIndex]);
 
-	if (DurationTime.count() < MaximumPropagationTime) {
+	if (DurationTime.count() < MaximumPropagationTime[DiscIndex]) {
 		if (VeryVerboseMode) {
 			std::cout << "Akcja związana z naciśnięciem przycisku: ODMOWA " << DiscIndex + 1 << '\n';
 		}
@@ -516,10 +517,14 @@ void CupGuiGroup::redrawStatusLabel() {
 	if (StatusTextBoxPtr->labelsize() != DEBUGGING_TEXT_SIZE) {
 		StatusTextBoxPtr->labelsize(DEBUGGING_TEXT_SIZE);
 	}
+	char FourthCoil = ' ';
+	if (getConfigurationRegisterValue(MODBUS_ADDR_CUP1_TYPE+CupId) == MOTORIZED_CUP_TYPE) {
+		FourthCoil = atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 3], std::memory_order_acquire) ? '1' : '0';
+	}
 	snprintf(StatusText, sizeof(StatusText) - 1,
 	         "%s\n"
 	         "Inputs: %04X %04X %04X %04X\n"
-	         "Coils: %c %c %c",
+	         "Coils: %c %c %c %c",
 	         atomic_load_explicit(&ModbusCoilsReadout[getIndexForSwitchPressed()], std::memory_order_acquire) ? TextCupIsInserted : TextCupIsRemoved,
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 0], std::memory_order_acquire),
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 1], std::memory_order_acquire),
@@ -527,7 +532,8 @@ void CupGuiGroup::redrawStatusLabel() {
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 3], std::memory_order_acquire),
 	         atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 0], std::memory_order_acquire) ? '1' : '0',
 	         atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 1], std::memory_order_acquire) ? '1' : '0',
-	         atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 2], std::memory_order_acquire) ? '1' : '0');
+	         atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 2], std::memory_order_acquire) ? '1' : '0',
+	         FourthCoil);
 	StatusTextBoxPtr->label(StatusText);
 }
 

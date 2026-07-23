@@ -149,7 +149,7 @@ static void peripheralThreadTiming() {
 			else {
 				std::chrono::milliseconds CupInsertionOrRemovalDuration =
 				    std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - CupInsertionOrRemovalStartTime[J]);
-				if (CupInsertionOrRemovalDuration.count() > MaximumPropagationTime) {
+				if (CupInsertionOrRemovalDuration.count() > MaximumPropagationTime[J]) {
 					atomic_store_explicit(&DisplayLimitSwitchError[J], true, std::memory_order_release);
 				}
 				else {
@@ -407,3 +407,9 @@ static void setupModbusRegistersToBeWritten() {
 	Result = copyCalibrationAdcOutputs( ModbusRegistersToBeWritten + (CALIBRATION_ADC_DATA_ADDRESS - CONFIGURATION_DATA_ADDRESS), CALIBRATION_ADC_DATA_LENGTH);
 	assert(Result == 0);
 }
+
+uint16_t getConfigurationRegisterValue(uint16_t Address) {
+	assert((Address >= CONFIGURATION_DATA_ADDRESS) && (Address < CONFIGURATION_DATA_ADDRESS + MODBUS_REGISTERS_TO_BE_WRITTEN));
+	return ModbusRegistersToBeWritten[Address - CONFIGURATION_DATA_ADDRESS];
+}
+
