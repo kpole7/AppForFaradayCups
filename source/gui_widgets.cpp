@@ -24,8 +24,8 @@
 
 #define DISC2_RADIUS 85 // assume disc1 radius = 128
 #define DISC3_RADIUS 40
-#define DISC_VALUE1_Y 30
-#define DISC_VALUE2_Y 60
+#define DISC_VALUE1_Y -10
+#define DISC_VALUE2_Y 40
 #define DISC_TEXTS_SPACE 10
 #define DISC_SLIT_WIDTH 8
 
@@ -224,6 +224,7 @@ void TripleDiscWidgetWithNoSlit::draw() {
 	       (h() * 2 * DISC3_RADIUS) / 256, 0, 360);
 }
 
+#if 0
 void TripleDiscWidgetWithVerticalSlit::draw() {
 	fl_color(COLOR_STRONGER_BLUE);
 	fl_pie(x(), y(), w(), h(), 0, 360); // outer ring
@@ -252,6 +253,7 @@ void TripleDiscWidgetWithHorizontalSlit::draw() {
 	fl_pie(x() + (w() * (128 - DISC3_RADIUS)) / 256, y() + (h() * (128 - DISC3_RADIUS)) / 256, (w() * 2 * DISC3_RADIUS) / 256,
 	       (h() * 2 * DISC3_RADIUS) / 256, 0, 360);
 }
+#endif
 
 static void cupInsertionButtonCallback(Fl_Widget *Widget, void *Data) {
 	(void)Data; // intentionally unused
