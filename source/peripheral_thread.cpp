@@ -374,7 +374,7 @@ char *getTransmissionQualityIndicatorTextForGui() {
 	static char TransmissionQualityIndicatorText[10];
 	double TransmissionQualityIndicatorFactor =
 	    (100.0 * atomic_load_explicit(&TransmissionQualityLowLevelIndicator, std::memory_order_acquire)) / (double)LOW_LEVEL_CONTINUOUS_COUNTING_MAX;
-	snprintf(TransmissionQualityIndicatorText, sizeof(TransmissionQualityIndicatorText) - 1, "%5.1f%%", TransmissionQualityIndicatorFactor);
+	snprintf(TransmissionQualityIndicatorText, sizeof(TransmissionQualityIndicatorText) - 1, "%3.0f%%", TransmissionQualityIndicatorFactor);
 	return TransmissionQualityIndicatorText;
 }
 
@@ -382,7 +382,7 @@ char *getTransmissionQualityIndicatorTextForDebugging() {
 	static char TransmissionQualityIndicatorText[10];
 	double TransmissionQualityIndicatorFactor =
 	    (100.0 * atomic_load_explicit(&TransmissionQualityLowLevelIndicator, std::memory_order_acquire)) / (double)LOW_LEVEL_CONTINUOUS_COUNTING_MAX;
-	snprintf(TransmissionQualityIndicatorText, sizeof(TransmissionQualityIndicatorText) - 1, "%5.1f%%", TransmissionQualityIndicatorFactor);
+	snprintf(TransmissionQualityIndicatorText, sizeof(TransmissionQualityIndicatorText) - 1, "%3.0f%%", TransmissionQualityIndicatorFactor);
 	return TransmissionQualityIndicatorText;
 }
 

@@ -169,13 +169,13 @@ void initializeGraphicWidgets() {
 		CupInsertionOrRemovalStartTime[J] = NowTemporary;
 	}
 
-	GeneralStatusTextBoxPtr = new Fl_Box(200, 10, 300, 15, "Tu powinny być różne dane");
+	GeneralStatusTextBoxPtr = new Fl_Box(239, 1, 270, 15, "Tu powinny być różne dane");
 	GeneralStatusTextBoxPtr->labelfont(FL_COURIER);
 	GeneralStatusTextBoxPtr->labelsize(DEBUGGING_TEXT_SIZE);
 	GeneralStatusTextBoxPtr->labelcolor(FL_BLACK);
 	GeneralStatusTextBoxPtr->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
-#if 0 // debugging
-	GeneralStatusTextBoxPtr->color(  );
+#if 1 // debugging
+	GeneralStatusTextBoxPtr->color(FL_YELLOW);
 	GeneralStatusTextBoxPtr->box(FL_FLAT_BOX);
 #endif
 
@@ -403,15 +403,14 @@ void CupGuiGroup::redrawTripleDisc() {
 
 void CupGuiGroup::redrawLabelsValues() {
 	if (isTransmissionCorrect() &&
-	    atomic_load_explicit(&ModbusCoilsReadout[COIL_OFFSET_IS_SWITCH_PRESSED + CupId * MODBUS_COILS_PER_CUP], std::memory_order_acquire)&&
-		(atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ACTIVE_CUP-MODBUS_INPUTS_ADDRESS], std::memory_order_acquire) == (uint16_t)(CupId + 1))) 
+	    atomic_load_explicit(&ModbusCoilsReadout[COIL_OFFSET_IS_SWITCH_PRESSED + CupId * MODBUS_COILS_PER_CUP], std::memory_order_acquire)) 
 	{
 		for (int J = 0; J < VISIBLE_VALUES_PER_DISC; J++) {
 			int TemporaryRegisterIndex = CupId * VALUES_PER_DISC + J;
 			assert(TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER);
 			uint16_t TemporaryValue = atomic_load_explicit(&ModbusInputRegisters[TemporaryRegisterIndex], std::memory_order_acquire);
 
-			if (0x8000 > TemporaryValue) {
+			if (atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ACTIVE_CUP-MODBUS_INPUTS_ADDRESS], std::memory_order_acquire) == (uint16_t)(CupId + 1)) {
 				double TemporaryFloatingPoint = 0.01 * (double)TemporaryValue;
 				std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "%.1fμA", TemporaryFloatingPoint);
 				if (strcmp(ValueLabelBuffer[CupId][J], "-0.0μA") == 0) {
@@ -419,7 +418,7 @@ void CupGuiGroup::redrawLabelsValues() {
 				}
 			}
 			else {
-				std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "N/A");
+				std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "b.d.");
 			}
 			ValueLabelBuffer[CupId][J][sizeof(ValueLabelBuffer[CupId][J]) - 1] = '\0';
 
@@ -517,14 +516,13 @@ void CupGuiGroup::redrawStatusLabel() {
 	}
 	snprintf(StatusText, sizeof(StatusText) - 1,
 	         "%s\n"
-	         "In: %04X %04X %04X %04X %04X\n"
-	         "Coils %c %c %c",
+	         "Inputs: %04X %04X %04X %04X\n"
+	         "Coils: %c %c %c",
 	         atomic_load_explicit(&ModbusCoilsReadout[getIndexForSwitchPressed()], std::memory_order_acquire) ? TextCupIsInserted : TextCupIsRemoved,
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 0], std::memory_order_acquire),
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 1], std::memory_order_acquire),
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 2], std::memory_order_acquire),
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 3], std::memory_order_acquire),
-	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 4], std::memory_order_acquire),
 	         atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 0], std::memory_order_acquire) ? '1' : '0',
 	         atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 1], std::memory_order_acquire) ? '1' : '0',
 	         atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 2], std::memory_order_acquire) ? '1' : '0');
