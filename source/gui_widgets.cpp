@@ -403,8 +403,9 @@ void CupGuiGroup::redrawTripleDisc() {
 
 void CupGuiGroup::redrawLabelsValues() {
 	if (isTransmissionCorrect() &&
-	    atomic_load_explicit(&ModbusCoilsReadout[COIL_OFFSET_IS_SWITCH_PRESSED + CupId * MODBUS_COILS_PER_CUP], std::memory_order_acquire)) 
-		{
+	    atomic_load_explicit(&ModbusCoilsReadout[COIL_OFFSET_IS_SWITCH_PRESSED + CupId * MODBUS_COILS_PER_CUP], std::memory_order_acquire)&&
+		(atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ACTIVE_CUP-MODBUS_INPUTS_ADDRESS], std::memory_order_acquire) == (uint16_t)(CupId + 1))) 
+	{
 		for (int J = 0; J < VISIBLE_VALUES_PER_DISC; J++) {
 			int TemporaryRegisterIndex = CupId * VALUES_PER_DISC + J;
 			assert(TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER);
