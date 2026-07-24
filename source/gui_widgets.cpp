@@ -170,12 +170,12 @@ void initializeGraphicWidgets() {
 		CupInsertionOrRemovalStartTime[J] = NowTemporary;
 	}
 
-	GeneralStatusTextBoxPtr = new Fl_Box(239, 1, 270, 15, "Tu powinny być różne dane");
+	GeneralStatusTextBoxPtr = new Fl_Box(300, 1, 210, 27, "Tu powinny być różne dane");
 	GeneralStatusTextBoxPtr->labelfont(FL_COURIER);
 	GeneralStatusTextBoxPtr->labelsize(DEBUGGING_TEXT_SIZE);
 	GeneralStatusTextBoxPtr->labelcolor(FL_BLACK);
 	GeneralStatusTextBoxPtr->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
-#if 1 // debugging
+#if 0 // debugging
 	GeneralStatusTextBoxPtr->color(FL_YELLOW);
 	GeneralStatusTextBoxPtr->box(FL_FLAT_BOX);
 #endif
@@ -361,7 +361,7 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 	CupInsertionButtonPtr->labelsize(ORDINARY_TEXT_SIZE);
 	CupInsertionButtonPtr->callback(cupInsertionButtonCallback, nullptr);
 
-	StatusTextBoxPtr = new Fl_Box(X + 300, Y + 230, 210, 60, TextCupIsInserted); // "tu powinny być różne dane");
+	StatusTextBoxPtr = new Fl_Box(X + 300, Y + 230, 210, 60, TextCupIsInserted);
 	StatusTextBoxPtr->labelfont(FL_COURIER);
 	StatusTextBoxPtr->labelsize(ORDINARY_TEXT_SIZE);
 	StatusTextBoxPtr->labelcolor(FL_BLACK);
@@ -524,7 +524,8 @@ void CupGuiGroup::redrawStatusLabel() {
 	snprintf(StatusText, sizeof(StatusText) - 1,
 	         "%s\n"
 	         "Inputs: %04X %04X %04X %04X\n"
-	         "Coils: %c %c %c %c",
+	         "Coils: %c %c %c %c\n"
+			 "Error: %04X %04X",
 	         atomic_load_explicit(&ModbusCoilsReadout[getIndexForSwitchPressed()], std::memory_order_acquire) ? TextCupIsInserted : TextCupIsRemoved,
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 0], std::memory_order_acquire),
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 1], std::memory_order_acquire),
@@ -533,7 +534,9 @@ void CupGuiGroup::redrawStatusLabel() {
 	         atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 0], std::memory_order_acquire) ? '1' : '0',
 	         atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 1], std::memory_order_acquire) ? '1' : '0',
 	         atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 2], std::memory_order_acquire) ? '1' : '0',
-	         FourthCoil);
+	         FourthCoil,
+			 atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_ERROR        -MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire),
+			 atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_ERROR_STORAGE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire));
 	StatusTextBoxPtr->label(StatusText);
 }
 
@@ -580,8 +583,11 @@ void refreshGui(void *Data) {
 	else {
 		static char GeneralDescriptionText[800];
 		GeneralStatusTextBoxPtr->show();
-		snprintf(GeneralDescriptionText, sizeof(GeneralDescriptionText) - 1, "Port %s    Modbus %s", SerialPortRequestedNamePtr->c_str(),
-		         getTransmissionQualityIndicatorTextForGui());
+		snprintf(GeneralDescriptionText, sizeof(GeneralDescriptionText) - 1, 
+				 "Port %s\nModbus %s  Error %04X %04X", SerialPortRequestedNamePtr->c_str(),
+		         getTransmissionQualityIndicatorTextForGui(),
+				 atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ERROR_CODE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire),
+				 atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ERROR_STORAGE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire) );
 		GeneralStatusTextBoxPtr->label(GeneralDescriptionText);
 	}
 }
