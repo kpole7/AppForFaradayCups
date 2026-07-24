@@ -79,6 +79,8 @@ static uint16_t ModbusRunupRepeatsCounter;
 
 static uint16_t ModbusRegistersToBeWritten[MODBUS_REGISTERS_TO_BE_WRITTEN];
 
+static bool IsCompletedFirstTalkWithSlave = false;
+
 //.................................................................................................
 // Local function prototypes
 //.................................................................................................
@@ -214,7 +216,7 @@ static void peripheralThreadHandler() {
 
 		switch (FsmState) {
 		case ModbusFsmStates::OPEN:
-			if (ModbusRunupRepeatsCounter >= MODBUS_RUNUP_REPEATS_LIMIT) {
+			if (!IsCompletedFirstTalkWithSlave && (ModbusRunupRepeatsCounter >= MODBUS_RUNUP_REPEATS_LIMIT)) {
 
 				Fl::awake(permanentErrorGuiUpdate, nullptr);
 
@@ -223,37 +225,51 @@ static void peripheralThreadHandler() {
 			}
 			FsmState = ModbusFsmStates::READING_DEVICE_NAME;
 			Result = readSlaveName();
-			determineTransmissionQuality(Result);
+			if (FailureCodes::NO_FAILURE != Result) {
+				determineTransmissionQuality(Result);
+			}
 			break;
 		case ModbusFsmStates::READING_DEVICE_NAME:
 			FsmState = ModbusFsmStates::READING_SLAVE_TIME_STAMP;
 			Result = readSlaveTimeStamp();
-			determineTransmissionQuality(Result);
+			if (FailureCodes::NO_FAILURE != Result) {
+				determineTransmissionQuality(Result);
+			}
 			break;
 		case ModbusFsmStates::READING_SLAVE_TIME_STAMP:
 			FsmState = ModbusFsmStates::WRITING_CONFIGURATION_DATA1;
 			Result = writeMultipleHoldingRegisters(CONFIGURATION_DATA_ADDRESS,    20, ModbusRegistersToBeWritten); // 89=20+20+20+20+9
-			determineTransmissionQuality(Result);
+			if (FailureCodes::NO_FAILURE != Result) {
+				determineTransmissionQuality(Result);
+			}
 			break;
 		case ModbusFsmStates::WRITING_CONFIGURATION_DATA1:
 			FsmState = ModbusFsmStates::WRITING_CONFIGURATION_DATA2;
 			Result = writeMultipleHoldingRegisters(CONFIGURATION_DATA_ADDRESS+20, 20, ModbusRegistersToBeWritten+20);
-			determineTransmissionQuality(Result);
+			if (FailureCodes::NO_FAILURE != Result) {
+				determineTransmissionQuality(Result);
+			}
 			break;
 		case ModbusFsmStates::WRITING_CONFIGURATION_DATA2:
 			FsmState = ModbusFsmStates::WRITING_CONFIGURATION_DATA3;
 			Result = writeMultipleHoldingRegisters(CONFIGURATION_DATA_ADDRESS+40, 20, ModbusRegistersToBeWritten+40);
-			determineTransmissionQuality(Result);
+			if (FailureCodes::NO_FAILURE != Result) {
+				determineTransmissionQuality(Result);
+			}
 			break;
 		case ModbusFsmStates::WRITING_CONFIGURATION_DATA3:
 			FsmState = ModbusFsmStates::WRITING_CONFIGURATION_DATA4;
 			Result = writeMultipleHoldingRegisters(CONFIGURATION_DATA_ADDRESS+60, 20, ModbusRegistersToBeWritten+60);
-			determineTransmissionQuality(Result);
+			if (FailureCodes::NO_FAILURE != Result) {
+				determineTransmissionQuality(Result);
+			}
 			break;
 		case ModbusFsmStates::WRITING_CONFIGURATION_DATA4:
 			FsmState = ModbusFsmStates::WRITING_CONFIGURATION_DATA5;
 			Result = writeMultipleHoldingRegisters(CONFIGURATION_DATA_ADDRESS+80,  9, ModbusRegistersToBeWritten+80);
-			determineTransmissionQuality(Result);
+			if (FailureCodes::NO_FAILURE != Result) {
+				determineTransmissionQuality(Result);
+			}
 			break;
 		case ModbusFsmStates::WRITING_CONFIGURATION_DATA5:
 			FsmState = ModbusFsmStates::READING_INPUT_REGISTERS;
@@ -291,6 +307,7 @@ static void peripheralThreadHandler() {
 				FsmState = ModbusFsmStates::READING_INPUT_REGISTERS;
 				Result = readInputRegisters();
 				determineTransmissionQuality(Result);
+				IsCompletedFirstTalkWithSlave = true;
 			}
 		}
 			break;
@@ -314,7 +331,6 @@ static void peripheralThreadHandler() {
 			break;
 		case ModbusFsmStates::RECOVERY4_PAUSE:
 			Result = initializeModbus();
-			determineTransmissionQuality(Result);
 			if (FailureCodes::NO_FAILURE == Result) {
 				FsmState = ModbusFsmStates::OPEN;
 			}
