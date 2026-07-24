@@ -222,7 +222,7 @@ static FailureCodes mainInitializations(int argc, char **argv) {
 	for (int Cup = 0; Cup < CUPS_NUMBER; Cup++) {
 		for (int J = 0; J < MODBUS_INPUTS_PER_CUP; J++) {
 			int TemporaryRegisterIndex = Cup * MODBUS_INPUTS_PER_CUP + J;
-			assert(TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER);
+			assert(TemporaryRegisterIndex < MODBUS_INPUT_REGISTERS_NUMBER);
 			atomic_store_explicit(&ModbusInputRegisters[TemporaryRegisterIndex], 0xFFFF, std::memory_order_release);
 		}
 	}

@@ -182,10 +182,10 @@ FailureCodes writeMultipleHoldingRegisters(uint16_t StartAddress, uint16_t Quant
 }
 
 FailureCodes readInputRegisters() {
-	static uint16_t RegistersTable[25]; // 125 max
+	static uint16_t RegistersTable[MODBUS_INPUT_REGISTERS_NUMBER]; // 125 max
 
-	int RegistersToBeRead = MODBUS_INPUTS_PER_CUP * NumberOfFaradayCupsToBeOperated;
-	int ReceivedRegisters = modbus_read_input_registers(Context, MODBUS_INPUTS_ADDRESS, RegistersToBeRead, RegistersTable);
+	int ReceivedRegisters = modbus_read_input_registers(Context, 
+		MODBUS_INPUT_REGISTERS_ADDRESS, MODBUS_INPUT_REGISTERS_NUMBER, RegistersTable);
 	if (ReceivedRegisters == -1) {
 		// Communication / protocol error (CRC, timeout, invalid response)
 		if (VerboseMode) {
@@ -195,13 +195,14 @@ FailureCodes readInputRegisters() {
 		return FailureCodes::ERROR_MODBUS_READING;
 	}
 
-	if (ReceivedRegisters != RegistersToBeRead) {
+	if (ReceivedRegisters != MODBUS_INPUT_REGISTERS_NUMBER) {
 		if (VerboseMode) {
-			std::cout << "Nieoczekiwana liczba rejestrów: otrzymano " << ReceivedRegisters << ", oczekiwano " << RegistersToBeRead << '\n';
+			std::cout << "Nieoczekiwana liczba rejestrów: otrzymano " << ReceivedRegisters 
+			<< ", oczekiwano " << MODBUS_INPUT_REGISTERS_NUMBER << '\n';
 		}
 		return FailureCodes::ERROR_MODBUS_FRAME_READ;
 	}
-	for (int i = 0; i < ReceivedRegisters; ++i) {
+	for (int i = 0; i < MODBUS_INPUT_REGISTERS_NUMBER; ++i) {
 		atomic_store_explicit(&ModbusInputRegisters[i], RegistersTable[i], std::memory_order_release);
 	}
 

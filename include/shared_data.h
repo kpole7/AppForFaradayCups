@@ -13,7 +13,7 @@
 // Global variables
 //.................................................................................................
 
-extern std::atomic<uint16_t> ModbusInputRegisters[MODBUS_INPUTS_NUMBER];
+extern std::atomic<uint16_t> ModbusInputRegisters[MODBUS_INPUT_REGISTERS_NUMBER];
 
 extern std::atomic<bool> ModbusCoilsReadout[MODBUS_COILS_NUMBER];
 

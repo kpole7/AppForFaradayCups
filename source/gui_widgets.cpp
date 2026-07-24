@@ -410,10 +410,10 @@ void CupGuiGroup::redrawLabelsValues() {
 	{
 		for (int J = 0; J < VISIBLE_VALUES_PER_DISC; J++) {
 			int TemporaryRegisterIndex = CupId * VALUES_PER_DISC + J;
-			assert(TemporaryRegisterIndex < MODBUS_INPUTS_NUMBER);
+			assert(TemporaryRegisterIndex < MODBUS_INPUT_REGISTERS_NUMBER);
 			uint16_t TemporaryValue = atomic_load_explicit(&ModbusInputRegisters[TemporaryRegisterIndex], std::memory_order_acquire);
 
-			if (atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ACTIVE_CUP-MODBUS_INPUTS_ADDRESS], std::memory_order_acquire) == (uint16_t)(CupId + 1)) {
+			if (atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ACTIVE_CUP-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire) == (uint16_t)(CupId + 1)) {
 				double TemporaryFloatingPoint = 0.01 * (double)TemporaryValue;
 				std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "%.1fμA", TemporaryFloatingPoint);
 				if (strcmp(ValueLabelBuffer[CupId][J], "-0.0μA") == 0) {
