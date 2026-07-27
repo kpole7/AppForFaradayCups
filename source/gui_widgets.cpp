@@ -263,7 +263,6 @@ static void cupInsertionButtonCallback(Fl_Widget *Widget, void *Data) {
 	int DiscIndex = MyGroup->getCupId();
 	assert(DiscIndex < CUPS_NUMBER);
 
-	// protection against too frequent clicking + protection against too early display of limit switch error
 	std::chrono::high_resolution_clock::time_point TimeNow = std::chrono::high_resolution_clock::now();
 	std::chrono::milliseconds DurationTime;
 	DurationTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - CupInsertionOrRemovalStartTime[DiscIndex]);
@@ -438,15 +437,8 @@ void CupGuiGroup::redrawSwitchErrorLabel() {
 			}
 		}
 		else {
-			if (ModbusCoilsReadout[getIndexForBlockage()] && !ModbusCoilsReadout[getIndexForSwitchPressed()]) {
-				if (0 == SwitchErrorTextBoxPtr->visible()) {
-					SwitchErrorTextBoxPtr->show();
-				}
-			}
-			else {
-				if (0 != SwitchErrorTextBoxPtr->visible()) {
-					SwitchErrorTextBoxPtr->hide();
-				}
+			if (0 != SwitchErrorTextBoxPtr->visible()) {
+				SwitchErrorTextBoxPtr->hide();
 			}
 		}
 	}

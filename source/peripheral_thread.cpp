@@ -139,20 +139,6 @@ static void peripheralThreadTiming() {
 	TimeNow = std::chrono::high_resolution_clock::now();
 	std::chrono::milliseconds DurationTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - PeripheralThreadLoopStart);
 	while (DurationTime.count() < PeripheralThreadTimeInMilliseconds) {
-		// free time activities:  checking for inconsistencies in the status of limit switches
-		for (int J = 0; J < NumberOfFaradayCupsToBeOperated; J++) {
-			int TemporaryCoilIndex1 = COIL_OFFSET_IS_CUP_FORCED + J * MODBUS_COILS_PER_CUP;
-			assert(TemporaryCoilIndex1 < MODBUS_COILS_NUMBER);
-			int TemporaryCoilIndex2 = COIL_OFFSET_IS_SWITCH_PRESSED + J * MODBUS_COILS_PER_CUP;
-			assert(TemporaryCoilIndex2 < MODBUS_COILS_NUMBER);
-			if (ModbusCoilsReadout[TemporaryCoilIndex1] == ModbusCoilsReadout[TemporaryCoilIndex2]) {
-				atomic_store_explicit(&DisplayLimitSwitchError[J], false, std::memory_order_release);
-			}
-			else {
-				std::chrono::milliseconds CupInsertionOrRemovalDuration =
-				    std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - CupInsertionOrRemovalStartTime[J]);
-			}
-		}
 		TimeNow = std::chrono::high_resolution_clock::now();
 		DurationTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - PeripheralThreadLoopStart);
 		if (DurationTime.count() >= PeripheralThreadTimeInMilliseconds) {
