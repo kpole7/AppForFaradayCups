@@ -23,8 +23,6 @@ extern char CupDescriptionPtr[CUPS_NUMBER][101];
 
 extern std::string ThisApplicationDirectory;
 
-extern int MaximumPropagationTime[CUPS_NUMBER];
-
 extern int NumberOfFaradayCupsToBeOperated;
 
 extern int ModbusSlaveAddress;

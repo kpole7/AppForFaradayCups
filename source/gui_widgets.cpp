@@ -268,13 +268,6 @@ static void cupInsertionButtonCallback(Fl_Widget *Widget, void *Data) {
 	std::chrono::milliseconds DurationTime;
 	DurationTime = std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - CupInsertionOrRemovalStartTime[DiscIndex]);
 
-	if (DurationTime.count() < MaximumPropagationTime[DiscIndex]) {
-		if (VeryVerboseMode) {
-			std::cout << "Akcja związana z naciśnięciem przycisku: ODMOWA " << DiscIndex + 1 << '\n';
-		}
-		return;
-	}
-
 	int TemporaryIndex = COIL_OFFSET_IS_SWITCH_PRESSED + MODBUS_COILS_PER_CUP * DiscIndex;
 	if (TemporaryIndex < MODBUS_COILS_NUMBER) {
 		if (atomic_load_explicit(&ModbusCoilsReadout[TemporaryIndex], std::memory_order_acquire)) {

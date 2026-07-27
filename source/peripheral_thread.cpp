@@ -151,12 +151,6 @@ static void peripheralThreadTiming() {
 			else {
 				std::chrono::milliseconds CupInsertionOrRemovalDuration =
 				    std::chrono::duration_cast<std::chrono::milliseconds>(TimeNow - CupInsertionOrRemovalStartTime[J]);
-				if (CupInsertionOrRemovalDuration.count() > MaximumPropagationTime[J]) {
-					atomic_store_explicit(&DisplayLimitSwitchError[J], true, std::memory_order_release);
-				}
-				else {
-					atomic_store_explicit(&DisplayLimitSwitchError[J], false, std::memory_order_release);
-				}
 			}
 		}
 		TimeNow = std::chrono::high_resolution_clock::now();
