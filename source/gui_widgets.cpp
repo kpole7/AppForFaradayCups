@@ -412,7 +412,7 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 	StatusTextBoxPtr->labelcolor(FL_BLACK);
 	StatusTextBoxPtr->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
-	SeparatorPtr = new Fl_Box(X, Y + DISC_SPACE_Y - 4, MAIN_WINDOW_WIDTH, 4);
+	SeparatorPtr = new Fl_Box(X, Y + DISC_SPACE_Y - 8, MAIN_WINDOW_WIDTH, 4);
 	SeparatorPtr->box(FL_FLAT_BOX);
 	SeparatorPtr->color(SEPARATOR_COLOR);
 
@@ -599,7 +599,10 @@ void CupGuiGroup::redrawButton() {
 	else {
 		CupInsertionButtonPtr->label("Wsuń");
 	}
-	if (!isTransmissionCorrect() || atomic_load_explicit(&ModbusCoilsReadout[getIndexForBlockage()], std::memory_order_acquire)) {
+	if (!isTransmissionCorrect() || 
+	    atomic_load_explicit(&ModbusCoilsReadout[getIndexForBlockage()], std::memory_order_acquire) ||
+		(0 != atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_ERROR-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire))) 
+	{
 		CupInsertionButtonPtr->deactivate();
 	}
 	else {

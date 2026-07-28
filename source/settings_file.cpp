@@ -98,7 +98,8 @@ FailureCodes determineApplicationPath(char *Argv0) {
 #if 0
         	std::cout << "PATH_MAX= " << PATH_MAX << '\n';
 #endif
-			std::cout << " Katalog programu: " << ThisApplicationDirectory << '\n';
+			std::cout << " Katalog programu: " << ThisApplicationDirectory << '\n' 
+			<< " Data kompilacji: " << __DATE__ << " " << __TIME__ << '\n';
 		}
 	}
 	else {
