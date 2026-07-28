@@ -18,6 +18,3 @@ std::atomic<bool> ModbusCoilChangeReqest[CUPS_NUMBER];
 /// There is a need to measure the time it takes to send a command to the slave, physically execute it,
 /// and receive feedback from the limit switches
 std::chrono::high_resolution_clock::time_point CupInsertionOrRemovalStartTime[CUPS_NUMBER];
-
-/// Flag set in a peripheral thread and read in the GUI handler
-std::atomic<bool> DisplayLimitSwitchError[CUPS_NUMBER];

@@ -381,7 +381,10 @@ int CupGuiGroup::getIndexForSwitchPressed() const { return MODBUS_COILS_PER_CUP 
 int CupGuiGroup::getIndexForBlockage() const { return MODBUS_COILS_PER_CUP * CupId + COIL_OFFSET_IS_CUP_BLOCKED; }
 
 void CupGuiGroup::redrawTripleDisc() {
-	if (isTransmissionCorrect() && atomic_load_explicit(&ModbusCoilsReadout[getIndexForSwitchPressed()], std::memory_order_acquire)) {
+	if (isTransmissionCorrect() && 
+	    atomic_load_explicit(&ModbusCoilsReadout[getIndexForSwitchPressed()], std::memory_order_acquire) &&
+	    (0 == atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_ERROR-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire))) 
+	{
 		if (0 == TripleDisc->visible()) {
 			TripleDisc->show();
 		}
@@ -397,19 +400,26 @@ void CupGuiGroup::redrawTripleDisc() {
 }
 
 void CupGuiGroup::redrawLabelsValues() {
-	if (isTransmissionCorrect() &&
-	    atomic_load_explicit(&ModbusCoilsReadout[COIL_OFFSET_IS_SWITCH_PRESSED + CupId * MODBUS_COILS_PER_CUP], std::memory_order_acquire)) 
-	{
+	if (0 != TripleDisc->visible()) {
 		for (int J = 0; J < VISIBLE_VALUES_PER_DISC; J++) {
 			int TemporaryRegisterIndex = CupId * VALUES_PER_DISC + J;
 			assert(TemporaryRegisterIndex < MODBUS_INPUT_REGISTERS_NUMBER);
 			uint16_t TemporaryValue = atomic_load_explicit(&ModbusInputRegisters[TemporaryRegisterIndex], std::memory_order_acquire);
 
 			if (atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ACTIVE_CUP-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire) == (uint16_t)(CupId + 1)) {
-				double TemporaryFloatingPoint = 0.01 * (double)TemporaryValue;
-				std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "%.1fμA", TemporaryFloatingPoint);
-				if (strcmp(ValueLabelBuffer[CupId][J], "-0.0μA") == 0) {
-					std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "0.0μA");
+				bool AnyErrorInFrontOfCup = false;
+				for (int K = 0; K < CupId; K++) {
+					if (0 != atomic_load_explicit(&ModbusInputRegisters[K+MODBUS_ADDR_CUP1_ERROR-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire)) {
+						AnyErrorInFrontOfCup = true;
+						break;
+					}
+				}
+				if (!AnyErrorInFrontOfCup) {
+					double TemporaryFloatingPoint = 0.01 * (double)TemporaryValue;
+					std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "%.1fμA", TemporaryFloatingPoint);
+					if (strcmp(ValueLabelBuffer[CupId][J], "-0.0μA") == 0) {
+						std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "0.0μA");
+					}
 				}
 			}
 			else {
@@ -431,7 +441,8 @@ void CupGuiGroup::redrawLabelsValues() {
 
 void CupGuiGroup::redrawSwitchErrorLabel() {
 	if (isTransmissionCorrect()) {
-		if (atomic_load_explicit(&DisplayLimitSwitchError[CupId], std::memory_order_acquire)) {
+		assert(CupId < CUPS_NUMBER);
+		if (0 != atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_ERROR-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire)) {
 			if (0 == SwitchErrorTextBoxPtr->visible()) {
 				SwitchErrorTextBoxPtr->show();
 			}
@@ -506,10 +517,11 @@ void CupGuiGroup::redrawStatusLabel() {
 	if (getConfigurationRegisterValue(MODBUS_ADDR_CUP1_TYPE+CupId) == MOTORIZED_CUP_TYPE) {
 		FourthCoil = atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 3], std::memory_order_acquire) ? '1' : '0';
 	}
+	assert(CupId < CUPS_NUMBER);
 	snprintf(StatusText, sizeof(StatusText) - 1,
 	         "%s\n"
 	         "Inputs: %04X %04X %04X %04X\n"
-	         "Coils: %c %c %c %c\n"
+	         "Coils: %c %c %c %c   Stan: %d\n"
 			 "Error: %04X %04X",
 	         atomic_load_explicit(&ModbusCoilsReadout[getIndexForSwitchPressed()], std::memory_order_acquire) ? TextCupIsInserted : TextCupIsRemoved,
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 0], std::memory_order_acquire),
@@ -520,7 +532,8 @@ void CupGuiGroup::redrawStatusLabel() {
 	         atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 1], std::memory_order_acquire) ? '1' : '0',
 	         atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 2], std::memory_order_acquire) ? '1' : '0',
 	         FourthCoil,
-			 atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_ERROR        -MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire),
+			 atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_FSM_STATE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire),
+			 atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_ERROR-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire),
 			 atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_ERROR_STORAGE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire));
 	StatusTextBoxPtr->label(StatusText);
 }
