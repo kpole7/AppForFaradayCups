@@ -41,6 +41,7 @@
 #define COLOR_GRAY_RED 0x54
 #define NORMAL_BUTTON_COLOR 0x75
 #define SEPARATOR_COLOR 0x30
+#define COLOR_BLACK 0x00
 
 //.................................................................................................
 // Definitions of types
@@ -104,6 +105,23 @@ class ImageWidget : public Fl_Widget {
 	std::unique_ptr<Fl_PNG_Image> img_;
 };
 
+class CupGuiGroup;
+
+class OnErrorGroup : public Fl_Group {
+  public:
+	OnErrorGroup(int X, int Y, int W, int H, const char *L = nullptr);
+	void draw() override;
+
+  private:
+	Fl_Box *ErrorTextBoxPtr;
+	Fl_Button *RecoveryButtonPtr;
+
+	[[nodiscard]] int getCupId() const;
+	static void cupRecoveryButtonCallback(Fl_Widget *Widget, void *Data);
+};
+
+
+
 class CupGuiGroup : public Fl_Group {
   private:
 	int CupId;
@@ -116,7 +134,7 @@ class CupGuiGroup : public Fl_Group {
 	ImageWidget *UnconnectedImagePtr;
 	Fl_Box *LockoutTextBoxPtr;
 	Fl_Box *UnconnectedTextBoxPtr;
-	Fl_Box *SwitchErrorTextBoxPtr;
+	OnErrorGroup *OnErrorGroupPtr;
 	Fl_Button *CupInsertionButtonPtr;
 	Fl_Box *StatusTextBoxPtr;
 	Fl_Box *SeparatorPtr;
@@ -289,6 +307,53 @@ static void cupInsertionButtonCallback(Fl_Widget *Widget, void *Data) {
 	}
 }
 
+void OnErrorGroup::draw() {
+	fl_push_clip(x(), y(), w(), h());
+	fl_color(FL_RED);
+	fl_rectf(x(), y(), w(), h());
+	fl_color(FL_YELLOW);
+	fl_rectf(x() + 8, y() + 8, w() - 16, h() - 16);
+	Fl_Group::draw();
+	fl_pop_clip();
+}
+
+int OnErrorGroup::getCupId() const {
+	const auto *MyCupGroup = static_cast<const CupGuiGroup *>(parent());
+	assert(nullptr != MyCupGroup);
+	return MyCupGroup->getCupId();
+}
+
+void OnErrorGroup::cupRecoveryButtonCallback(Fl_Widget *Widget, void *Data) {
+	(void)Data; // intentionally unused
+
+	const auto *MyGroup = static_cast<OnErrorGroup *>(Widget->parent());
+	assert(nullptr != MyGroup);
+	int CupId = MyGroup->getCupId();
+	assert((CupId >= 0) && (CupId < CUPS_NUMBER));
+	atomic_store_explicit(&ModbusCupRecoveryChangeReqest[CupId], true, std::memory_order_release);
+}
+
+OnErrorGroup::OnErrorGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X, Y, W, H, L) {
+	this->begin();
+	this->box(FL_NO_BOX);
+
+	ErrorTextBoxPtr = new Fl_Box(X + 16, Y + 16, W - 32, H - 66, "Błąd krańcówki\nlub sterownika");
+	ErrorTextBoxPtr->labelfont(FL_HELVETICA_BOLD);
+	ErrorTextBoxPtr->labelsize(16);
+	ErrorTextBoxPtr->labelcolor(COLOR_BLACK);
+	ErrorTextBoxPtr->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
+	ErrorTextBoxPtr->box(FL_NO_BOX);
+
+	RecoveryButtonPtr = new Fl_Button(X + ((W - 110) / 2), Y + H - 46, 110, 32, "Recovery");
+	RecoveryButtonPtr->box(FL_BORDER_BOX);
+	RecoveryButtonPtr->color(NORMAL_BUTTON_COLOR);
+	RecoveryButtonPtr->labelfont(ORDINARY_TEXT_FONT);
+	RecoveryButtonPtr->labelsize(ORDINARY_TEXT_SIZE);
+	RecoveryButtonPtr->callback(cupRecoveryButtonCallback, nullptr);
+
+	this->end();
+}
+
 CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X, Y, W, H, L) {
 	this->begin();
 	CupId = -1;
@@ -337,14 +402,8 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 	UnconnectedTextBoxPtr->labelcolor(COLOR_DARK_RED);
 	UnconnectedTextBoxPtr->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
-	SwitchErrorTextBoxPtr = new Fl_Box(X + 330, Y + 118, 160, 60, "Błąd krańcówki\nlub sterownika");
-	SwitchErrorTextBoxPtr->hide();
-	SwitchErrorTextBoxPtr->labelfont(FL_HELVETICA_BOLD);
-	SwitchErrorTextBoxPtr->labelsize(16);
-	SwitchErrorTextBoxPtr->color(FL_YELLOW);
-	SwitchErrorTextBoxPtr->box(FL_FLAT_BOX);
-	SwitchErrorTextBoxPtr->labelcolor(COLOR_DARK_RED);
-	SwitchErrorTextBoxPtr->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
+	OnErrorGroupPtr = new OnErrorGroup(X + 30, Y + 60, 280, 180);
+	OnErrorGroupPtr->hide();
 
 	CupInsertionButtonPtr = new Fl_Button(X + 360, Y + 190, 90, 40, "Wysuń"); // "??????" );
 	CupInsertionButtonPtr->box(FL_BORDER_BOX);
@@ -443,19 +502,19 @@ void CupGuiGroup::redrawSwitchErrorLabel() {
 	if (isTransmissionCorrect()) {
 		assert(CupId < CUPS_NUMBER);
 		if (0 != atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_ERROR-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire)) {
-			if (0 == SwitchErrorTextBoxPtr->visible()) {
-				SwitchErrorTextBoxPtr->show();
+			if (0 == OnErrorGroupPtr->visible()) {
+				OnErrorGroupPtr->show();
 			}
 		}
 		else {
-			if (0 != SwitchErrorTextBoxPtr->visible()) {
-				SwitchErrorTextBoxPtr->hide();
+			if (0 != OnErrorGroupPtr->visible()) {
+				OnErrorGroupPtr->hide();
 			}
 		}
 	}
 	else {
-		if (0 != SwitchErrorTextBoxPtr->visible()) {
-			SwitchErrorTextBoxPtr->hide();
+		if (0 != OnErrorGroupPtr->visible()) {
+			OnErrorGroupPtr->hide();
 		}
 	}
 }

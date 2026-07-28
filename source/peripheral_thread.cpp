@@ -270,7 +270,17 @@ static void peripheralThreadHandler() {
 		{
 			bool IsActionDone = false;
 			for (int J = 0; J < NumberOfFaradayCupsToBeOperated; J++) {
-				if (atomic_load_explicit(&ModbusCoilChangeReqest[J], std::memory_order_acquire)) {
+				if (atomic_load_explicit(&ModbusCupRecoveryChangeReqest[J], std::memory_order_acquire)) {
+					FsmState = ModbusFsmStates::WRITING_COIL;
+
+					atomic_store_explicit(&ModbusCupRecoveryChangeReqest[J], false, std::memory_order_release);
+					Result = writeSingleCoil(MODBUS_ADDR_CUP1_ERROR_RECOVERY + J, true);
+					determineTransmissionQuality(Result);
+
+					IsActionDone = true;
+					J = NumberOfFaradayCupsToBeOperated;
+				}
+				else if (atomic_load_explicit(&ModbusCoilChangeReqest[J], std::memory_order_acquire)) {
 					FsmState = ModbusFsmStates::WRITING_COIL;
 
 					atomic_store_explicit(&ModbusCoilChangeReqest[J], false, std::memory_order_release);
@@ -281,6 +291,9 @@ static void peripheralThreadHandler() {
 					IsActionDone = true;
 					//break;
 					J = NumberOfFaradayCupsToBeOperated;
+				}
+				else{
+					// No action
 				}
 			}
 			if (!IsActionDone) {

@@ -21,6 +21,8 @@ extern std::atomic<bool> ModbusCoilRequestedValue[CUPS_NUMBER];
 
 extern std::atomic<bool> ModbusCoilChangeReqest[CUPS_NUMBER];
 
+extern std::atomic<bool> ModbusCupRecoveryChangeReqest[CUPS_NUMBER];
+
 extern std::chrono::high_resolution_clock::time_point CupInsertionOrRemovalStartTime[CUPS_NUMBER];
 
 #endif // SOURCE_SHARED_DATA_H_

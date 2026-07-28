@@ -14,6 +14,9 @@ std::atomic<bool> ModbusCoilRequestedValue[CUPS_NUMBER];
 /// The coil change request
 std::atomic<bool> ModbusCoilChangeReqest[CUPS_NUMBER];
 
+/// The recovery request for a cup
+std::atomic<bool> ModbusCupRecoveryChangeReqest[CUPS_NUMBER];
+
 /// @brief This is the time when the user requested the cup to be inserted/removed
 /// There is a need to measure the time it takes to send a command to the slave, physically execute it,
 /// and receive feedback from the limit switches
