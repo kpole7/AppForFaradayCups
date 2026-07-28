@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
 
 	MenuWidget.add("Narzędzia/Status/Ukryty", 0, callbackForMenuItemStatus, (void *)0, FL_MENU_RADIO);
 	int indexOfMenuItemStatusNormal = MenuWidget.add("Narzędzia/Status/Normalny", 0, callbackForMenuItemStatus, (void *)1, FL_MENU_RADIO);
-	MenuWidget.add("Narzędzia/Status/Szczegółowy", 0, callbackForMenuItemStatus, (void *)2, FL_MENU_RADIO);
+	MenuWidget.add("Narzędzia/Status/Serwisowy", 0, callbackForMenuItemStatus, (void *)2, FL_MENU_RADIO);
 	MenuWidget.add("Pomoc/Otwórz PDF", 0, callbackForMenuItemHelp);
 
 	Fl_Menu_Item *MenuItems = const_cast<Fl_Menu_Item *>(MenuWidget.menu());

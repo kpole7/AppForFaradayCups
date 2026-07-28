@@ -18,6 +18,7 @@
 #include "settings_file.h"
 #include "shared_data.h"
 #include "modbus_addresses.h"
+#include "auxiliaryFSMs.h"
 
 //.................................................................................................
 // Preprocessor directives
@@ -120,8 +121,6 @@ class OnErrorGroup : public Fl_Group {
 	static void cupRecoveryButtonCallback(Fl_Widget *Widget, void *Data);
 };
 
-
-
 class CupGuiGroup : public Fl_Group {
   private:
 	int CupId;
@@ -156,13 +155,6 @@ class CupGuiGroup : public Fl_Group {
 };
 
 //.................................................................................................
-// Local constants
-//.................................................................................................
-
-static const char TextCupIsInserted[] = "     Kubek Wsunięty";
-static const char TextCupIsRemoved[] = "     Kubek Wysunięty";
-
-//.................................................................................................
 // Local variables
 //.................................................................................................
 
@@ -177,6 +169,8 @@ static Fl_Box *FailureMessagePtr;
 //.................................................................................................
 
 static void cupInsertionButtonCallback(Fl_Widget *Widget, void *Data);
+
+static const char* stateDescriptionForCup(int CupId);
 
 //.................................................................................................
 // Function definitions
@@ -337,14 +331,14 @@ OnErrorGroup::OnErrorGroup(int X, int Y, int W, int H, const char *L) : Fl_Group
 	this->begin();
 	this->box(FL_NO_BOX);
 
-	ErrorTextBoxPtr = new Fl_Box(X + 16, Y + 16, W - 32, H - 66, "Błąd krańcówki\nlub sterownika");
+	ErrorTextBoxPtr = new Fl_Box(X + 16, Y + 16, W - 32, H - 66, "Nieoczekiwany\nstan krańcówki");
 	ErrorTextBoxPtr->labelfont(FL_HELVETICA_BOLD);
 	ErrorTextBoxPtr->labelsize(16);
 	ErrorTextBoxPtr->labelcolor(COLOR_BLACK);
 	ErrorTextBoxPtr->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 	ErrorTextBoxPtr->box(FL_NO_BOX);
 
-	RecoveryButtonPtr = new Fl_Button(X + ((W - 110) / 2), Y + H - 46, 110, 32, "Recovery");
+	RecoveryButtonPtr = new Fl_Button(X + ((W - 110) / 2), Y + H - 46, 110, 32, "Ponów próbę");
 	RecoveryButtonPtr->box(FL_BORDER_BOX);
 	RecoveryButtonPtr->color(NORMAL_BUTTON_COLOR);
 	RecoveryButtonPtr->labelfont(ORDINARY_TEXT_FONT);
@@ -412,7 +406,7 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 	CupInsertionButtonPtr->labelsize(ORDINARY_TEXT_SIZE);
 	CupInsertionButtonPtr->callback(cupInsertionButtonCallback, nullptr);
 
-	StatusTextBoxPtr = new Fl_Box(X + 300, Y + 230, 210, 60, TextCupIsInserted);
+	StatusTextBoxPtr = new Fl_Box(X + 300, Y + 230, 210, 60, " ");
 	StatusTextBoxPtr->labelfont(FL_COURIER);
 	StatusTextBoxPtr->labelsize(ORDINARY_TEXT_SIZE);
 	StatusTextBoxPtr->labelcolor(FL_BLACK);
@@ -546,6 +540,7 @@ void CupGuiGroup::redrawTransmissionErrorIdicator() {
 }
 
 void CupGuiGroup::redrawStatusLabel() {
+	static const char* DescriptionPtr[CUPS_NUMBER] = {nullptr};
 	if ((0 == StatusLevelForGui) || (!isTransmissionCorrect())) {
 		if (0 != StatusTextBoxPtr->visible()) {
 			StatusTextBoxPtr->hide();
@@ -560,15 +555,14 @@ void CupGuiGroup::redrawStatusLabel() {
 		if (StatusTextBoxPtr->labelsize() != ORDINARY_TEXT_SIZE) {
 			StatusTextBoxPtr->labelsize(ORDINARY_TEXT_SIZE);
 		}
-		if (atomic_load_explicit(&ModbusCoilsReadout[getIndexForSwitchPressed()], std::memory_order_acquire)) {
-			StatusTextBoxPtr->label(TextCupIsInserted);
-		}
-		else {
-			StatusTextBoxPtr->label(TextCupIsRemoved);
-		}
+		assert(CupId < CUPS_NUMBER);
+		DescriptionPtr[CupId] = stateDescriptionForCup(CupId);
+		StatusTextBoxPtr->label(DescriptionPtr[CupId]);
+		StatusTextBoxPtr->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 		return;
 	}
 
+	StatusTextBoxPtr->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 	if (StatusTextBoxPtr->labelsize() != DEBUGGING_TEXT_SIZE) {
 		StatusTextBoxPtr->labelsize(DEBUGGING_TEXT_SIZE);
 	}
@@ -577,12 +571,13 @@ void CupGuiGroup::redrawStatusLabel() {
 		FourthCoil = atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 3], std::memory_order_acquire) ? '1' : '0';
 	}
 	assert(CupId < CUPS_NUMBER);
+	DescriptionPtr[CupId] = stateDescriptionForCup(CupId);
 	snprintf(StatusText, sizeof(StatusText) - 1,
 	         "%s\n"
 	         "Inputs: %04X %04X %04X %04X\n"
 	         "Coils: %c %c %c %c   Stan: %d\n"
 			 "Error: %04X %04X",
-	         atomic_load_explicit(&ModbusCoilsReadout[getIndexForSwitchPressed()], std::memory_order_acquire) ? TextCupIsInserted : TextCupIsRemoved,
+	         DescriptionPtr[CupId],
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 0], std::memory_order_acquire),
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 1], std::memory_order_acquire),
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 2], std::memory_order_acquire),
@@ -670,4 +665,104 @@ void permanentErrorGuiUpdate(void *Data){
 	GeneralStatusTextBoxPtr->hide();
 
 	showFailureMessageWidget();
+}
+
+static const char* stateDescriptionForCup(int CupId) {
+	static const char TextInserted[] =       "Kubek wsunięty";
+	static const char TextRemoved[] =        "Kubek wysunięty";
+	static const char TextBeingInserted[] =  "Kubek w trakcie wsuwania";
+	static const char TextBeingRemoved[] =   "Kubek w trakcie wysuwania";
+	static const char TextBeingRecovered[] = "Resetowanie";
+	static const char TextError[] =          "Stan nieokreślony";
+	static const char TextInternalError[] =  "Błędne dane Modbus";
+	char *ResultPtr = nullptr;
+	uint16_t StateValue = atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_FSM_STATE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire);
+	assert(CupId < CUPS_NUMBER);
+	if (0 == CupId){
+		switch (StateValue) {
+			case PNEUMATIC_FSM_STATE_EXTRACTED:
+				ResultPtr = (char *)TextRemoved;
+				break;
+			case PNEUMATIC_FSM_STATE_INSERTED:
+				ResultPtr = (char *)TextInserted;
+				break;
+			case PNEUMATIC_FSM_STATE_INSERTING:
+				ResultPtr = (char *)TextRemoved; // displaying time is too short to show a different text
+				break;
+			case PNEUMATIC_FSM_STATE_WITHDRAWING:
+				ResultPtr = (char *)TextInserted; // displaying time is too short to show a different text
+				break;
+			case PNEUMATIC_FSM_STATE_BOOTED:
+				ResultPtr = (char *)TextBeingRecovered;
+				break;
+			case PNEUMATIC_FSM_STATE_ERROR:
+				ResultPtr = (char *)TextError;
+				break;
+			default:
+				ResultPtr = (char *)TextInternalError;
+				break;
+		}
+	}
+	else if (1 == CupId){
+		switch (StateValue) {
+			case PNEUMATIC_WITH_LOCK_FSM_STATE_EXTRACTED:
+				ResultPtr = (char *)TextRemoved;
+				break;
+			case PNEUMATIC_WITH_LOCK_FSM_STATE_INSERTED:
+			case PNEUMATIC_WITH_LOCK_FSM_STATE_PAUSE_AFTER_LOCK:
+			case PNEUMATIC_WITH_LOCK_FSM_STATE_LOCKED_INSERTED:
+			case PNEUMATIC_WITH_LOCK_FSM_STATE_PAUSE_AFTER_UNLOCK:
+				ResultPtr = (char *)TextInserted;
+				break;
+			case PNEUMATIC_WITH_LOCK_FSM_STATE_INSERTING:
+				ResultPtr = (char *)TextRemoved; // displaying time is too short to show a different text
+				break;
+			case PNEUMATIC_WITH_LOCK_FSM_STATE_WITHDRAWING:
+				ResultPtr = (char *)TextInserted; // displaying time is too short to show a different text
+				break;
+			case PNEUMATIC_WITH_LOCK_FSM_STATE_BOOTED:
+				ResultPtr = (char *)TextBeingRecovered;
+				break;
+			case PNEUMATIC_WITH_LOCK_FSM_STATE_ERROR:
+				ResultPtr = (char *)TextError;
+				break;
+			default:
+				ResultPtr = (char *)TextInternalError;
+				break;
+		}
+	}
+	else if (2 == CupId){
+		switch (StateValue) {
+			case MOTOR_FSM_STATE_EXTRACTED:
+				ResultPtr = (char *)TextRemoved;
+				break;
+			case MOTOR_FSM_STATE_INSERTED:
+				ResultPtr = (char *)TextInserted;
+				break;
+			case MOTOR_FSM_STATE_INSERTING:
+			case MOTOR_FSM_STATE_INSERTING_PRE_BRAKING:
+			case MOTOR_FSM_STATE_INSERTING_BRAKING:
+				ResultPtr = (char *)TextBeingInserted;
+				break;
+			case MOTOR_FSM_STATE_WITHDRAWING:
+			case MOTOR_FSM_STATE_WITHDRAWING_PRE_BRAKING:
+			case MOTOR_FSM_STATE_WITHDRAWING_BRAKING:
+				ResultPtr = (char *)TextBeingRemoved;
+				break;
+			case MOTOR_FSM_STATE_BOOTED:
+				ResultPtr = (char *)TextBeingRecovered;
+				break;
+			case MOTOR_FSM_STATE_ERROR:
+				ResultPtr = (char *)TextError;
+				break;
+			default:
+				ResultPtr = (char *)TextInternalError;
+				break;
+		}
+	}
+	else{
+		// nothing to do
+	}
+
+	return ResultPtr;
 }
