@@ -118,7 +118,6 @@ class OnErrorGroup : public Fl_Group {
 	Fl_Button *RecoveryButtonPtr;
 
 	[[nodiscard]] int getCupId() const;
-	static void cupRecoveryButtonCallback(Fl_Widget *Widget, void *Data);
 };
 
 class CupGuiGroup : public Fl_Group {
@@ -164,6 +163,43 @@ static CupGuiGroup *CupGroupPtr[CUPS_NUMBER];
 
 static Fl_Box *FailureMessagePtr;
 
+const char *PneumaticFsmStateMnemonics[] = {
+    "Boot",
+    "|< o",
+    " > o",
+    "  >o",
+    " < o",
+    "Udef"
+};
+const char *PneumaticWithLockFsmStateMnemonics[] = {
+    "Boot",
+    "|< o",
+    " > o",
+    "  >o",
+    " < o",
+    "P Lk",
+    "Lock",
+    "P UL",
+    "Udef"
+};
+const char *MotorFsmStateMnemonics[] = {
+    "Boot",
+    "  >o",
+    " < o",
+    "P< o",
+    "B< o",
+    "|< o",
+    " > o",
+    "  >P",
+    "  >B",
+    "Udef"
+};
+#define PNEUMATIC_FSM_STATE_MNEMONICS_COUNT (sizeof(PneumaticFsmStateMnemonics) / sizeof(PneumaticFsmStateMnemonics[0]))
+#define PNEUMATIC_WITH_LOCK_FSM_STATE_MNEMONICS_COUNT (sizeof(PneumaticWithLockFsmStateMnemonics) / sizeof(PneumaticWithLockFsmStateMnemonics[0]))
+#define MOTOR_FSM_STATE_MNEMONICS_COUNT (sizeof(MotorFsmStateMnemonics) / sizeof(MotorFsmStateMnemonics[0]))
+
+
+
 //.................................................................................................
 // Local function prototypes
 //.................................................................................................
@@ -200,28 +236,6 @@ void initializeGraphicWidgets() {
 		}
 	}
 }
-
-#if 0
-	DiscGraphics[DiscIndex] = new TripleDiscWidgetWithVerticalSlit( X+20, Y+20, 256, 256 );
-
-	for (int J=0; J <VALUES_PER_DISC; J++){
-		if (0 == J){
-			CupValueLabel_Ptr[DiscIndex][J]  = new Fl_Box(X, Y+DISC_VALUE1_Y, 128+20-DISC_TEXTS_SPACE, 30, "?" );
-			CupValueLabel_Ptr[DiscIndex][J]->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE);
-		}
-		else if (1 == J){
-			CupValueLabel_Ptr[DiscIndex][J]  = new Fl_Box(X+128+20+DISC_TEXTS_SPACE, Y+DISC_VALUE1_Y, 128+20-DISC_TEXTS_SPACE, 30, "?" );
-			CupValueLabel_Ptr[DiscIndex][J]->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
-		}
-		else{
-			CupValueLabel_Ptr[DiscIndex][J]  = new Fl_Box(X+20, Y+DISC_VALUE1_Y+(J-1)*(DISC_VALUE2_Y-DISC_VALUE1_Y), 256, 30, "?" );
-		}
-		CupValueLabel_Ptr[DiscIndex][J]->labelfont( FL_HELVETICA_BOLD );
-		CupValueLabel_Ptr[DiscIndex][J]->labelsize( 26 );
-	}
-
-	refreshValues(DiscIndex);
-#endif
 
 /// This function draws a single disc including rings and a circle in the middle (no texts)
 void TripleDiscWidgetWithNoSlit::draw() {
@@ -317,33 +331,16 @@ int OnErrorGroup::getCupId() const {
 	return MyCupGroup->getCupId();
 }
 
-void OnErrorGroup::cupRecoveryButtonCallback(Fl_Widget *Widget, void *Data) {
-	(void)Data; // intentionally unused
-
-	const auto *MyGroup = static_cast<OnErrorGroup *>(Widget->parent());
-	assert(nullptr != MyGroup);
-	int CupId = MyGroup->getCupId();
-	assert((CupId >= 0) && (CupId < CUPS_NUMBER));
-	atomic_store_explicit(&ModbusCupRecoveryChangeReqest[CupId], true, std::memory_order_release);
-}
-
 OnErrorGroup::OnErrorGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X, Y, W, H, L) {
 	this->begin();
 	this->box(FL_NO_BOX);
 
-	ErrorTextBoxPtr = new Fl_Box(X + 16, Y + 16, W - 32, H - 66, "Nieoczekiwany\nstan krańcówki");
+	ErrorTextBoxPtr = new Fl_Box(X + 16, Y + 34, W - 32, H - 66, "Błąd krańcówki");
 	ErrorTextBoxPtr->labelfont(FL_HELVETICA_BOLD);
 	ErrorTextBoxPtr->labelsize(16);
 	ErrorTextBoxPtr->labelcolor(COLOR_BLACK);
 	ErrorTextBoxPtr->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 	ErrorTextBoxPtr->box(FL_NO_BOX);
-
-	RecoveryButtonPtr = new Fl_Button(X + ((W - 110) / 2), Y + H - 46, 110, 32, "Ponów próbę");
-	RecoveryButtonPtr->box(FL_BORDER_BOX);
-	RecoveryButtonPtr->color(NORMAL_BUTTON_COLOR);
-	RecoveryButtonPtr->labelfont(ORDINARY_TEXT_FONT);
-	RecoveryButtonPtr->labelsize(ORDINARY_TEXT_SIZE);
-	RecoveryButtonPtr->callback(cupRecoveryButtonCallback, nullptr);
 
 	this->end();
 }
@@ -396,7 +393,7 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 	UnconnectedTextBoxPtr->labelcolor(COLOR_DARK_RED);
 	UnconnectedTextBoxPtr->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
-	OnErrorGroupPtr = new OnErrorGroup(X + 30, Y + 60, 280, 180);
+	OnErrorGroupPtr = new OnErrorGroup(X + 60, Y + 80, 220, 135);
 	OnErrorGroupPtr->hide();
 
 	CupInsertionButtonPtr = new Fl_Button(X + 360, Y + 190, 90, 40, "Wysuń"); // "??????" );
@@ -572,11 +569,27 @@ void CupGuiGroup::redrawStatusLabel() {
 	}
 	assert(CupId < CUPS_NUMBER);
 	DescriptionPtr[CupId] = stateDescriptionForCup(CupId);
+
+    uint16_t MyState = atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_FSM_STATE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire);
+    const char *MyText;
+    if (0 == CupId){
+        assert(MyState < PNEUMATIC_FSM_STATE_MNEMONICS_COUNT);
+        MyText = PneumaticFsmStateMnemonics[MyState];
+    }
+    else if (1 == CupId){
+        assert(MyState < PNEUMATIC_WITH_LOCK_FSM_STATE_MNEMONICS_COUNT);
+        MyText = PneumaticWithLockFsmStateMnemonics[MyState];
+    }
+    else{
+        assert(MyState < MOTOR_FSM_STATE_MNEMONICS_COUNT);
+        MyText = MotorFsmStateMnemonics[MyState];
+    }
+
 	snprintf(StatusText, sizeof(StatusText) - 1,
 	         "%s\n"
-	         "Inputs: %04X %04X %04X %04X\n"
-	         "Coils: %c %c %c %c   Stan: %d\n"
-			 "Error: %04X %04X",
+	         "We: %04X %04X %04X %04X\n"
+	         "Bity: %c %c %c %c Stan:%2d  %s\n"
+			 "Błąd: %04X %04X",
 	         DescriptionPtr[CupId],
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 0], std::memory_order_acquire),
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 1], std::memory_order_acquire),
@@ -587,6 +600,7 @@ void CupGuiGroup::redrawStatusLabel() {
 	         atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 2], std::memory_order_acquire) ? '1' : '0',
 	         FourthCoil,
 			 atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_FSM_STATE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire),
+             MyText,
 			 atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_ERROR-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire),
 			 atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_ERROR_STORAGE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire));
 	StatusTextBoxPtr->label(StatusText);
@@ -672,11 +686,10 @@ void permanentErrorGuiUpdate(void *Data){
 
 static const char* stateDescriptionForCup(int CupId) {
 	static const char TextInserted[] =       "Kubek wsunięty";
-	static const char TextRemoved[] =        "Kubek wysunięty";
-	static const char TextBeingInserted[] =  "Kubek w trakcie wsuwania";
-	static const char TextBeingRemoved[] =   "Kubek w trakcie wysuwania";
-	static const char TextBeingRecovered[] = "Resetowanie";
-	static const char TextError[] =          "Stan nieokreślony";
+	static const char TextRemoved[] =        "Kubek schowany";
+	static const char TextBeingInserted[] =  "Napęd aktywny";
+	static const char TextBeingRemoved[] =   "Napęd aktywny";
+	static const char TextBeingBooted[] =    "Resetowanie";
 	static const char TextInternalError[] =  "Błędne dane Modbus";
 	char *ResultPtr = nullptr;
 	uint16_t StateValue = atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_FSM_STATE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire);
@@ -696,10 +709,7 @@ static const char* stateDescriptionForCup(int CupId) {
 				ResultPtr = (char *)TextInserted; // displaying time is too short to show a different text
 				break;
 			case PNEUMATIC_FSM_STATE_BOOTED:
-				ResultPtr = (char *)TextBeingRecovered;
-				break;
-			case PNEUMATIC_FSM_STATE_ERROR:
-				ResultPtr = (char *)TextError;
+				ResultPtr = (char *)TextBeingBooted;
 				break;
 			default:
 				ResultPtr = (char *)TextInternalError;
@@ -724,10 +734,7 @@ static const char* stateDescriptionForCup(int CupId) {
 				ResultPtr = (char *)TextInserted; // displaying time is too short to show a different text
 				break;
 			case PNEUMATIC_WITH_LOCK_FSM_STATE_BOOTED:
-				ResultPtr = (char *)TextBeingRecovered;
-				break;
-			case PNEUMATIC_WITH_LOCK_FSM_STATE_ERROR:
-				ResultPtr = (char *)TextError;
+				ResultPtr = (char *)TextBeingBooted;
 				break;
 			default:
 				ResultPtr = (char *)TextInternalError;
@@ -753,10 +760,7 @@ static const char* stateDescriptionForCup(int CupId) {
 				ResultPtr = (char *)TextBeingRemoved;
 				break;
 			case MOTOR_FSM_STATE_BOOTED:
-				ResultPtr = (char *)TextBeingRecovered;
-				break;
-			case MOTOR_FSM_STATE_ERROR:
-				ResultPtr = (char *)TextError;
+				ResultPtr = (char *)TextBeingBooted;
 				break;
 			default:
 				ResultPtr = (char *)TextInternalError;

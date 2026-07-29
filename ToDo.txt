@@ -1,0 +1,14 @@
+Kubek schowany   (jest "Kubek wysunięty")
+Napęd aktywny    (jest "w trakcie wsuwania" itp)
+Błąd krańcówki   (jest "Nieoczekiwany...")
+-                (jest "b.d.")
+
+
+Błąd: (Error:)
+We:   (Inputs:)
+Bity: (Coils:)
+Stan:
+
+Timeouty w pliku konfiguracyjnym
+Zeruj błędy
+

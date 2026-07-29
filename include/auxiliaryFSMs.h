@@ -24,7 +24,6 @@ typedef enum {
     PNEUMATIC_FSM_STATE_INSERTING,
     PNEUMATIC_FSM_STATE_INSERTED,   // stable
     PNEUMATIC_FSM_STATE_WITHDRAWING,
-    PNEUMATIC_FSM_STATE_ERROR,
     PNEUMATIC_FSM_STATE_UNDEFINED
 } PneumaticFsmStateEnum;
 
@@ -37,7 +36,6 @@ typedef enum {
     PNEUMATIC_WITH_LOCK_FSM_STATE_PAUSE_AFTER_LOCK,
     PNEUMATIC_WITH_LOCK_FSM_STATE_LOCKED_INSERTED,  // stable
     PNEUMATIC_WITH_LOCK_FSM_STATE_PAUSE_AFTER_UNLOCK,
-    PNEUMATIC_WITH_LOCK_FSM_STATE_ERROR,
     PNEUMATIC_WITH_LOCK_FSM_STATE_UNDEFINED
 } PneumaticWithLockFsmStateEnum;
 
@@ -51,7 +49,6 @@ typedef enum {
     MOTOR_FSM_STATE_INSERTING,
     MOTOR_FSM_STATE_INSERTING_PRE_BRAKING,
     MOTOR_FSM_STATE_INSERTING_BRAKING,
-    MOTOR_FSM_STATE_ERROR,
     MOTOR_FSM_STATE_UNDEFINED
 } MotorFsmStateEnum;
 
@@ -65,7 +62,6 @@ typedef struct {
     uint16_t time_limit_withdrawing_ms[MAX_CUPS];
 
     bool cup_requested_state[MAX_CUPS];
-    bool cup_error_recover[MAX_CUPS];
 
     bool cup_switch[MAX_CUPS];
     bool cup_switch_a[MAX_CUPS];
@@ -97,7 +93,6 @@ typedef struct {
     uint16_t braking_elapsed[MAX_CUPS];
     bool is_cup_inserted[MAX_CUPS];
     uint16_t active_cup;
-    uint16_t error_in_memory[MAX_CUPS];
 } AuxiliaryFSMsState;
 
 void auxiliaryFSMsTick(const AuxiliaryFSMsInputs *Inputs,
