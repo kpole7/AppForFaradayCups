@@ -298,7 +298,7 @@ static void cupInsertionButtonCallback(Fl_Widget *Widget, void *Data) {
 		if (atomic_load_explicit(&ModbusCoilsReadout[TemporaryIndex], std::memory_order_acquire)) {
 			atomic_store_explicit(&ModbusCoilRequestedValue[DiscIndex], false, std::memory_order_release);
 			if (VeryVerboseMode) {
-				std::cout << "Akcja związana z naciśnięciem przycisku: wysuń " << DiscIndex + 1 << '\n';
+				std::cout << "Akcja związana z naciśnięciem przycisku: schowaj " << DiscIndex + 1 << '\n';
 			}
 		}
 		else {
@@ -396,7 +396,7 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 	OnErrorGroupPtr = new OnErrorGroup(X + 60, Y + 80, 220, 135);
 	OnErrorGroupPtr->hide();
 
-	CupInsertionButtonPtr = new Fl_Button(X + 360, Y + 190, 90, 40, "Wysuń"); // "??????" );
+	CupInsertionButtonPtr = new Fl_Button(X + 360, Y + 190, 90, 40, " ");
 	CupInsertionButtonPtr->box(FL_BORDER_BOX);
 	CupInsertionButtonPtr->color(NORMAL_BUTTON_COLOR);
 	CupInsertionButtonPtr->labelfont(ORDINARY_TEXT_FONT);
@@ -473,7 +473,7 @@ void CupGuiGroup::redrawLabelsValues() {
 				}
 			}
 			else {
-				std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "b.d.");
+				std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "----");
 			}
 			ValueLabelBuffer[CupId][J][sizeof(ValueLabelBuffer[CupId][J]) - 1] = '\0';
 
@@ -608,7 +608,7 @@ void CupGuiGroup::redrawStatusLabel() {
 
 void CupGuiGroup::redrawButton() {
 	if (atomic_load_explicit(&ModbusCoilsReadout[getIndexForSwitchPressed()], std::memory_order_acquire)) {
-		CupInsertionButtonPtr->label("Wysuń");
+		CupInsertionButtonPtr->label("Schowaj");
 	}
 	else {
 		CupInsertionButtonPtr->label("Wsuń");
@@ -653,7 +653,7 @@ void refreshGui(void *Data) {
 		static char GeneralDescriptionText[800];
 		GeneralStatusTextBoxPtr->show();
 		snprintf(GeneralDescriptionText, sizeof(GeneralDescriptionText) - 1, 
-				 "Port %s\nModbus %s  Error %04X %04X", SerialPortRequestedNamePtr->c_str(),
+				 "Port %s\nModbus %s  Błąd %04X %04X", SerialPortRequestedNamePtr->c_str(),
 		         getTransmissionQualityIndicatorTextForGui(),
 				 atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ERROR_CODE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire),
 				 atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ERROR_STORAGE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire) );

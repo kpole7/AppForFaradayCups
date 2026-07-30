@@ -1,14 +1,11 @@
-Kubek schowany   (jest "Kubek wysunięty")
-Napęd aktywny    (jest "w trakcie wsuwania" itp)
-Błąd krańcówki   (jest "Nieoczekiwany...")
--                (jest "b.d.")
-
-
-Błąd: (Error:)
-We:   (Inputs:)
-Bity: (Coils:)
-Stan:
+O.K.    Kubek schowany   (jest "Kubek wysunięty")
+O.K.    Napęd aktywny    (jest "w trakcie wsuwania" itp)
+O.K.    Błąd krańcówki   (jest "Nieoczekiwany...")
+O.K.    -                (jest "b.d.")
 
 Timeouty w pliku konfiguracyjnym
-Zeruj błędy
+Menu item: Zeruj błędy; wyszerzone, jeśli są wyzerowane
+Zrobić przegląd rejestrów Modbus
+Menu Pomoc -> Instrukcja użytkowania
+           -> Instrukcja konfiguracji
 
