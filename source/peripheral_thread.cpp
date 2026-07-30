@@ -200,12 +200,16 @@ static void peripheralThreadHandler() {
 
 				Fl::awake(permanentErrorGuiUpdate, nullptr);
 
+				if (VerboseMode) {
+					std::cout << "Przekroczono limit prób resetu Modbus" << '\n';
+				}
 				FsmState = ModbusFsmStates::PERMANENT_ERROR;
 				break;
 			}
 			FsmState = ModbusFsmStates::READING_DEVICE_NAME;
 			Result = readSlaveName();
 			if (FailureCodes::NO_FAILURE != Result) {
+				atomic_store_explicit(&LastFailureCodeForGui, Result, std::memory_order_release);
 				determineTransmissionQuality(Result);
 			}
 			break;
@@ -213,6 +217,7 @@ static void peripheralThreadHandler() {
 			FsmState = ModbusFsmStates::READING_SLAVE_TIME_STAMP;
 			Result = readSlaveTimeStamp();
 			if (FailureCodes::NO_FAILURE != Result) {
+				atomic_store_explicit(&LastFailureCodeForGui, Result, std::memory_order_release);
 				determineTransmissionQuality(Result);
 			}
 			break;
@@ -220,6 +225,7 @@ static void peripheralThreadHandler() {
 			FsmState = ModbusFsmStates::WRITING_CONFIGURATION_DATA1;
 			Result = writeMultipleHoldingRegisters(CONFIGURATION_DATA_ADDRESS,    20, ModbusRegistersToBeWritten); // 89=20+20+20+20+9
 			if (FailureCodes::NO_FAILURE != Result) {
+				atomic_store_explicit(&LastFailureCodeForGui, Result, std::memory_order_release);
 				determineTransmissionQuality(Result);
 			}
 			break;
@@ -227,6 +233,7 @@ static void peripheralThreadHandler() {
 			FsmState = ModbusFsmStates::WRITING_CONFIGURATION_DATA2;
 			Result = writeMultipleHoldingRegisters(CONFIGURATION_DATA_ADDRESS+20, 20, ModbusRegistersToBeWritten+20);
 			if (FailureCodes::NO_FAILURE != Result) {
+				atomic_store_explicit(&LastFailureCodeForGui, Result, std::memory_order_release);
 				determineTransmissionQuality(Result);
 			}
 			break;
@@ -234,6 +241,7 @@ static void peripheralThreadHandler() {
 			FsmState = ModbusFsmStates::WRITING_CONFIGURATION_DATA3;
 			Result = writeMultipleHoldingRegisters(CONFIGURATION_DATA_ADDRESS+40, 20, ModbusRegistersToBeWritten+40);
 			if (FailureCodes::NO_FAILURE != Result) {
+				atomic_store_explicit(&LastFailureCodeForGui, Result, std::memory_order_release);
 				determineTransmissionQuality(Result);
 			}
 			break;
@@ -241,6 +249,7 @@ static void peripheralThreadHandler() {
 			FsmState = ModbusFsmStates::WRITING_CONFIGURATION_DATA4;
 			Result = writeMultipleHoldingRegisters(CONFIGURATION_DATA_ADDRESS+60, 20, ModbusRegistersToBeWritten+60);
 			if (FailureCodes::NO_FAILURE != Result) {
+				atomic_store_explicit(&LastFailureCodeForGui, Result, std::memory_order_release);
 				determineTransmissionQuality(Result);
 			}
 			break;
@@ -248,6 +257,7 @@ static void peripheralThreadHandler() {
 			FsmState = ModbusFsmStates::WRITING_CONFIGURATION_DATA5;
 			Result = writeMultipleHoldingRegisters(CONFIGURATION_DATA_ADDRESS+80,  9, ModbusRegistersToBeWritten+80);
 			if (FailureCodes::NO_FAILURE != Result) {
+				atomic_store_explicit(&LastFailureCodeForGui, Result, std::memory_order_release);
 				determineTransmissionQuality(Result);
 			}
 			break;
@@ -261,6 +271,9 @@ static void peripheralThreadHandler() {
 		case ModbusFsmStates::READING_INPUT_REGISTERS:
 			FsmState = ModbusFsmStates::READING_COILS;
 			Result = readCoils();
+			if (FailureCodes::NO_FAILURE != Result) {
+				atomic_store_explicit(&LastFailureCodeForGui, Result, std::memory_order_release);
+			}
 			determineTransmissionQuality(Result);
 
 			Fl::awake(refreshGui, nullptr);

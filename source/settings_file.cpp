@@ -104,7 +104,7 @@ FailureCodes determineApplicationPath(char *Argv0) {
 	}
 	else {
 		std::cerr << "Nie udało się uzyskać ścieżki do programu." << '\n';
-		return FailureCodes::ERROR_SETTINGS_PATH;
+		return FailureCodes::ERROR_SETTINGS_UNABLE_TO_OBTAIN_PATH;
 	}
 	return FailureCodes::NO_FAILURE;
 }
@@ -234,8 +234,9 @@ static FailureCodes initializations() {
 	// Check if the configuration file exists
 	MyConfigurationFile.open(ConfigurationFilePathPtr->c_str()); // open file
 	if (!MyConfigurationFile.is_open()) {
-		std::cout << "Nie można otworzyć pliku: " << CONFIGURATION_FILE_NAME << '\n';
-		return FailureCodes::ERROR_SETTINGS_OPENING_FILE;
+		std::cout << "Nie można otworzyć pliku: " << CONFIGURATION_FILE_NAME << '\n' 
+		<< "Uwaga: plik konfiguracyjny powinien znajdować się w tym samym katalogu, co plik wykonywalny programu." << '\n';
+		return FailureCodes::ERROR_SETTINGS_UNABLE_TO_OPEN_FILE;
 	}
 	if (VerboseMode) {
 		std::cout << "Plik: " << CONFIGURATION_FILE_NAME << '\n';
@@ -255,7 +256,7 @@ static FailureCodes parseSerialPortName(const std::regex *PatternPtr, std::strin
 		}
 		else {
 			std::cout << "  Nadmiarowy opis portu szeregowego w linii: [" << *LinePtr << "]" << '\n';
-			return FailureCodes::ERROR_SETTINGS_EXCESSIVE_PORT_NAME;
+			return FailureCodes::ERROR_SETTINGS_REDUNDANT_PORT_NAME;
 		}
 	}
 	return FailureCodes::NO_FAILURE;
@@ -274,7 +275,7 @@ static FailureCodes parseCupName(const std::regex *PatternPtr, std::string *Line
 		}
 		else {
 			std::cout << "  Nadmiarowy tytuł kubka w linii: [" << *LinePtr << "]" << '\n';
-			return FailureCodes::ERROR_SETTINGS_EXCESSIVE_CUP_NAME;
+			return FailureCodes::ERROR_SETTINGS_REDUNDANT_CUP_NAME;
 		}
 	}
 	return FailureCodes::NO_FAILURE;
@@ -291,14 +292,14 @@ static FailureCodes parseSingleInteger(const std::regex *PatternPtr, std::string
 				*OutputValue = std::stoi(ParameterText, nullptr, 0);
 			} catch (const std::invalid_argument &) {
 				std::cout << "  Błąd konwersji na liczbę " << ParameterName << " (patrz " << __LINE__ << ")" << '\n';
-				return FailureCodes::ERROR_SETTINGS_CONVERTION_SINGLE_INTEGER;
+				return FailureCodes::ERROR_SETTINGS_CONVERTION_TO_NUMBER;
 			} catch (const std::out_of_range &) {
 				std::cout << "  Błąd konwersji na liczbę " << ParameterName << " (patrz " << __LINE__ << ")" << '\n';
-				return FailureCodes::ERROR_SETTINGS_CONVERTION_SINGLE_INTEGER;
+				return FailureCodes::ERROR_SETTINGS_CONVERTION_TO_NUMBER;
 			}
 			if ((*OutputValue < LowerLimit) || (*OutputValue > UpperLimit)) {
 				*OutputValue = -1;
-				return FailureCodes::ERROR_SETTINGS_IMPROPER_SINGLE_INTEGER;
+				return FailureCodes::ERROR_SETTINGS_VALUE_OUT_OF_RANGE;
 			}
 
 			if (VerboseMode) {
@@ -307,7 +308,7 @@ static FailureCodes parseSingleInteger(const std::regex *PatternPtr, std::string
 		}
 		else {
 			std::cout << "  Nadmiarowa deklaracja parametru " << ParameterName << ": [" << *LinePtr << "]" << '\n';
-			return FailureCodes::ERROR_SETTINGS_EXCESSIVE_PARAMETER;
+			return FailureCodes::ERROR_SETTINGS_REDUNDANT_PARAMETER_DEFINITION;
 		}
 	}
 	return FailureCodes::NO_FAILURE;
@@ -319,12 +320,12 @@ static FailureCodes parseCalibrationCurrents(const std::regex *PatternPtr, std::
 		for (int I = 0; I < CALIBRATION_CURRENTS_NUMBER; I++) {
 			if (UINT16_MAX != CurrentsArray[I]) {
 				std::cout << "  Nadmiarowa deklaracja prądu kalibracyjnego w linii: [" << *LinePtr << "]" << '\n';
-				return FailureCodes::ERROR_SETTINGS_EXCESSIVE_CURRENT_DEFINITION;
+				return FailureCodes::ERROR_SETTINGS_REDUNDANT_CURRENT_DEFINITION;
 			}
 			CurrentsArray[I] = static_cast<uint16_t>(std::stoi(Matches[I + 1]));
 			if (CurrentsArray[I] > CONFIGURATION_CURRENT_MAX) {
 				std::cout << "  Prąd kalibracyjny przekracza maksymalną wartość w linii: [" << *LinePtr << "]" << '\n';
-				return FailureCodes::ERROR_SETTINGS_IMPROPER_CURRENT_DEFINITION;
+				return FailureCodes::ERROR_SETTINGS_TOO_HIGH_CURRENT_VALUE;
 			}
 		}
 
@@ -351,7 +352,7 @@ static FailureCodes parseCalibrationAdcOutputs(bool IsLowGain, const std::regex 
 		uint16_t MyChannelIndex = static_cast<uint16_t>(std::stoi(Matches[2]));
 		if ((MyCupIndex < 1) || (MyCupIndex > CUPS_NUMBER) || (MyChannelIndex < 1) || (MyChannelIndex > CHANNELS_PER_CUP)) {
 			std::cout << "  Nieprawidłowy indeks kubka lub kanału w linii: [" << *LinePtr << "]" << '\n';
-			return FailureCodes::ERROR_SETTINGS_IMPROPER_ADC_OUTPUTS_DEFINITION;
+			return FailureCodes::ERROR_SETTINGS_INCORRECT_CUP_OR_CHANNEL_INDEX;
 		}
 		uint16_t GainsPerChannel = 2; // low and high gain
 		uint16_t CurrentsPerOneGain = 3; // I1, I2, I3 for low gain and I2, I3, I4 for high gain
@@ -363,12 +364,12 @@ static FailureCodes parseCalibrationAdcOutputs(bool IsLowGain, const std::regex 
 		for (int I = 0; I < CurrentsPerOneGain; I++) {
 			if (UINT16_MAX != AdcOutputsArray[MyLocalIndex + I]) {
 				std::cout << "  Nadmiarowa deklaracja odczytu ADC w linii: [" << *LinePtr << "]" << '\n';
-				return FailureCodes::ERROR_SETTINGS_EXCESSIVE_ADC_OUTPUTS_DEFINITION;
+				return FailureCodes::ERROR_SETTINGS_REDUNDANT_ADC_READING;
 			}
 			AdcOutputsArray[MyLocalIndex + I] = static_cast<uint16_t>(std::stoi(Matches[I + 3]));
 			if (AdcOutputsArray[MyLocalIndex + I] > CONFIGURATION_ADC_MAX) {
 				std::cout << "  Odczyt ADC przekracza maksymalną wartość w linii: [" << *LinePtr << "]" << '\n';
-				return FailureCodes::ERROR_SETTINGS_IMPROPER_ADC_OUTPUTS_DEFINITION;
+				return FailureCodes::ERROR_SETTINGS_VALUE_OUT_OF_RANGE;
 			}
 		}
 
@@ -389,7 +390,7 @@ static FailureCodes parseCalibrationAdcOutputs(bool IsLowGain, const std::regex 
 static FailureCodes finalTest() {
 	if (nullptr == SerialPortRequestedNamePtr) {
 		std::cout << " Nie znaleziono opisu portu szeregowego" << '\n';
-		return FailureCodes::ERROR_SETTINGS_PORT_NAME;
+		return FailureCodes::ERROR_SETTINGS_PORT_NAME_NOT_FOUND;
 	}
 	for (int J = 0; J < CUPS_NUMBER; J++) {
 		if (0 == CupDescriptionPtr[J][0]) {
@@ -402,13 +403,13 @@ static FailureCodes finalTest() {
 	for (int J = 0; J < CALIBRATION_CURRENTS_NUMBER; J++) {
 		if (UINT16_MAX == CalibrationCurrents[J]) {
 			std::cout << " Nie znaleziono definicji prądów kalibracyjnych" << '\n';
-			return FailureCodes::ERROR_SETTINGS_CALIBRATION_DATA;
+			return FailureCodes::ERROR_SETTINGS_CALIBRATION_CURRENTS_NOT_FOUND;
 		}
 	}
 	for (int J = 0; J < CALIBRATION_ADC_READINGS_NUMBER; J++) {
 		if (UINT16_MAX == CalibrationAdcOutputs[J]) {
 			std::cout << " Nie znaleziono definicji odczytów ADC" << '\n';
-			return FailureCodes::ERROR_SETTINGS_CALIBRATION_DATA;
+			return FailureCodes::ERROR_SETTINGS_CALIBRATION_ADC_READINGS_NOT_FOUND;
 		}
 	}
 	if (VerboseMode) {

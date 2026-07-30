@@ -25,4 +25,6 @@ extern std::atomic<bool> ModbusCupRecoveryChangeReqest[CUPS_NUMBER];
 
 extern std::chrono::high_resolution_clock::time_point CupInsertionOrRemovalStartTime[CUPS_NUMBER];
 
+extern std::atomic<FailureCodes> LastFailureCodeForGui;
+
 #endif // SOURCE_SHARED_DATA_H_

@@ -4,8 +4,12 @@ O.K.    Błąd krańcówki   (jest "Nieoczekiwany...")
 O.K.    -                (jest "b.d.")
 
 Timeouty w pliku konfiguracyjnym
-Menu item: Zeruj błędy; wyszerzone, jeśli są wyzerowane
-Zrobić przegląd rejestrów Modbus
 Menu Pomoc -> Instrukcja użytkowania
-           -> Instrukcja konfiguracji
+
+
+
+Na później:
+
+Menu item: Zeruj błędy; wyszarzone, jeśli są wyzerowane
+Zrobić przegląd rejestrów Modbus
 

@@ -88,6 +88,12 @@ int main(int argc, char **argv) {
 
 	// Main window of the application
 	Fl::scheme("gtk+");
+	if (1 > NumberOfFaradayCupsToBeOperated) {
+		NumberOfFaradayCupsToBeOperated = 1;
+	}
+	if (CUPS_NUMBER < NumberOfFaradayCupsToBeOperated) {
+		NumberOfFaradayCupsToBeOperated = CUPS_NUMBER;
+	}
 	ApplicationWindow =
 	    new WindowEscProof(MAIN_WINDOW_WIDTH, NumberOfFaradayCupsToBeOperated * DISC_SPACE_Y + MAIN_MENU_HEIGHT, "Pomiar Wiązki w Linii Iniekcyjnej");
 	ApplicationWindow->begin();
@@ -101,7 +107,7 @@ int main(int argc, char **argv) {
 	MenuWidget.add("Narzędzia/Status/Ukryty", 0, callbackForMenuItemStatus, (void *)0, FL_MENU_RADIO);
 	int indexOfMenuItemStatusNormal = MenuWidget.add("Narzędzia/Status/Normalny", 0, callbackForMenuItemStatus, (void *)1, FL_MENU_RADIO);
 	MenuWidget.add("Narzędzia/Status/Serwisowy", 0, callbackForMenuItemStatus, (void *)2, FL_MENU_RADIO);
-	MenuWidget.add("Pomoc/Otwórz PDF", 0, callbackForMenuItemHelp);
+	MenuWidget.add("Pomoc/Instrukcja użytkowania", 0, callbackForMenuItemHelp);
 
 	Fl_Menu_Item *MenuItems = const_cast<Fl_Menu_Item *>(MenuWidget.menu());
 	MenuWidget.setonly(&MenuItems[indexOfMenuItemStatusNormal]);
@@ -114,7 +120,7 @@ int main(int argc, char **argv) {
 		initializeGraphicWidgets();
 	}
 	else {
-		showFailureMessageWidget();
+		showFailureMessageWidget(ErrorCode);
 	}
 
 	ApplicationWindow->end();
@@ -254,7 +260,7 @@ static FailureCodes determineVerbosity(int argc, char **argv) {
 		}
 		else {
 			std::cout << "Nieznany argument: " << Argument << '\n';
-			return FailureCodes::ERROR_COMMAND_SYNTAX;
+			return FailureCodes::ERROR_COMMAND_LINE_SYNTAX;
 		}
 	}
 	if (VeryVerboseMode) {

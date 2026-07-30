@@ -21,3 +21,6 @@ std::atomic<bool> ModbusCupRecoveryChangeReqest[CUPS_NUMBER];
 /// There is a need to measure the time it takes to send a command to the slave, physically execute it,
 /// and receive feedback from the limit switches
 std::chrono::high_resolution_clock::time_point CupInsertionOrRemovalStartTime[CUPS_NUMBER];
+
+/// The most recent failure code that should be shown in the GUI error dialog.
+std::atomic<FailureCodes> LastFailureCodeForGui{FailureCodes::NO_FAILURE};

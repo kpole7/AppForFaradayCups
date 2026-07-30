@@ -36,6 +36,6 @@ void permanentErrorGuiUpdate(void *Data);
 
 void initializeFailureMessageWidget();
 
-void showFailureMessageWidget();
+void showFailureMessageWidget(FailureCodes FailureCodeForGui);
 
 #endif // SOURCE_GUI_WIDGETS_H_
