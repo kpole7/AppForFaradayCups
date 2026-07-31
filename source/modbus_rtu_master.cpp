@@ -178,6 +178,9 @@ FailureCodes writeMultipleHoldingRegisters(uint16_t StartAddress, uint16_t Quant
 		}
 		return FailureCodes::ERROR_MODBUS_WRITING;
 	}
+	if (VerboseMode) {
+		std::cout << "  Zapisano prawidłowo rejestry Modbus, start address: " << StartAddress << '\n';
+	}
 	return FailureCodes::NO_FAILURE;
 }
 

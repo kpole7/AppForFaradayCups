@@ -17,8 +17,6 @@
 // Preprocessor directives
 //.................................................................................................
 
-#define CHANNELS_PER_CUP 4
-
 #define MODBUS_SLAVE_ADDRESS_MAX 247 // defined in the Modbus standard
 
 #define CALIBRATION_CURRENTS_NUMBER 4
@@ -43,6 +41,11 @@ std::string ThisApplicationDirectory;
 int NumberOfFaradayCupsToBeOperated;
 
 int ModbusSlaveAddress;
+
+/// Timeout values used to calibration; 
+/// UINT16_MAX is an illegal value and is used to indicate that the timeout has not been initialized yet
+uint16_t CupInsertingTimeouts[CUPS_NUMBER];  // in milliseconds
+uint16_t CupWithdrawingTimeouts[CUPS_NUMBER];  // in milliseconds
 
 /// Currents values used to calibration; 
 /// UINT16_MAX is an illegal value and is used to indicate that the current has not been initialized yet
@@ -75,6 +78,10 @@ static FailureCodes parseSerialPortName(const std::regex *PatternPtr, std::strin
 static FailureCodes parseCupName(const std::regex *PatternPtr, std::string *LinePtr, int CupIndex);
 static FailureCodes parseSingleInteger(const std::regex *PatternPtr, std::string *LinePtr, int *OutputValue, int LowerLimit, int UpperLimit,
                                        const char *ParameterName);
+static FailureCodes parseInsertingTimeouts(const std::regex *PatternPtr, std::string *LinePtr, 
+										   uint16_t CupInsertingTimeouts[CUPS_NUMBER]);
+static FailureCodes parseWithdrawingTimeouts(const std::regex *PatternPtr, std::string *LinePtr, 
+											 uint16_t CupWithdrawingTimeouts[CUPS_NUMBER]);
 static FailureCodes parseCalibrationCurrents(const std::regex *PatternPtr, std::string *LinePtr, uint16_t CurrentsArray[CALIBRATION_CURRENTS_NUMBER]);
 static FailureCodes parseCalibrationAdcOutputs(bool IsLowGain, const std::regex *PatternPtr, std::string *LinePtr, 
 											   uint16_t AdcOutputsArray[CALIBRATION_ADC_READINGS_NUMBER]);
@@ -125,6 +132,8 @@ FailureCodes configurationFileParsing() {
 	std::regex PatternCup3Title(R"(\s*(?!#)Tytuł trzeciego kubka:\s*(.+)\s*$)");
 	std::regex PatternFaradayCupsNumber(R"(\s*(?!#)Liczba kubków Faradaya do obsłużenia:\s*(\d+)\s*$)");
 	std::regex PatternModbusSlaveAddress(R"(\s*(?!#)Adres mobusowy slave'a:\s*(\d+)\s*$)");
+	std::regex PatternInsertingTimeout(R"(\s*(?!#)Limit czasu wsuwania kubka\s*(\d+)\s*:\s*(\d+)\s*$)");
+	std::regex PatternWithdrawingTimeout(R"(\s*(?!#)Limit czasu schowania kubka\s*(\d+)\s*:\s*(\d+)\s*$)");
 	std::regex PatternCalibrationCurrents(R"(\s*(?!#)Prądy kalibracyjne:\s*I1\s*=\s*(\d+)\s*uA/100,\s*I2\s*=\s*(\d+)\s*uA/100,\s*I3\s*=\s*(\d+)\s*uA/100,\s*I4\s*=\s*(\d+)\s*uA/100\s*$)");
 	std::regex PatternCalibrationLowGain( R"(\s*(?!#)Odczyty ADC dla kubka (\d+), kanału (\d+), wzmocnienia małego: Y\(I1\) = (\d+), Y\(I2\) = (\d+), Y\(I3\) = (\d+)\s*$)");
 	std::regex PatternCalibrationHighGain(R"(\s*(?!#)Odczyty ADC dla kubka (\d+), kanału (\d+), wzmocnienia dużego: Y\(I2\) = (\d+), Y\(I3\) = (\d+), Y\(I4\) = (\d+)\s*$)");
@@ -168,6 +177,17 @@ FailureCodes configurationFileParsing() {
 			return Result;
 		}
 
+		Result = parseInsertingTimeouts(&PatternInsertingTimeout, &Line, CupInsertingTimeouts);
+		if (FailureCodes::NO_FAILURE != Result) {
+			return Result;
+		}
+
+		Result = parseWithdrawingTimeouts(&PatternWithdrawingTimeout, &Line, CupWithdrawingTimeouts);
+		if (FailureCodes::NO_FAILURE != Result) {
+			return Result;
+		}
+
+
 		Result = parseCalibrationCurrents(&PatternCalibrationCurrents, &Line, CalibrationCurrents);
 		if (FailureCodes::NO_FAILURE != Result) {
 			return Result;
@@ -190,24 +210,25 @@ FailureCodes configurationFileParsing() {
 	return Result;
 }
 
-int copyCalibrationCurrents( uint16_t *OutputArrayPtr, int Quantity ) {
-	if (Quantity != CALIBRATION_CURRENTS_NUMBER) {
-		return -1;
-	}
+void copyCalibrationCurrents(uint16_t *OutputArrayPtr) {
 	for (int I = 0; I < CALIBRATION_CURRENTS_NUMBER; I++) {
 		OutputArrayPtr[I] = CalibrationCurrents[I];
 	}
-	return 0;
 }
 
-int copyCalibrationAdcOutputs( uint16_t *OutputArrayPtr, int Quantity ) {
-	if (Quantity != CALIBRATION_ADC_READINGS_NUMBER) {
-		return -1;
-	}
+void copyCalibrationAdcOutputs(uint16_t *OutputArrayPtr) {
 	for (int I = 0; I < CALIBRATION_ADC_READINGS_NUMBER; I++) {
 		OutputArrayPtr[I] = CalibrationAdcOutputs[I];
 	}
-	return 0;
+}
+
+void copyActuatorsTimeouts(uint16_t *OutputArrayPtr) {
+	for (int I = 0; I < CUPS_NUMBER; I++) {
+		OutputArrayPtr[I] = CupInsertingTimeouts[I];
+	}
+	for (int I = 0; I < CUPS_NUMBER; I++) {
+		OutputArrayPtr[I + CUPS_NUMBER] = CupWithdrawingTimeouts[I];
+	}
 }
 
 static FailureCodes initializations() {
@@ -216,10 +237,16 @@ static FailureCodes initializations() {
 		CupDescriptionPtr[J][0] = 0;
 	}
 
+	for (int I = 0; I < CUPS_NUMBER; I++) {
+		CupInsertingTimeouts[I] = UINT16_MAX;
+	}
+	for (int I = 0; I < CUPS_NUMBER; I++) {
+		CupWithdrawingTimeouts[I] = UINT16_MAX;
+	}
+
 	for (int I = 0; I < CALIBRATION_CURRENTS_NUMBER; I++) {
 		CalibrationCurrents[I] = UINT16_MAX;
 	}
-
 	for (int I = 0; I < CALIBRATION_ADC_READINGS_NUMBER; I++) {
 		CalibrationAdcOutputs[I] = UINT16_MAX;
 	}
@@ -314,7 +341,57 @@ static FailureCodes parseSingleInteger(const std::regex *PatternPtr, std::string
 	return FailureCodes::NO_FAILURE;
 }
 
-static FailureCodes parseCalibrationCurrents(const std::regex *PatternPtr, std::string *LinePtr, uint16_t CurrentsArray[CALIBRATION_CURRENTS_NUMBER]) {
+static FailureCodes parseInsertingTimeouts(const std::regex *PatternPtr, std::string *LinePtr, 
+	uint16_t CupInsertingTimeouts[CUPS_NUMBER]) 
+{
+	std::smatch Matches;
+	if (std::regex_match(*LinePtr, Matches, *PatternPtr)) {
+		uint16_t MyCupIndex = static_cast<uint16_t>(std::stoi(Matches[1]));
+		if ((MyCupIndex < 1) || (MyCupIndex > CUPS_NUMBER)) {
+			std::cout << "  Nieprawidłowy indeks kubka w linii: [" << *LinePtr << "]" << '\n';
+			return FailureCodes::ERROR_SETTINGS_INCORRECT_CUP_OR_CHANNEL_INDEX;
+		}
+		uint16_t MyTimeoutValue = static_cast<uint16_t>(std::stoi(Matches[2]));
+		if (UINT16_MAX != CupInsertingTimeouts[MyCupIndex - 1]) {
+			std::cout << "  Nadmiarowa deklaracja limitu czasu wsuwania kubka w linii: [" << *LinePtr << "]" << '\n';
+			return FailureCodes::ERROR_SETTINGS_REDUNDANT_PARAMETER_DEFINITION;
+		}
+		CupInsertingTimeouts[MyCupIndex - 1] = MyTimeoutValue;
+
+		if (VerboseMode) {
+			std::cout << "  Limit czasu wsuwania kubka " << MyCupIndex << ": " << MyTimeoutValue << " ms, w linii: [" << *LinePtr << "]" << '\n';
+		}
+	}
+	return FailureCodes::NO_FAILURE;
+}
+
+static FailureCodes parseWithdrawingTimeouts(const std::regex *PatternPtr, std::string *LinePtr, 
+	uint16_t CupWithdrawingTimeouts[CUPS_NUMBER]) 
+{
+	std::smatch Matches;
+	if (std::regex_match(*LinePtr, Matches, *PatternPtr)) {
+		uint16_t MyCupIndex = static_cast<uint16_t>(std::stoi(Matches[1]));
+		if ((MyCupIndex < 1) || (MyCupIndex > CUPS_NUMBER)) {
+			std::cout << "  Nieprawidłowy indeks kubka w linii: [" << *LinePtr << "]" << '\n';
+			return FailureCodes::ERROR_SETTINGS_INCORRECT_CUP_OR_CHANNEL_INDEX;
+		}
+		uint16_t MyTimeoutValue = static_cast<uint16_t>(std::stoi(Matches[2]));
+		if (UINT16_MAX != CupWithdrawingTimeouts[MyCupIndex - 1]) {
+			std::cout << "  Nadmiarowa deklaracja limitu czasu schowania kubka w linii: [" << *LinePtr << "]" << '\n';
+			return FailureCodes::ERROR_SETTINGS_REDUNDANT_PARAMETER_DEFINITION;
+		}
+		CupWithdrawingTimeouts[MyCupIndex - 1] = MyTimeoutValue;
+
+		if (VerboseMode) {
+			std::cout << "  Limit czasu schowania kubka " << MyCupIndex << ": " << MyTimeoutValue << " ms, w linii: [" << *LinePtr << "]" << '\n';
+		}
+	}
+	return FailureCodes::NO_FAILURE;
+}
+
+static FailureCodes parseCalibrationCurrents(const std::regex *PatternPtr, std::string *LinePtr, 
+	uint16_t CurrentsArray[CALIBRATION_CURRENTS_NUMBER]) 
+{
 	std::smatch Matches;
 	if (std::regex_match(*LinePtr, Matches, *PatternPtr)) {
 		for (int I = 0; I < CALIBRATION_CURRENTS_NUMBER; I++) {
@@ -398,6 +475,18 @@ static FailureCodes finalTest() {
 			if (VerboseMode) {
 				std::cout << " Nie znaleziono tytułu kubka " << J + 1 << "; nadano tytuł zastępczy" << '\n';
 			}
+		}
+	}
+	for (int J = 0; J < CUPS_NUMBER; J++) {
+		if (UINT16_MAX == CupInsertingTimeouts[J]) {
+			std::cout << " Nie znaleziono definicji limitów czasu wsuwania kubków" << '\n';
+			return FailureCodes::ERROR_SETTINGS_CUP_INSERTING_TIMEOUTS_NOT_FOUND;
+		}
+	}
+	for (int J = 0; J < CUPS_NUMBER; J++) {
+		if (UINT16_MAX == CupWithdrawingTimeouts[J]) {
+			std::cout << " Nie znaleziono definicji limitów czasu schowania kubków" << '\n';
+			return FailureCodes::ERROR_SETTINGS_CUP_WITHDRAWING_TIMEOUTS_NOT_FOUND;
 		}
 	}
 	for (int J = 0; J < CALIBRATION_CURRENTS_NUMBER; J++) {

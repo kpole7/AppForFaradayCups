@@ -14,6 +14,7 @@
 #include "peripheral_thread.h"
 #include "settings_file.h"
 #include "shared_data.h"
+#include "configFaradayCups.h"
 
 //.................................................................................................
 // Preprocessor directives
@@ -411,23 +412,16 @@ char *getTransmissionQualityIndicatorTextForDebugging() {
 static void setupModbusRegistersToBeWritten() {
 	// The following values are set in the Modbus registers of the slave device during the initialization phase of the application;
 	// refer to the modbusRegisters.ods
-	ModbusRegistersToBeWritten[0] =  700u; // MODBUS_ADDR_TIME_LIMIT_INSERTING1
-	ModbusRegistersToBeWritten[1] =  700u; // MODBUS_ADDR_TIME_LIMIT_INSERTING2
-	ModbusRegistersToBeWritten[2] = 4000u; // MODBUS_ADDR_TIME_LIMIT_INSERTING3
-	ModbusRegistersToBeWritten[3] =  300u; // MODBUS_ADDR_TIME_LIMIT_WITHDRAWING1
-	ModbusRegistersToBeWritten[4] =  300u; // MODBUS_ADDR_TIME_LIMIT_WITHDRAWING2
-	ModbusRegistersToBeWritten[5] = 4400u; // MODBUS_ADDR_TIME_LIMIT_WITHDRAWING3
-	ModbusRegistersToBeWritten[6] = 3;    // MODBUS_ADDR_INSTALLED_CUPS
-	ModbusRegistersToBeWritten[7] = 4;    // MODBUS_ADDR_ELECTRODES_CUP1
-	ModbusRegistersToBeWritten[8] = 4;    // MODBUS_ADDR_ELECTRODES_CUP2
-	ModbusRegistersToBeWritten[9] = 4;    // MODBUS_ADDR_ELECTRODES_CUP3
-	ModbusRegistersToBeWritten[10] = 0;   // MODBUS_ADDR_CUP1_TYPE
-	ModbusRegistersToBeWritten[11] = 1;   // MODBUS_ADDR_CUP2_TYPE
-	ModbusRegistersToBeWritten[12] = 2;   // MODBUS_ADDR_CUP3_TYPE
-	int Result = copyCalibrationCurrents( ModbusRegistersToBeWritten+(CALIBRATION_CURRENTS_ADDRESS - CONFIGURATION_DATA_ADDRESS), CALIBRATION_CURRENTS_LENGTH);
-	assert(Result == 0);
-	Result = copyCalibrationAdcOutputs( ModbusRegistersToBeWritten + (CALIBRATION_ADC_DATA_ADDRESS - CONFIGURATION_DATA_ADDRESS), CALIBRATION_ADC_DATA_LENGTH);
-	assert(Result == 0);
+	ModbusRegistersToBeWritten[6] = CUPS_NUMBER;    // MODBUS_ADDR_INSTALLED_CUPS
+	ModbusRegistersToBeWritten[7] = CHANNELS_PER_CUP;    // MODBUS_ADDR_ELECTRODES_CUP1
+	ModbusRegistersToBeWritten[8] = CHANNELS_PER_CUP;    // MODBUS_ADDR_ELECTRODES_CUP2
+	ModbusRegistersToBeWritten[9] = CHANNELS_PER_CUP;    // MODBUS_ADDR_ELECTRODES_CUP3
+	ModbusRegistersToBeWritten[10] = CUP_TYPE_PNEUMATIC;   // MODBUS_ADDR_CUP1_TYPE
+	ModbusRegistersToBeWritten[11] = CUP_TYPE_PNEUMATIC_WITH_LOCK;   // MODBUS_ADDR_CUP2_TYPE
+	ModbusRegistersToBeWritten[12] = CUP_TYPE_MOTOR;   // MODBUS_ADDR_CUP3_TYPE
+	copyCalibrationCurrents( ModbusRegistersToBeWritten+(CALIBRATION_CURRENTS_ADDRESS - CONFIGURATION_DATA_ADDRESS));
+	copyCalibrationAdcOutputs( ModbusRegistersToBeWritten + (CALIBRATION_ADC_DATA_ADDRESS - CONFIGURATION_DATA_ADDRESS));
+	copyActuatorsTimeouts(ModbusRegistersToBeWritten + (MODBUS_ADDR_TIME_LIMIT_INSERTING1 - CONFIGURATION_DATA_ADDRESS));
 }
 
 uint16_t getConfigurationRegisterValue(uint16_t Address) {

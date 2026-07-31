@@ -797,6 +797,10 @@ static const char* getErrorDescription(FailureCodes Error) {
 			return "Błąd nazwy portu szeregowego w pliku konfiguracyjnym";
 		case FailureCodes::ERROR_SETTINGS_REDUNDANT_PORT_NAME:
 			return "Nadmiarowa nazwa portu szeregowego w pliku konfiguracyjnym";
+		case FailureCodes::ERROR_SETTINGS_CUP_INSERTING_TIMEOUTS_NOT_FOUND:
+			return "Nie znaleziono opisu limitów czasu wsuwania kubków w pliku konfiguracyjnym";
+		case FailureCodes::ERROR_SETTINGS_CUP_WITHDRAWING_TIMEOUTS_NOT_FOUND:
+			return "Nie znaleziono opisu limitów czasu schowania kubków w pliku konfiguracyjnym";
 		case FailureCodes::ERROR_SETTINGS_CALIBRATION_CURRENTS_NOT_FOUND:
 			return "Nie znaleziono prądów kalibracyjnych w pliku konfiguracyjnym";
 		case FailureCodes::ERROR_SETTINGS_CALIBRATION_ADC_READINGS_NOT_FOUND:

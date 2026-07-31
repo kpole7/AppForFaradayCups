@@ -11,6 +11,8 @@
 // Preprocessor directives
 //.................................................................................................
 
+#define CHANNELS_PER_CUP 4
+
 #define MOTORIZED_CUP_TYPE 2
 
 //.................................................................................................
@@ -35,8 +37,10 @@ FailureCodes determineApplicationPath(char *Argv0);
 
 FailureCodes configurationFileParsing();
 
-int copyCalibrationCurrents( uint16_t *OutputArrayPtr, int Quantity );
+void copyCalibrationCurrents(uint16_t *OutputArrayPtr);
 
-int copyCalibrationAdcOutputs( uint16_t *OutputArrayPtr, int Quantity );
+void copyCalibrationAdcOutputs(uint16_t *OutputArrayPtr);
+
+void copyActuatorsTimeouts(uint16_t *OutputArrayPtr);
 
 #endif // SOURCE_SETTINGS_FILE_H_
