@@ -232,7 +232,7 @@ void initializeGraphicWidgets() {
 #endif
 
 	for (int J = 0; J < CUPS_NUMBER; J++) {
-		CupGroupPtr[J] = new CupGuiGroup(0, MAIN_MENU_HEIGHT + 10 + (CUPS_NUMBER-1-J) * DISC_SPACE_Y, MAIN_WINDOW_WIDTH, 300);
+		CupGroupPtr[J] = new CupGuiGroup(0, MAIN_MENU_HEIGHT + (CUPS_NUMBER-1-J) * DISC_SPACE_Y, MAIN_WINDOW_WIDTH, DISC_SPACE_Y);
 		CupGroupPtr[J]->configure(J);
 		if (J >= NumberOfFaradayCupsToBeOperated) {
 			CupGroupPtr[J]->hide();
@@ -355,12 +355,12 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 	memset(ValueLabelBuffer, 0, sizeof(ValueLabelBuffer));
 	memset(StatusText, 0, sizeof(StatusText));
 
-	LockoutBackgroundPtr = new Fl_Box(X, Y, MAIN_WINDOW_WIDTH, DISC_SPACE_Y - 8, nullptr);
+	LockoutBackgroundPtr = new Fl_Box(X, Y, MAIN_WINDOW_WIDTH, DISC_SPACE_Y, nullptr);
 	LockoutBackgroundPtr->box(FL_FLAT_BOX);
-	LockoutBackgroundPtr->color(fl_rgb_color(0xDF, 0xD3, 0x72));
+	LockoutBackgroundPtr->color(fl_rgb_color(0xDF, 0xB9, 0x72));
 	LockoutBackgroundPtr->hide();
 
-	TitleTextBoxPtr = new Fl_Box(X + 0, Y, 400, 20, "Tytuł");
+	TitleTextBoxPtr = new Fl_Box(X + 0, Y+10, 400, 20, "Tytuł");
 	TitleTextBoxPtr->labelfont(ORDINARY_TEXT_FONT);
 	TitleTextBoxPtr->labelsize(ORDINARY_TEXT_SIZE);
 #if 0
@@ -369,7 +369,7 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 #endif
 	TitleTextBoxPtr->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
-	TripleDisc = new TripleDiscWidgetWithNoSlit(X + 20, Y + 30, 256, 256);
+	TripleDisc = new TripleDiscWidgetWithNoSlit(X + 20, Y + 40, 256, 256);
 	TripleDisc->hide();
 
 	for (int J = 0; J < VALUES_PER_DISC; J++) {
@@ -417,7 +417,7 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 	StatusTextBoxPtr->labelcolor(FL_BLACK);
 	StatusTextBoxPtr->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
-	SeparatorPtr = new Fl_Box(X, Y + DISC_SPACE_Y - 8, MAIN_WINDOW_WIDTH, 4);
+	SeparatorPtr = new Fl_Box(X, Y + DISC_SPACE_Y - 4, MAIN_WINDOW_WIDTH, SEPARATOR_HEIGHT, nullptr);
 	SeparatorPtr->box(FL_FLAT_BOX);
 	SeparatorPtr->color(SEPARATOR_COLOR);
 
@@ -546,6 +546,13 @@ void CupGuiGroup::redrawLockoutIndicator() {
 			LockoutBackgroundPtr->hide();
 		}
 	}
+
+	// if (CupId == 0) {
+	// 	LockoutBackgroundPtr->color(fl_rgb_color(0xDF, 0x99, 0x72));
+	// }
+	// if (CupId == 2) {
+	// 	LockoutBackgroundPtr->color(FL_YELLOW);
+	// }
 }
 
 void CupGuiGroup::redrawTransmissionErrorIdicator() {

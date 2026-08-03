@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
 		NumberOfFaradayCupsToBeOperated = CUPS_NUMBER;
 	}
 	ApplicationWindow =
-	    new WindowEscProof(MAIN_WINDOW_WIDTH, NumberOfFaradayCupsToBeOperated * DISC_SPACE_Y + MAIN_MENU_HEIGHT, "Pomiar Wiązki w Linii Iniekcyjnej");
+	    new WindowEscProof(MAIN_WINDOW_WIDTH, NumberOfFaradayCupsToBeOperated * DISC_SPACE_Y + MAIN_MENU_HEIGHT - SEPARATOR_HEIGHT, "Pomiar Wiązki w Linii Iniekcyjnej");
 	ApplicationWindow->begin();
 	ApplicationWindow->color(COLOR_BACKGROUND);
 	ApplicationWindow->callback(onMainWindowCloseCallback); // Window close event is handled
