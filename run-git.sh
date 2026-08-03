@@ -1,4 +1,4 @@
-cd /home/krzysztof/LocalSoftware/AppForFaradayCups
+cd /home/krzysztof/work/AppForFaradayCups
 git gui &
 exit
 

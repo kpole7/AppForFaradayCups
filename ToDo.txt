@@ -3,13 +3,13 @@ O.K.    Napęd aktywny    (jest "w trakcie wsuwania" itp)
 O.K.    Błąd krańcówki   (jest "Nieoczekiwany...")
 O.K.    -                (jest "b.d.")
 
-Timeouty w pliku konfiguracyjnym
+O.K.    Timeouty w pliku konfiguracyjnym
+O.K.    Zrobić przegląd rejestrów Modbus
 Menu Pomoc -> Instrukcja użytkowania
 
 
 
 Na później:
 
-Menu item: Zeruj błędy; wyszarzone, jeśli są wyzerowane
-Zrobić przegląd rejestrów Modbus
+Menu item: Zeruj błędy
 
