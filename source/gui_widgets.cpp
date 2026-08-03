@@ -126,7 +126,7 @@ class CupGuiGroup : public Fl_Group {
 	char ValueLabelBuffer[CUPS_NUMBER][VALUES_PER_DISC][64];
 	char StatusText[800];
 	Fl_Box *TitleTextBoxPtr;
-	Fl_Box *LockoutBackgroundPtr;
+	Fl_Box *BackgroundPtr;
 	TripleDiscWidgetWithNoSlit *TripleDisc;
 	Fl_Box *CupValueLabelPtr[VALUES_PER_DISC];
 	ImageWidget *PadlockImagePtr;
@@ -142,8 +142,7 @@ class CupGuiGroup : public Fl_Group {
 	void redrawTripleDisc();
 	void redrawLabelsValues();
 	void redrawSwitchErrorLabel();
-	void redrawLockoutIndicator();
-	void redrawTransmissionErrorIdicator();
+	void redrawIndicatorsOfErrorsOrLockout();
 	void redrawStatusLabel();
 	void redrawButton();
 
@@ -355,10 +354,10 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 	memset(ValueLabelBuffer, 0, sizeof(ValueLabelBuffer));
 	memset(StatusText, 0, sizeof(StatusText));
 
-	LockoutBackgroundPtr = new Fl_Box(X, Y, MAIN_WINDOW_WIDTH, DISC_SPACE_Y, nullptr);
-	LockoutBackgroundPtr->box(FL_FLAT_BOX);
-	LockoutBackgroundPtr->color(fl_rgb_color(0xDF, 0xB9, 0x72));
-	LockoutBackgroundPtr->hide();
+	BackgroundPtr = new Fl_Box(X, Y, MAIN_WINDOW_WIDTH, DISC_SPACE_Y, nullptr);
+	BackgroundPtr->box(FL_FLAT_BOX);
+	BackgroundPtr->color(fl_rgb_color(0xDF, 0xB9, 0x72));
+	BackgroundPtr->hide();
 
 	TitleTextBoxPtr = new Fl_Box(X + 0, Y+10, 400, 20, "Tytuł");
 	TitleTextBoxPtr->labelfont(ORDINARY_TEXT_FONT);
@@ -396,7 +395,6 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 	UnconnectedTextBoxPtr->hide();
 	UnconnectedTextBoxPtr->labelfont(FL_HELVETICA_BOLD);
 	UnconnectedTextBoxPtr->labelsize(16);
-	UnconnectedTextBoxPtr->color(FL_YELLOW);
 	UnconnectedTextBoxPtr->box(FL_FLAT_BOX);
 	UnconnectedTextBoxPtr->labelcolor(COLOR_DARK_RED);
 	UnconnectedTextBoxPtr->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
@@ -518,51 +516,44 @@ void CupGuiGroup::redrawSwitchErrorLabel() {
 	}
 }
 
-void CupGuiGroup::redrawLockoutIndicator() {
-	const bool IsBlocked = atomic_load_explicit(&ModbusCoilsReadout[getIndexForBlockage()], std::memory_order_acquire);
-	const bool ShowLockout = isTransmissionCorrect() && IsBlocked;
-	const bool ShowLockoutBackground = ShowLockout && (CupId == (CUPS_NUMBER / 2));
-
-	if (ShowLockout) {
-		if (0 == PadlockImagePtr->visible()) {
-			PadlockImagePtr->show();
-			LockoutTextBoxPtr->show();
-		}
-	}
-	else {
+void CupGuiGroup::redrawIndicatorsOfErrorsOrLockout() {
+	if (!isTransmissionCorrect()) {
 		if (0 != PadlockImagePtr->visible()) {
 			PadlockImagePtr->hide();
 			LockoutTextBoxPtr->hide();
 		}
-	}
-
-	if (ShowLockoutBackground) {
-		if (0 == LockoutBackgroundPtr->visible()) {
-			LockoutBackgroundPtr->show();
-		}
-	}
-	else {
-		if (0 != LockoutBackgroundPtr->visible()) {
-			LockoutBackgroundPtr->hide();
-		}
-	}
-
-	// if (CupId == 0) {
-	// 	LockoutBackgroundPtr->color(fl_rgb_color(0xDF, 0x99, 0x72));
-	// }
-	// if (CupId == 2) {
-	// 	LockoutBackgroundPtr->color(FL_YELLOW);
-	// }
-}
-
-void CupGuiGroup::redrawTransmissionErrorIdicator() {
-	if (isTransmissionCorrect()) {
-		UnconnectedImagePtr->hide();
-		UnconnectedTextBoxPtr->hide();
-	}
-	else {
 		UnconnectedImagePtr->show();
 		UnconnectedTextBoxPtr->show();
+		if (0 == BackgroundPtr->visible()) {
+			BackgroundPtr->show();
+		}
+		BackgroundPtr->color(FL_YELLOW);
+	}
+	else {
+		UnconnectedImagePtr->hide();
+		UnconnectedTextBoxPtr->hide();
+
+		const bool IsBlocked = atomic_load_explicit(&ModbusCoilsReadout[getIndexForBlockage()], std::memory_order_acquire);
+
+		if (IsBlocked) {
+			if (0 == PadlockImagePtr->visible()) {
+				PadlockImagePtr->show();
+				LockoutTextBoxPtr->show();
+			}
+			if (0 == BackgroundPtr->visible()) {
+				BackgroundPtr->show();
+			}
+			BackgroundPtr->color(fl_rgb_color(0xDF, 0xB9, 0x72));
+		}
+		else {
+			if (0 != PadlockImagePtr->visible()) {
+				PadlockImagePtr->hide();
+				LockoutTextBoxPtr->hide();
+			}
+			if (0 != BackgroundPtr->visible()) {
+				BackgroundPtr->hide();
+			}
+		}
 	}
 }
 
@@ -663,8 +654,7 @@ void CupGuiGroup::refreshData() {
 	redrawTripleDisc();
 	redrawLabelsValues();
 	redrawSwitchErrorLabel();
-	redrawLockoutIndicator();
-	redrawTransmissionErrorIdicator();
+	redrawIndicatorsOfErrorsOrLockout();
 	redrawStatusLabel();
 	redrawButton();
 }
