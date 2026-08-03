@@ -126,6 +126,7 @@ class CupGuiGroup : public Fl_Group {
 	char ValueLabelBuffer[CUPS_NUMBER][VALUES_PER_DISC][64];
 	char StatusText[800];
 	Fl_Box *TitleTextBoxPtr;
+	Fl_Box *LockoutBackgroundPtr;
 	TripleDiscWidgetWithNoSlit *TripleDisc;
 	Fl_Box *CupValueLabelPtr[VALUES_PER_DISC];
 	ImageWidget *PadlockImagePtr;
@@ -354,6 +355,11 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 	memset(ValueLabelBuffer, 0, sizeof(ValueLabelBuffer));
 	memset(StatusText, 0, sizeof(StatusText));
 
+	LockoutBackgroundPtr = new Fl_Box(X, Y, MAIN_WINDOW_WIDTH, DISC_SPACE_Y - 8, nullptr);
+	LockoutBackgroundPtr->box(FL_FLAT_BOX);
+	LockoutBackgroundPtr->color(fl_rgb_color(0xDF, 0xD3, 0x72));
+	LockoutBackgroundPtr->hide();
+
 	TitleTextBoxPtr = new Fl_Box(X + 0, Y, 400, 20, "Tytuł");
 	TitleTextBoxPtr->labelfont(ORDINARY_TEXT_FONT);
 	TitleTextBoxPtr->labelsize(ORDINARY_TEXT_SIZE);
@@ -513,7 +519,11 @@ void CupGuiGroup::redrawSwitchErrorLabel() {
 }
 
 void CupGuiGroup::redrawLockoutIndicator() {
-	if (isTransmissionCorrect() && atomic_load_explicit(&ModbusCoilsReadout[getIndexForBlockage()], std::memory_order_acquire)) {
+	const bool IsBlocked = atomic_load_explicit(&ModbusCoilsReadout[getIndexForBlockage()], std::memory_order_acquire);
+	const bool ShowLockout = isTransmissionCorrect() && IsBlocked;
+	const bool ShowLockoutBackground = ShowLockout && (CupId == (CUPS_NUMBER / 2));
+
+	if (ShowLockout) {
 		if (0 == PadlockImagePtr->visible()) {
 			PadlockImagePtr->show();
 			LockoutTextBoxPtr->show();
@@ -523,6 +533,17 @@ void CupGuiGroup::redrawLockoutIndicator() {
 		if (0 != PadlockImagePtr->visible()) {
 			PadlockImagePtr->hide();
 			LockoutTextBoxPtr->hide();
+		}
+	}
+
+	if (ShowLockoutBackground) {
+		if (0 == LockoutBackgroundPtr->visible()) {
+			LockoutBackgroundPtr->show();
+		}
+	}
+	else {
+		if (0 != LockoutBackgroundPtr->visible()) {
+			LockoutBackgroundPtr->hide();
 		}
 	}
 }
