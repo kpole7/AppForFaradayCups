@@ -163,36 +163,39 @@ static CupGuiGroup *CupGroupPtr[CUPS_NUMBER];
 
 static Fl_Box *FailureMessagePtr;
 
+static Fl_Color ColorDirtyYellow = fl_rgb_color(0xEA, 0xEA, 0x00);
+static Fl_Color ColorDirtyOrange = fl_rgb_color(0xE2, 0xAE, 0x4B);
+
 const char *PneumaticFsmStateMnemonics[] = {
-    "Boot",
-    "|< o",
-    " > o",
-    "  >o",
-    " < o",
-    "Udef"
+    "Boot ",
+    " Out ",
+    "GoIn ",
+    " In  ",
+    "GoOut",
+    "Undef"
 };
 const char *PneumaticWithLockFsmStateMnemonics[] = {
-    "Boot",
-    "|< o",
-    " > o",
-    "  >o",
-    " < o",
-    "P Lk",
-    "Lock",
-    "P UL",
-    "Udef"
+    "Boot ",
+    " Out ",
+    "GoIn ",
+    " In  ",
+    "GoOut",
+    "P Lck",
+    "Lock ",
+    "P UnL",
+    "Undef"
 };
 const char *MotorFsmStateMnemonics[] = {
-    "Boot",
-    "  >o",
-    " < o",
-    "P< o",
-    "B< o",
-    "|< o",
-    " > o",
-    "  >P",
-    "  >B",
-    "Udef"
+    "Boot ",
+    " In  ",
+    "GoOut",
+    "P Out",
+    "B Out",
+    " Out ",
+    "GoIn ",
+    "P In ",
+    "B In ",
+    "Undef"
 };
 #define PNEUMATIC_FSM_STATE_MNEMONICS_COUNT (sizeof(PneumaticFsmStateMnemonics) / sizeof(PneumaticFsmStateMnemonics[0]))
 #define PNEUMATIC_WITH_LOCK_FSM_STATE_MNEMONICS_COUNT (sizeof(PneumaticWithLockFsmStateMnemonics) / sizeof(PneumaticWithLockFsmStateMnemonics[0]))
@@ -356,7 +359,7 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 
 	BackgroundPtr = new Fl_Box(X, Y, MAIN_WINDOW_WIDTH, DISC_SPACE_Y, nullptr);
 	BackgroundPtr->box(FL_FLAT_BOX);
-	BackgroundPtr->color(fl_rgb_color(0xDF, 0xB9, 0x72));
+	BackgroundPtr->color(ColorDirtyOrange);
 	BackgroundPtr->hide();
 
 	TitleTextBoxPtr = new Fl_Box(X + 0, Y+10, 400, 20, "Tytuł");
@@ -396,6 +399,7 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 	UnconnectedTextBoxPtr->labelfont(FL_HELVETICA_BOLD);
 	UnconnectedTextBoxPtr->labelsize(16);
 	UnconnectedTextBoxPtr->box(FL_FLAT_BOX);
+	UnconnectedTextBoxPtr->color(ColorDirtyYellow);
 	UnconnectedTextBoxPtr->labelcolor(COLOR_DARK_RED);
 	UnconnectedTextBoxPtr->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
@@ -527,7 +531,7 @@ void CupGuiGroup::redrawIndicatorsOfErrorsOrLockout() {
 		if (0 == BackgroundPtr->visible()) {
 			BackgroundPtr->show();
 		}
-		BackgroundPtr->color(FL_YELLOW);
+		BackgroundPtr->color(ColorDirtyYellow);
 	}
 	else {
 		UnconnectedImagePtr->hide();
@@ -543,7 +547,7 @@ void CupGuiGroup::redrawIndicatorsOfErrorsOrLockout() {
 			if (0 == BackgroundPtr->visible()) {
 				BackgroundPtr->show();
 			}
-			BackgroundPtr->color(fl_rgb_color(0xDF, 0xB9, 0x72));
+			BackgroundPtr->color(ColorDirtyOrange);
 		}
 		else {
 			if (0 != PadlockImagePtr->visible()) {
