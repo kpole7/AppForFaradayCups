@@ -136,7 +136,7 @@ FailureCodes readSlaveTimeStamp() {
 		!std::islower(static_cast<unsigned char>(TimeStampText[1])) ||
 		!std::islower(static_cast<unsigned char>(TimeStampText[2])) ||
 		(TimeStampText[3] != ' ') || 
-		!std::isdigit(static_cast<unsigned char>(TimeStampText[4])) ||
+		(!std::isdigit(static_cast<unsigned char>(TimeStampText[4])) && (TimeStampText[4] != ' ')) ||
 		!std::isdigit(static_cast<unsigned char>(TimeStampText[5])) ||
 		(TimeStampText[6] != ' ') || 
 		!std::isdigit(static_cast<unsigned char>(TimeStampText[7])) ||
