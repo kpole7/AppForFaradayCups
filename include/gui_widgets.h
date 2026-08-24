@@ -31,6 +31,8 @@
 
 void initializeGraphicWidgets();
 
+Fl_Widget *getScrollableCupsAreaWidget();
+
 void refreshGui(void *Data);
 
 void permanentErrorGuiUpdate(void *Data);

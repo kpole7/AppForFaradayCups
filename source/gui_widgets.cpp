@@ -10,6 +10,7 @@
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Group.H>
 #include <FL/Fl_PNG_Image.H>
+#include <FL/Fl_Scroll.H>
 #include <FL/Fl_Widget.H>
 
 #include "gui_widgets.h"
@@ -161,6 +162,8 @@ static Fl_Box *GeneralStatusTextBoxPtr;
 
 static CupGuiGroup *CupGroupPtr[CUPS_NUMBER];
 
+static Fl_Scroll *CupsScrollAreaPtr;
+
 static Fl_Box *FailureMessagePtr;
 
 static Fl_Color ColorDirtyYellow = fl_rgb_color(0xEA, 0xEA, 0x00);
@@ -233,6 +236,11 @@ void initializeGraphicWidgets() {
 	GeneralStatusTextBoxPtr->box(FL_FLAT_BOX);
 #endif
 
+	// The scroll area lets the window shrink below the height needed to show all cups at once
+	int ScrollAreaHeight = DISC_SPACE_Y * NumberOfFaradayCupsToBeOperated;
+	CupsScrollAreaPtr = new Fl_Scroll(0, MAIN_MENU_HEIGHT, MAIN_WINDOW_WIDTH, ScrollAreaHeight);
+	CupsScrollAreaPtr->type(Fl_Scroll::VERTICAL);
+	CupsScrollAreaPtr->begin();
 	for (int J = 0; J < CUPS_NUMBER; J++) {
 		CupGroupPtr[J] = new CupGuiGroup(0, MAIN_MENU_HEIGHT + (CUPS_NUMBER-1-J) * DISC_SPACE_Y, MAIN_WINDOW_WIDTH, DISC_SPACE_Y);
 		CupGroupPtr[J]->configure(J);
@@ -240,6 +248,11 @@ void initializeGraphicWidgets() {
 			CupGroupPtr[J]->hide();
 		}
 	}
+	CupsScrollAreaPtr->end();
+}
+
+Fl_Widget *getScrollableCupsAreaWidget() {
+	return CupsScrollAreaPtr;
 }
 
 /// This function draws a single disc including rings and a circle in the middle (no texts)

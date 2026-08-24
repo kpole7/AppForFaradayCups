@@ -94,11 +94,14 @@ int main(int argc, char **argv) {
 	if (CUPS_NUMBER < NumberOfFaradayCupsToBeOperated) {
 		NumberOfFaradayCupsToBeOperated = CUPS_NUMBER;
 	}
+	int MainWindowHeight = MAIN_MENU_HEIGHT + DISC_SPACE_Y * NumberOfFaradayCupsToBeOperated;
 	ApplicationWindow =
-	    new WindowEscProof(MAIN_WINDOW_WIDTH, NumberOfFaradayCupsToBeOperated * DISC_SPACE_Y + MAIN_MENU_HEIGHT - SEPARATOR_HEIGHT, "Pomiar Wiązki w Linii Iniekcyjnej");
+	    new WindowEscProof(MAIN_WINDOW_WIDTH, MainWindowHeight, "Pomiar Wiązki w Linii Iniekcyjnej");
 	ApplicationWindow->begin();
 	ApplicationWindow->color(COLOR_BACKGROUND);
 	ApplicationWindow->callback(onMainWindowCloseCallback); // Window close event is handled
+	// Allow shrinking the window height down to half, showing a scrollbar for the cups that no longer fit
+	ApplicationWindow->size_range(MAIN_WINDOW_WIDTH, MainWindowHeight / 2, MAIN_WINDOW_WIDTH, MainWindowHeight);
 
 	// Menu
 	Fl_Menu_Bar MenuWidget(0, 0, MAIN_WINDOW_WIDTH, MAIN_MENU_HEIGHT);
@@ -118,6 +121,7 @@ int main(int argc, char **argv) {
 
 	if (FailureCodes::NO_FAILURE == ErrorCode) {
 		initializeGraphicWidgets();
+		ApplicationWindow->resizable(getScrollableCupsAreaWidget());
 	}
 	else {
 		showFailureMessageWidget(ErrorCode);
