@@ -42,7 +42,7 @@
 #define COLOR_DARK_RED 0x50
 #define COLOR_GRAY_RED 0x54
 #define NORMAL_BUTTON_COLOR 0x75
-#define SEPARATOR_COLOR 0x30
+#define SEPARATOR_COLOR 0x28
 #define COLOR_BLACK 0x00
 
 //.................................................................................................
@@ -432,7 +432,7 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 	StatusTextBoxPtr->labelcolor(FL_BLACK);
 	StatusTextBoxPtr->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
-	SeparatorPtr = new Fl_Box(X, Y + DISC_SPACE_Y - 4, MAIN_WINDOW_WIDTH, SEPARATOR_HEIGHT, nullptr);
+	SeparatorPtr = new Fl_Box(X, Y, MAIN_WINDOW_WIDTH, SEPARATOR_HEIGHT, nullptr);
 	SeparatorPtr->box(FL_FLAT_BOX);
 	SeparatorPtr->color(SEPARATOR_COLOR);
 
