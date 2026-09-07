@@ -42,7 +42,7 @@
 #define COLOR_DARK_RED 0x50
 #define COLOR_GRAY_RED 0x54
 #define NORMAL_BUTTON_COLOR 0x75
-#define SEPARATOR_COLOR 0x28
+#define SEPARATOR_COLOR 0x2A
 #define COLOR_BLACK 0x00
 
 //.................................................................................................
@@ -710,11 +710,17 @@ void showFailureMessageWidget(FailureCodes FailureCodeForGui) {
 		getErrorDescription(FailureCodeForGui));
 	FailureMessagePtr->label(Buffer);
 	FailureMessagePtr->show();
+	if (VerboseMode) {
+		std::cout << "--------------------------------------GUI FAILURE MESSAGE--------------------------------------" << '\n';
+		std::cout << Buffer << '\n';
+		std::cout << "-----------------------------------------------------------------------------------------------" << '\n';
+	}
 }
 
 void permanentErrorGuiUpdate(void *Data){
 	(void)Data; // intentionally unused
 
+	CupsScrollAreaPtr->hide();
 	CupGroupPtr[0]->hide();
 	CupGroupPtr[1]->hide();
 	CupGroupPtr[2]->hide();
