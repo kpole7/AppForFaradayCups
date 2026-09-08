@@ -27,8 +27,8 @@
 
 #define DISC2_RADIUS 85 // assume disc1 radius = 128
 #define DISC3_RADIUS 40
-#define DISC_VALUE1_Y -10
-#define DISC_VALUE2_Y 40
+#define DISC_VALUE1_Y -5
+#define DISC_VALUE2_Y 45
 #define DISC_TEXTS_SPACE 10
 #define DISC_SLIT_WIDTH 8
 
@@ -388,7 +388,7 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 	TripleDisc->hide();
 
 	for (int J = 0; J < VALUES_PER_DISC; J++) {
-		CupValueLabelPtr[J] = new Fl_Box(X + 20, Y + DISC_VALUE1_Y + (VALUES_PER_DISC-J-2) * (DISC_VALUE2_Y - DISC_VALUE1_Y), 256, 30, "?");
+		CupValueLabelPtr[J] = new Fl_Box(X + 20, Y + DISC_VALUE1_Y + (VALUES_PER_DISC-J-1) * (DISC_VALUE2_Y - DISC_VALUE1_Y), 256, 30, "?");
 		CupValueLabelPtr[J]->labelfont(FL_HELVETICA_BOLD);
 		CupValueLabelPtr[J]->labelsize(26);
 		CupValueLabelPtr[J]->hide();
