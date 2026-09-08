@@ -28,7 +28,7 @@
 
 #define TRANSMISSION_CORRECTNESS_LIMIT ((LOW_LEVEL_CONTINUOUS_COUNTING_MAX * 9) / 10) // 90%
 
-#define MODBUS_RUNUP_REPEATS_LIMIT 5
+#define MODBUS_RUNUP_REPEATS_LIMIT 15
 
 //...............................................................................................
 // Types definitions
