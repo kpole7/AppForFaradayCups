@@ -17,6 +17,8 @@
 
 #define MODBUS_RESPONSE_TIMEOUT 50 // milliseconds
 
+#define NEGLIGIBLE_CURRENT 0.2 // microamperes
+
 // Attention: compare with getErrorDescription()
 enum class FailureCodes {
 	NO_FAILURE,

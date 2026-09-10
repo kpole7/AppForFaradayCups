@@ -489,10 +489,22 @@ void CupGuiGroup::redrawLabelsValues() {
 				}
 				if (!AnyErrorInFrontOfCup) {
 					double TemporaryFloatingPoint = 0.01 * (double)TemporaryValue;
-					std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "%.1fμA", TemporaryFloatingPoint);
-					if (strcmp(ValueLabelBuffer[CupId][J], "-0.0μA") == 0) {
-						std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "0.0μA");
+
+#if 0					
+					// Final correction.
+					// A very small input current is displayed as zero current.
+					// Calculation formula:
+					// displayed_value = 1.5 * measured_value - 1.5 * NEGLIGIBLE_CURRENT 
+					// for measured values < 3 * NEGLIGIBLE_CURRENT
+					// NEGLIGIBLE_CURRENT is in microamperes
+					if (TemporaryFloatingPoint < 3 * NEGLIGIBLE_CURRENT){
+						TemporaryFloatingPoint = 1.5 * TemporaryFloatingPoint - 1.5 * NEGLIGIBLE_CURRENT;
 					}
+#endif
+					if (TemporaryFloatingPoint < NEGLIGIBLE_CURRENT){
+						TemporaryFloatingPoint = 0.0;
+					}
+					std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "%.1fμA", TemporaryFloatingPoint);
 				}
 			}
 			else {
