@@ -18,6 +18,7 @@
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Double_Window.H> // to eliminate flickering
 #include <FL/Fl_Menu_Bar.H>
+#include <FL/Fl_PNG_Image.H>
 #include <FL/Fl_Window.H>
 #include <FL/fl_ask.H>
 
@@ -100,6 +101,14 @@ int main(int argc, char **argv) {
 	ApplicationWindow->begin();
 	ApplicationWindow->color(COLOR_BACKGROUND);
 	ApplicationWindow->callback(onMainWindowCloseCallback); // Window close event is handled
+	const std::string WindowIconPath = ThisApplicationDirectory + "/AppForFaradayCups.png";
+	Fl_PNG_Image *WindowIcon = new Fl_PNG_Image(WindowIconPath.c_str());
+	if ((nullptr != WindowIcon) && (nullptr != WindowIcon->data()) && (WindowIcon->w() > 0) && (WindowIcon->h() > 0)) {
+		ApplicationWindow->icon(WindowIcon);
+	}
+	else {
+		delete WindowIcon;
+	}
 	// Allow shrinking the window height down to half, showing a scrollbar for the cups that no longer fit
 	ApplicationWindow->size_range(MAIN_WINDOW_WIDTH, MainWindowHeight / 2, MAIN_WINDOW_WIDTH, MainWindowHeight);
 
