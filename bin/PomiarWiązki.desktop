@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=PomiarWiązki
+Comment=Program do pomiaru wiązki (kubki Faradaya)
+Exec=/home/krzysztof/work/AppForFaradayCups/bin/PomiarWiązki
+Icon=/home/krzysztof/work/AppForFaradayCups/bin/PomiarWiązki.svg
+Terminal=false
+Categories=Science;Utility;
