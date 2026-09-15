@@ -66,6 +66,9 @@ add_custom_command(TARGET appForFaradayCups POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
           "${CMAKE_CURRENT_SOURCE_DIR}/doc/AppForFaradayCups.png"
           "$<TARGET_FILE_DIR:appForFaradayCups>/AppForFaradayCups.png"
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+          "${CMAKE_CURRENT_SOURCE_DIR}/doc/AppForFaradayCups.svg"
+          "$<TARGET_FILE_DIR:appForFaradayCups>/AppForFaradayCups.svg"
   COMMENT "Copying runtime resources to build output directory"
 )
 

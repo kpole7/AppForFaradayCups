@@ -1,2 +1,0 @@
-cp "PomiarWiązki.cfg" build 
-
