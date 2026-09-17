@@ -34,7 +34,7 @@
 
 #define ORDINARY_TEXT_FONT FL_HELVETICA
 #define ORDINARY_TEXT_SIZE 14
-#define DEBUGGING_TEXT_SIZE 11
+#define DEBUGGING_TEXT_SIZE 10
 
 #define COLOR_STRONGER_BLUE 0xE5
 #define COLOR_MEDIUM_BLUE 0xEE
@@ -612,6 +612,10 @@ void CupGuiGroup::redrawStatusLabel() {
 	StatusTextBoxPtr->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 	if (StatusTextBoxPtr->labelsize() != DEBUGGING_TEXT_SIZE) {
 		StatusTextBoxPtr->labelsize(DEBUGGING_TEXT_SIZE);
+#if 0 // debugging
+		StatusTextBoxPtr->color(FL_YELLOW);
+		StatusTextBoxPtr->box(FL_FLAT_BOX);
+#endif
 	}
 	char FourthCoil = ' ';
 	if (getConfigurationRegisterValue(MODBUS_ADDR_CUP1_TYPE+CupId) == MOTORIZED_CUP_TYPE) {
