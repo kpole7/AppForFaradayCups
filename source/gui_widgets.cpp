@@ -28,13 +28,13 @@
 #define DISC2_RADIUS 85 // assume disc1 radius = 128
 #define DISC3_RADIUS 40
 #define DISC_VALUE1_Y -5
-#define DISC_VALUE2_Y 45
+#define DISC_VALUE2_Y 30
 #define DISC_TEXTS_SPACE 10
 #define DISC_SLIT_WIDTH 8
 
 #define ORDINARY_TEXT_FONT FL_HELVETICA
-#define ORDINARY_TEXT_SIZE 14
-#define DEBUGGING_TEXT_SIZE 10
+#define ORDINARY_TEXT_SIZE 12
+#define DEBUGGING_TEXT_SIZE 8
 
 #define COLOR_STRONGER_BLUE 0xE5
 #define COLOR_MEDIUM_BLUE 0xEE
@@ -226,7 +226,7 @@ void initializeGraphicWidgets() {
 		CupInsertionOrRemovalStartTime[J] = NowTemporary;
 	}
 
-	GeneralStatusTextBoxPtr = new Fl_Box(300, 1, 210, 27, "Tu powinny być różne dane");
+	GeneralStatusTextBoxPtr = new Fl_Box(300, 1, 210, 20, "Tu powinny być różne dane");
 	GeneralStatusTextBoxPtr->labelfont(FL_COURIER);
 	GeneralStatusTextBoxPtr->labelsize(DEBUGGING_TEXT_SIZE);
 	GeneralStatusTextBoxPtr->labelcolor(FL_BLACK);
@@ -353,9 +353,9 @@ OnErrorGroup::OnErrorGroup(int X, int Y, int W, int H, const char *L) : Fl_Group
 	this->begin();
 	this->box(FL_NO_BOX);
 
-	ErrorTextBoxPtr = new Fl_Box(X + 16, Y + 34, W - 32, H - 66, "Błąd krańcówki");
+	ErrorTextBoxPtr = new Fl_Box(X + 16, Y + 25, W - 32, H - 48, "Błąd krańcówki");
 	ErrorTextBoxPtr->labelfont(FL_HELVETICA_BOLD);
-	ErrorTextBoxPtr->labelsize(16);
+	ErrorTextBoxPtr->labelsize(12);
 	ErrorTextBoxPtr->labelcolor(COLOR_BLACK);
 	ErrorTextBoxPtr->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 	ErrorTextBoxPtr->box(FL_NO_BOX);
@@ -375,7 +375,7 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 	BackgroundPtr->color(ColorDirtyOrange);
 	BackgroundPtr->hide();
 
-	TitleTextBoxPtr = new Fl_Box(X + 0, Y+10, 400, 20, "Tytuł");
+	TitleTextBoxPtr = new Fl_Box(X + 0, Y+10, 400, 15, "Tytuł");
 	TitleTextBoxPtr->labelfont(ORDINARY_TEXT_FONT);
 	TitleTextBoxPtr->labelsize(ORDINARY_TEXT_SIZE);
 #if 0
@@ -384,20 +384,20 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 #endif
 	TitleTextBoxPtr->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
-	TripleDisc = new TripleDiscWidgetWithNoSlit(X + 20, Y + 40, 256, 256);
+	TripleDisc = new TripleDiscWidgetWithNoSlit(X + 20, Y + 29, 186, 186); // (X + 20, Y + 40, 256, 256);
 	TripleDisc->hide();
 
 	for (int J = 0; J < VALUES_PER_DISC; J++) {
-		CupValueLabelPtr[J] = new Fl_Box(X + 20, Y + DISC_VALUE1_Y + (VALUES_PER_DISC-J-1) * (DISC_VALUE2_Y - DISC_VALUE1_Y), 256, 30, "?");
+		CupValueLabelPtr[J] = new Fl_Box(X + 17, Y + DISC_VALUE1_Y + (VALUES_PER_DISC-J-1) * (DISC_VALUE2_Y - DISC_VALUE1_Y), 192, 30, "?");
 		CupValueLabelPtr[J]->labelfont(FL_HELVETICA_BOLD);
-		CupValueLabelPtr[J]->labelsize(26);
+		CupValueLabelPtr[J]->labelsize(19);
 		CupValueLabelPtr[J]->hide();
 	}
 
 	PadlockImagePtr = new ImageWidget(X + 380, Y + 30, 54, 54, padlock_png, padlock_png_len, nullptr);
 	PadlockImagePtr->hide();
 
-	UnconnectedImagePtr = new ImageWidget(X + 380, Y + 60, 51, 51, unconnected_png, unconnected_png_len, nullptr);
+	UnconnectedImagePtr = new ImageWidget(X + 380, Y + 30, 51, 51, unconnected_png, unconnected_png_len, nullptr);
 	UnconnectedImagePtr->hide();
 
 	LockoutTextBoxPtr = new Fl_Box(X + 340, Y + 90, 150, 25, "Blokada Aktywna");
@@ -407,7 +407,7 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 	LockoutTextBoxPtr->labelcolor(COLOR_DARK_RED);
 	LockoutTextBoxPtr->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
-	UnconnectedTextBoxPtr = new Fl_Box(X + 330, Y + 112, 150, 45, "Błąd Modbus:\nBrak Połączenia");
+	UnconnectedTextBoxPtr = new Fl_Box(X + 330, Y + 82, 150, 40, "Błąd Modbus:\nBrak Połączenia");
 	UnconnectedTextBoxPtr->hide();
 	UnconnectedTextBoxPtr->labelfont(FL_HELVETICA_BOLD);
 	UnconnectedTextBoxPtr->labelsize(16);
@@ -416,17 +416,17 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 	UnconnectedTextBoxPtr->labelcolor(COLOR_DARK_RED);
 	UnconnectedTextBoxPtr->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
-	OnErrorGroupPtr = new OnErrorGroup(X + 60, Y + 80, 220, 135);
+	OnErrorGroupPtr = new OnErrorGroup(X + 60, Y + 60, 220, 105);
 	OnErrorGroupPtr->hide();
 
-	CupInsertionButtonPtr = new Fl_Button(X + 360, Y + 190, 90, 40, " ");
+	CupInsertionButtonPtr = new Fl_Button(X + 360, Y + 138, 70, 30, " ");
 	CupInsertionButtonPtr->box(FL_BORDER_BOX);
 	CupInsertionButtonPtr->color(NORMAL_BUTTON_COLOR);
 	CupInsertionButtonPtr->labelfont(ORDINARY_TEXT_FONT);
 	CupInsertionButtonPtr->labelsize(ORDINARY_TEXT_SIZE);
 	CupInsertionButtonPtr->callback(cupInsertionButtonCallback, nullptr);
 
-	StatusTextBoxPtr = new Fl_Box(X + 300, Y + 230, 210, 60, " ");
+	StatusTextBoxPtr = new Fl_Box(X + 300, Y + 168, 210, 45, " ");
 	StatusTextBoxPtr->labelfont(FL_COURIER);
 	StatusTextBoxPtr->labelsize(ORDINARY_TEXT_SIZE);
 	StatusTextBoxPtr->labelcolor(FL_BLACK);
@@ -508,7 +508,7 @@ void CupGuiGroup::redrawLabelsValues() {
 				}
 			}
 			else {
-				std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "----");
+				std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "0");
 			}
 			ValueLabelBuffer[CupId][J][sizeof(ValueLabelBuffer[CupId][J]) - 1] = '\0';
 

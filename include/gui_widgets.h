@@ -19,9 +19,9 @@
 //.................................................................................................
 
 #define MAIN_WINDOW_WIDTH 510
-#define DISC_SPACE_Y 310
-#define MAIN_MENU_HEIGHT 30
-#define SEPARATOR_HEIGHT 2
+#define DISC_SPACE_Y 226
+#define MAIN_MENU_HEIGHT 22
+#define SEPARATOR_HEIGHT 1
 
 #define COLOR_BACKGROUND 0x35
 

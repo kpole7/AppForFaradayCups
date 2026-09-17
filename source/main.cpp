@@ -123,6 +123,7 @@ int main(int argc, char **argv) {
 
 	Fl_Menu_Item *MenuItems = const_cast<Fl_Menu_Item *>(MenuWidget.menu());
 	MenuWidget.setonly(&MenuItems[indexOfMenuItemStatusNormal]);
+	MenuWidget.textsize(12);
 
 	StatusLevelForGui = DEFAULT_STATUS_LEVEL;
 
