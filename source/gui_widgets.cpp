@@ -27,9 +27,7 @@
 
 #define DISC2_RADIUS 85 // assume disc1 radius = 128
 #define DISC3_RADIUS 40
-#define DISC_VALUE1_Y -5
-#define DISC_VALUE2_Y 30
-#define DISC_TEXTS_SPACE 10
+#define DISC2_BIS_RADIUS 64
 #define DISC_SLIT_WIDTH 8
 
 #define ORDINARY_TEXT_FONT FL_HELVETICA
@@ -49,24 +47,16 @@
 // Definitions of types
 //.................................................................................................
 
-/// A disc consisting of a circle and two rings
-class TripleDiscWidgetWithNoSlit : public Fl_Widget {
-  public:
-	TripleDiscWidgetWithNoSlit(int X, int Y, int W, int H, const char *L = nullptr) : Fl_Widget(X, Y, W, H, L) {}
-	void draw() override;
-};
+typedef enum {
+    DISK_INNER_CIRCLE_AND_TWO_RINGS = 0,
+	DISK_INNER_CIRCLE_AND_TWO_VERTICAL_HALF_RINGS
+} DiskShapesEnum;
 
-/// A disc consisting of a circle and two rings; the outer ring has a vertical slit
-class TripleDiscWidgetWithVerticalSlit : public Fl_Widget {
+/// A disk representing a Faraday cup
+class DiscWidgetForFaradayCup : public Fl_Widget {
   public:
-	TripleDiscWidgetWithVerticalSlit(int X, int Y, int W, int H, const char *L = nullptr) : Fl_Widget(X, Y, W, H, L) {}
-	void draw() override;
-};
-
-/// A disc consisting of a circle and two rings; the outer ring has a horizontal slit
-class TripleDiscWidgetWithHorizontalSlit : public Fl_Widget {
-  public:
-	TripleDiscWidgetWithHorizontalSlit(int X, int Y, int W, int H, const char *L = nullptr) : Fl_Widget(X, Y, W, H, L) {}
+    DiskShapesEnum Shape;
+	DiscWidgetForFaradayCup(int X, int Y, int W, int H, const char *L = nullptr) : Fl_Widget(X, Y, W, H, L) {}
 	void draw() override;
 };
 
@@ -128,7 +118,7 @@ class CupGuiGroup : public Fl_Group {
 	char StatusText[800];
 	Fl_Box *TitleTextBoxPtr;
 	Fl_Box *BackgroundPtr;
-	TripleDiscWidgetWithNoSlit *TripleDisc;
+	DiscWidgetForFaradayCup *PictureOfDisc;
 	Fl_Box *CupValueLabelPtr[VALUES_PER_DISC];
 	ImageWidget *PadlockImagePtr;
 	ImageWidget *UnconnectedImagePtr;
@@ -155,19 +145,11 @@ class CupGuiGroup : public Fl_Group {
 };
 
 //.................................................................................................
-// Local variables
+// Local constants
 //.................................................................................................
 
-static Fl_Box *GeneralStatusTextBoxPtr;
-
-static CupGuiGroup *CupGroupPtr[CUPS_NUMBER];
-
-static Fl_Scroll *CupsScrollAreaPtr;
-
-static Fl_Box *FailureMessagePtr;
-
-static Fl_Color ColorDirtyYellow = fl_rgb_color(0xEA, 0xEA, 0x00);
-static Fl_Color ColorDirtyOrange = fl_rgb_color(0xE2, 0xAE, 0x4B);
+static const int16_t LocationOfMeasuredValues[CUPS_NUMBER][VALUES_PER_DISC] = 
+	{{	105, 40, 170, -999	},{	105, 62, 30, -999	},{	105, 62, 30, -999	}};
 
 const char *PneumaticFsmStateMnemonics[] = {
     "Boot ",
@@ -177,7 +159,7 @@ const char *PneumaticFsmStateMnemonics[] = {
     "GoOut",
     "Undef"
 };
-const char *PneumaticWithLockFsmStateMnemonics[] = {
+static const char *PneumaticWithLockFsmStateMnemonics[] = {
     "Boot ",
     " Out ",
     "GoIn ",
@@ -188,7 +170,7 @@ const char *PneumaticWithLockFsmStateMnemonics[] = {
     "P UnL",
     "Undef"
 };
-const char *MotorFsmStateMnemonics[] = {
+static const char *MotorFsmStateMnemonics[] = {
     "Boot ",
     " In  ",
     "GoOut",
@@ -204,7 +186,20 @@ const char *MotorFsmStateMnemonics[] = {
 #define PNEUMATIC_WITH_LOCK_FSM_STATE_MNEMONICS_COUNT (sizeof(PneumaticWithLockFsmStateMnemonics) / sizeof(PneumaticWithLockFsmStateMnemonics[0]))
 #define MOTOR_FSM_STATE_MNEMONICS_COUNT (sizeof(MotorFsmStateMnemonics) / sizeof(MotorFsmStateMnemonics[0]))
 
+static const Fl_Color ColorDirtyYellow = fl_rgb_color(0xEA, 0xEA, 0x00);
+static const Fl_Color ColorDirtyOrange = fl_rgb_color(0xE2, 0xAE, 0x4B);
 
+//.................................................................................................
+// Local variables
+//.................................................................................................
+
+static Fl_Box *GeneralStatusTextBoxPtr;
+
+static CupGuiGroup *CupGroupPtr[CUPS_NUMBER];
+
+static Fl_Scroll *CupsScrollAreaPtr;
+
+static Fl_Box *FailureMessagePtr;
 
 //.................................................................................................
 // Local function prototypes
@@ -258,46 +253,30 @@ Fl_Widget *getScrollableCupsAreaWidget() {
 }
 
 /// This function draws a single disc including rings and a circle in the middle (no texts)
-void TripleDiscWidgetWithNoSlit::draw() {
-	fl_color(COLOR_STRONGER_BLUE);
-	fl_pie(x(), y(), w(), h(), 0, 360); // outer ring
+void DiscWidgetForFaradayCup::draw() {
+	if (Shape == DISK_INNER_CIRCLE_AND_TWO_VERTICAL_HALF_RINGS) {
+		fl_color(COLOR_STRONGER_BLUE); //
+		fl_pie(x(), y(), w(), h(), 0, 360); // outer ring
 
-	fl_color(COLOR_MEDIUM_BLUE); // medium ring
-	fl_pie(x() + (w() * (128 - DISC2_RADIUS)) / 256, y() + (h() * (128 - DISC2_RADIUS)) / 256, (w() * 2 * DISC2_RADIUS) / 256,
-	       (h() * 2 * DISC2_RADIUS) / 256, 0, 360);
+		fl_color(fl_rgb_color(0xC0, 0xC0, 0xC0));
+		fl_rectf(x(), y() + (h() - DISC_SLIT_WIDTH) / 2, w(), DISC_SLIT_WIDTH);
 
-	fl_color(COLOR_WEAK_BLUE); // inner circle
-	fl_pie(x() + (w() * (128 - DISC3_RADIUS)) / 256, y() + (h() * (128 - DISC3_RADIUS)) / 256, (w() * 2 * DISC3_RADIUS) / 256,
-	       (h() * 2 * DISC3_RADIUS) / 256, 0, 360);
-}
+		fl_color(COLOR_WEAK_BLUE); // inner circle
+		fl_pie(x() + (w() * (128 - DISC2_BIS_RADIUS)) / 256, y() + (h() * (128 - DISC2_BIS_RADIUS)) / 256, (w() * 2 * DISC2_BIS_RADIUS) / 256,
+			(h() * 2 * DISC2_BIS_RADIUS) / 256, 0, 360);
+	}
+	else{
+		fl_color(COLOR_STRONGER_BLUE);
+		fl_pie(x(), y(), w(), h(), 0, 360); // outer ring
 
-void TripleDiscWidgetWithVerticalSlit::draw() {
-	fl_color(COLOR_STRONGER_BLUE);
-	fl_pie(x(), y(), w(), h(), 0, 360); // outer ring
+		fl_color(COLOR_MEDIUM_BLUE); // medium ring
+		fl_pie(x() + (w() * (128 - DISC2_RADIUS)) / 256, y() + (h() * (128 - DISC2_RADIUS)) / 256, (w() * 2 * DISC2_RADIUS) / 256,
+			(h() * 2 * DISC2_RADIUS) / 256, 0, 360);
 
-	fl_color(COLOR_BACKGROUND);
-	fl_rectf(x() + (w() - DISC_SLIT_WIDTH) / 2, y(), DISC_SLIT_WIDTH, h());
-
-	fl_color(COLOR_MEDIUM_BLUE); // medium ring
-	fl_pie(x() + (w() * (128 - DISC2_RADIUS)) / 256, y() + (h() * (128 - DISC2_RADIUS)) / 256, (w() * 2 * DISC2_RADIUS) / 256,
-	       (h() * 2 * DISC2_RADIUS) / 256, 0, 360);
-
-	fl_color(COLOR_WEAK_BLUE); // inner circle
-	fl_pie(x() + (w() * (128 - DISC3_RADIUS)) / 256, y() + (h() * (128 - DISC3_RADIUS)) / 256, (w() * 2 * DISC3_RADIUS) / 256,
-	       (h() * 2 * DISC3_RADIUS) / 256, 0, 360);
-}
-
-void TripleDiscWidgetWithHorizontalSlit::draw() {
-	fl_color(COLOR_STRONGER_BLUE);
-	fl_pie(x(), y(), w(), h(), 0, 360); // outer ring
-
-	fl_color(COLOR_MEDIUM_BLUE); // medium ring
-	fl_pie(x() + (w() * (128 - DISC2_RADIUS)) / 256, y() + (h() * (128 - DISC2_RADIUS)) / 256, (w() * 2 * DISC2_RADIUS) / 256,
-	       (h() * 2 * DISC2_RADIUS) / 256, 0, 360);
-
-	fl_color(COLOR_WEAK_BLUE); // inner circle
-	fl_pie(x() + (w() * (128 - DISC3_RADIUS)) / 256, y() + (h() * (128 - DISC3_RADIUS)) / 256, (w() * 2 * DISC3_RADIUS) / 256,
-	       (h() * 2 * DISC3_RADIUS) / 256, 0, 360);
+		fl_color(COLOR_WEAK_BLUE); // inner circle
+		fl_pie(x() + (w() * (128 - DISC3_RADIUS)) / 256, y() + (h() * (128 - DISC3_RADIUS)) / 256, (w() * 2 * DISC3_RADIUS) / 256,
+			(h() * 2 * DISC3_RADIUS) / 256, 0, 360);
+	}
 }
 
 static void cupInsertionButtonCallback(Fl_Widget *Widget, void *Data) {
@@ -384,11 +363,12 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 #endif
 	TitleTextBoxPtr->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
-	TripleDisc = new TripleDiscWidgetWithNoSlit(X + 20, Y + 29, 186, 186); // (X + 20, Y + 40, 256, 256);
-	TripleDisc->hide();
+	PictureOfDisc = new DiscWidgetForFaradayCup(X + 20, Y + 29, 186, 186); // (X + 20, Y + 40, 256, 256);
+	PictureOfDisc->hide();
+	PictureOfDisc->Shape = DISK_INNER_CIRCLE_AND_TWO_RINGS;
 
 	for (int J = 0; J < VALUES_PER_DISC; J++) {
-		CupValueLabelPtr[J] = new Fl_Box(X + 17, Y + DISC_VALUE1_Y + (VALUES_PER_DISC-J-1) * (DISC_VALUE2_Y - DISC_VALUE1_Y), 192, 30, "?");
+		CupValueLabelPtr[J] = new Fl_Box(X, Y, 192, 30, "?");
 		CupValueLabelPtr[J]->labelfont(FL_HELVETICA_BOLD);
 		CupValueLabelPtr[J]->labelsize(19);
 		CupValueLabelPtr[J]->hide();
@@ -445,6 +425,15 @@ void CupGuiGroup::configure(int IdValue) {
 	assert(IdValue < CUPS_NUMBER);
 	CupId = IdValue;
 	TitleTextBoxPtr->label(CupDescriptionPtr[CupId]);
+	if (0 == CupId){
+		PictureOfDisc->Shape = DISK_INNER_CIRCLE_AND_TWO_VERTICAL_HALF_RINGS;
+	}
+	else{
+		PictureOfDisc->Shape = DISK_INNER_CIRCLE_AND_TWO_RINGS;
+	}
+	for (int J = 0; J < VALUES_PER_DISC; J++) {
+		CupValueLabelPtr[J]->position(x() + 17, y() + LocationOfMeasuredValues[CupId][J]);
+	}
 }
 
 int CupGuiGroup::getCupId() const { return CupId; }
@@ -458,22 +447,22 @@ void CupGuiGroup::redrawTripleDisc() {
 	    atomic_load_explicit(&ModbusCoilsReadout[getIndexForSwitchPressed()], std::memory_order_acquire) &&
 	    (0 == atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_ERROR-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire))) 
 	{
-		if (0 == TripleDisc->visible()) {
-			TripleDisc->show();
+		if (0 == PictureOfDisc->visible()) {
+			PictureOfDisc->show();
 		}
 		else {
-			TripleDisc->redraw();
+			PictureOfDisc->redraw();
 		}
 	}
 	else {
-		if (0 != TripleDisc->visible()) {
-			TripleDisc->hide();
+		if (0 != PictureOfDisc->visible()) {
+			PictureOfDisc->hide();
 		}
 	}
 }
 
 void CupGuiGroup::redrawLabelsValues() {
-	if (0 != TripleDisc->visible()) {
+	if (0 != PictureOfDisc->visible()) {
 		for (int J = 0; J < VISIBLE_VALUES_PER_DISC; J++) {
 			int TemporaryRegisterIndex = CupId * VALUES_PER_DISC + J;
 			assert(TemporaryRegisterIndex < MODBUS_INPUT_REGISTERS_NUMBER);
