@@ -226,13 +226,15 @@ void initializeGraphicWidgets() {
 		CupInsertionOrRemovalStartTime[J] = NowTemporary;
 	}
 
-	GeneralStatusTextBoxPtr = new Fl_Box(300, 1, 210, 20, "Tu powinny być różne dane");
+	int GeneralStatusTextBoxPositionX = (MAIN_WINDOW_WIDTH*3)/7; 
+	GeneralStatusTextBoxPtr = new Fl_Box(GeneralStatusTextBoxPositionX, 1, 
+		MAIN_WINDOW_WIDTH - GeneralStatusTextBoxPositionX, 20, "Tu powinny być różne dane");
 	GeneralStatusTextBoxPtr->labelfont(FL_COURIER);
 	GeneralStatusTextBoxPtr->labelsize(DEBUGGING_TEXT_SIZE);
 	GeneralStatusTextBoxPtr->labelcolor(FL_BLACK);
 	GeneralStatusTextBoxPtr->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 #if 0 // debugging
-	GeneralStatusTextBoxPtr->color(FL_YELLOW);
+	GeneralStatusTextBoxPtr->color(FL_CYAN);
 	GeneralStatusTextBoxPtr->box(FL_FLAT_BOX);
 #endif
 
@@ -269,7 +271,6 @@ void TripleDiscWidgetWithNoSlit::draw() {
 	       (h() * 2 * DISC3_RADIUS) / 256, 0, 360);
 }
 
-#if 0
 void TripleDiscWidgetWithVerticalSlit::draw() {
 	fl_color(COLOR_STRONGER_BLUE);
 	fl_pie(x(), y(), w(), h(), 0, 360); // outer ring
@@ -298,7 +299,6 @@ void TripleDiscWidgetWithHorizontalSlit::draw() {
 	fl_pie(x() + (w() * (128 - DISC3_RADIUS)) / 256, y() + (h() * (128 - DISC3_RADIUS)) / 256, (w() * 2 * DISC3_RADIUS) / 256,
 	       (h() * 2 * DISC3_RADIUS) / 256, 0, 360);
 }
-#endif
 
 static void cupInsertionButtonCallback(Fl_Widget *Widget, void *Data) {
 	(void)Data; // intentionally unused
@@ -355,7 +355,7 @@ OnErrorGroup::OnErrorGroup(int X, int Y, int W, int H, const char *L) : Fl_Group
 
 	ErrorTextBoxPtr = new Fl_Box(X + 16, Y + 25, W - 32, H - 48, "Błąd krańcówki");
 	ErrorTextBoxPtr->labelfont(FL_HELVETICA_BOLD);
-	ErrorTextBoxPtr->labelsize(12);
+	ErrorTextBoxPtr->labelsize(16);
 	ErrorTextBoxPtr->labelcolor(COLOR_BLACK);
 	ErrorTextBoxPtr->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 	ErrorTextBoxPtr->box(FL_NO_BOX);
@@ -489,7 +489,6 @@ void CupGuiGroup::redrawLabelsValues() {
 				}
 				if (!AnyErrorInFrontOfCup) {
 					double TemporaryFloatingPoint = 0.01 * (double)TemporaryValue;
-
 #if 0					
 					// Final correction.
 					// A very small input current is displayed as zero current.
@@ -506,6 +505,10 @@ void CupGuiGroup::redrawLabelsValues() {
 					}
 					std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "%.1fμA", TemporaryFloatingPoint);
 				}
+				else {
+					std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "?");
+				}
+				ValueLabelBuffer[CupId][J][sizeof(ValueLabelBuffer[CupId][J]) - 1] = '\0';
 			}
 			else {
 				std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "0");
@@ -706,10 +709,12 @@ void refreshGui(void *Data) {
 		static char GeneralDescriptionText[800];
 		GeneralStatusTextBoxPtr->show();
 		snprintf(GeneralDescriptionText, sizeof(GeneralDescriptionText) - 1, 
-				 "Port %s\nModbus %s  Błąd %04X %04X", SerialPortRequestedNamePtr->c_str(),
+				 "Port %s\nModbus %s  Błąd %04X %04X  Aktywny %d  Ini. %d", SerialPortRequestedNamePtr->c_str(),
 		         getTransmissionQualityIndicatorTextForGui(),
 				 atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ERROR_CODE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire),
-				 atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ERROR_STORAGE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire) );
+				 atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ERROR_STORAGE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire),
+				 atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ACTIVE_CUP-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire),
+				 atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_SUCCESSFULL_INITIALIZATION-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire) );
 		GeneralStatusTextBoxPtr->label(GeneralDescriptionText);
 	}
 }
