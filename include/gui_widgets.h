@@ -18,7 +18,7 @@
 // Preprocessor directives
 //.................................................................................................
 
-#define MAIN_WINDOW_WIDTH 510
+#define MAIN_WINDOW_WIDTH 370
 #define DISC_SPACE_Y 226
 #define MAIN_MENU_HEIGHT 22
 #define SEPARATOR_HEIGHT 1

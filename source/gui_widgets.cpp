@@ -32,7 +32,6 @@
 
 #define ORDINARY_TEXT_FONT FL_HELVETICA
 #define ORDINARY_TEXT_SIZE 12
-#define DEBUGGING_TEXT_SIZE 8
 
 #define COLOR_STRONGER_BLUE 0xE5
 #define COLOR_MEDIUM_BLUE 0xEE
@@ -221,11 +220,11 @@ void initializeGraphicWidgets() {
 		CupInsertionOrRemovalStartTime[J] = NowTemporary;
 	}
 
-	int GeneralStatusTextBoxPositionX = (MAIN_WINDOW_WIDTH*3)/7; 
+	int GeneralStatusTextBoxPositionX = 130; 
 	GeneralStatusTextBoxPtr = new Fl_Box(GeneralStatusTextBoxPositionX, 1, 
 		MAIN_WINDOW_WIDTH - GeneralStatusTextBoxPositionX, 20, "Tu powinny być różne dane");
 	GeneralStatusTextBoxPtr->labelfont(FL_COURIER);
-	GeneralStatusTextBoxPtr->labelsize(DEBUGGING_TEXT_SIZE);
+	GeneralStatusTextBoxPtr->labelsize(8);
 	GeneralStatusTextBoxPtr->labelcolor(FL_BLACK);
 	GeneralStatusTextBoxPtr->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 #if 0 // debugging
@@ -399,14 +398,15 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 	OnErrorGroupPtr = new OnErrorGroup(X + 60, Y + 60, 220, 105);
 	OnErrorGroupPtr->hide();
 
-	CupInsertionButtonPtr = new Fl_Button(X + 360, Y + 138, 70, 30, " ");
+	CupInsertionButtonPtr = new Fl_Button(X + 260, Y + 138, 70, 30, " ");
 	CupInsertionButtonPtr->box(FL_BORDER_BOX);
 	CupInsertionButtonPtr->color(NORMAL_BUTTON_COLOR);
 	CupInsertionButtonPtr->labelfont(ORDINARY_TEXT_FONT);
 	CupInsertionButtonPtr->labelsize(ORDINARY_TEXT_SIZE);
 	CupInsertionButtonPtr->callback(cupInsertionButtonCallback, nullptr);
 
-	StatusTextBoxPtr = new Fl_Box(X + 300, Y + 168, 210, 45, " ");
+	int StatusTextBoxPositionX = X + 200; 
+	StatusTextBoxPtr = new Fl_Box(StatusTextBoxPositionX, Y + 168, MAIN_WINDOW_WIDTH - StatusTextBoxPositionX, 45, " ");
 	StatusTextBoxPtr->labelfont(FL_COURIER);
 	StatusTextBoxPtr->labelsize(ORDINARY_TEXT_SIZE);
 	StatusTextBoxPtr->labelcolor(FL_BLACK);
@@ -468,44 +468,39 @@ void CupGuiGroup::redrawLabelsValues() {
 			assert(TemporaryRegisterIndex < MODBUS_INPUT_REGISTERS_NUMBER);
 			uint16_t TemporaryValue = atomic_load_explicit(&ModbusInputRegisters[TemporaryRegisterIndex], std::memory_order_acquire);
 
+			bool IsValueValid = false;
 			if (atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ACTIVE_CUP-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire) == (uint16_t)(CupId + 1)) {
-				bool AnyErrorInFrontOfCup = false;
-				for (int K = 0; K < CupId; K++) {
-					if (0 != atomic_load_explicit(&ModbusInputRegisters[K+MODBUS_ADDR_CUP1_ERROR-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire)) {
-						AnyErrorInFrontOfCup = true;
-						break;
-					}
+				IsValueValid = true;
+			}
+			for (int K = 0; K < CupId; K++) {
+				if (0 != atomic_load_explicit(&ModbusInputRegisters[K+MODBUS_ADDR_CUP1_ERROR-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire)) {
+					IsValueValid = false;
+					break;
 				}
-				if (!AnyErrorInFrontOfCup) {
-					double TemporaryFloatingPoint = 0.01 * (double)TemporaryValue;
+			}
+			CupValueLabelPtr[J]->labelfont(IsValueValid ? FL_HELVETICA_BOLD : FL_HELVETICA);
+
+			double TemporaryFloatingPoint = 0.01 * (double)TemporaryValue;
 #if 0					
-					// Final correction.
-					// A very small input current is displayed as zero current.
-					// Calculation formula:
-					// displayed_value = 1.5 * measured_value - 1.5 * NEGLIGIBLE_CURRENT 
-					// for measured values < 3 * NEGLIGIBLE_CURRENT
-					// NEGLIGIBLE_CURRENT is in microamperes
-					if (TemporaryFloatingPoint < 3 * NEGLIGIBLE_CURRENT){
-						TemporaryFloatingPoint = 1.5 * TemporaryFloatingPoint - 1.5 * NEGLIGIBLE_CURRENT;
-					}
+			// Final correction.
+			// A very small input current is displayed as zero current.
+			// Calculation formula:
+			// displayed_value = 1.5 * measured_value - 1.5 * NEGLIGIBLE_CURRENT 
+			// for measured values < 3 * NEGLIGIBLE_CURRENT
+			// NEGLIGIBLE_CURRENT is in microamperes
+			if (TemporaryFloatingPoint < 3 * NEGLIGIBLE_CURRENT){
+				TemporaryFloatingPoint = 1.5 * TemporaryFloatingPoint - 1.5 * NEGLIGIBLE_CURRENT;
+			}
 #endif
-					if (TemporaryFloatingPoint < NEGLIGIBLE_CURRENT){
-						TemporaryFloatingPoint = 0.0;
-					}
-					std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "%.1fμA", TemporaryFloatingPoint);
-				}
-				else {
-					std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "?");
-				}
-				ValueLabelBuffer[CupId][J][sizeof(ValueLabelBuffer[CupId][J]) - 1] = '\0';
+			if (TemporaryFloatingPoint < NEGLIGIBLE_CURRENT){
+				TemporaryFloatingPoint = 0.0;
 			}
-			else {
-				std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "0");
-			}
+			std::snprintf(ValueLabelBuffer[CupId][J], sizeof(ValueLabelBuffer[CupId][J]) - 1, "%.1fμA", TemporaryFloatingPoint);
+
 			ValueLabelBuffer[CupId][J][sizeof(ValueLabelBuffer[CupId][J]) - 1] = '\0';
 
-			CupValueLabelPtr[J]->show();
 			CupValueLabelPtr[J]->label(ValueLabelBuffer[CupId][J]);
+			CupValueLabelPtr[J]->show();
 			CupValueLabelPtr[J]->redraw();
 		}
 	}
@@ -602,8 +597,8 @@ void CupGuiGroup::redrawStatusLabel() {
 	}
 
 	StatusTextBoxPtr->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
-	if (StatusTextBoxPtr->labelsize() != DEBUGGING_TEXT_SIZE) {
-		StatusTextBoxPtr->labelsize(DEBUGGING_TEXT_SIZE);
+	if (StatusTextBoxPtr->labelsize() != 9) {
+		StatusTextBoxPtr->labelsize(9);
 #if 0 // debugging
 		StatusTextBoxPtr->color(FL_YELLOW);
 		StatusTextBoxPtr->box(FL_FLAT_BOX);
@@ -633,7 +628,7 @@ void CupGuiGroup::redrawStatusLabel() {
 
 	snprintf(StatusText, sizeof(StatusText) - 1,
 	         "%s\n"
-	         "We: %04X %04X %04X %04X\n"
+	         "We: %05u %05u %05u %05u\n"
 	         "Bity: %c %c %c %c Stan:%2d  %s\n"
 			 "Błąd: %04X %04X",
 	         DescriptionPtr[CupId],
@@ -698,7 +693,7 @@ void refreshGui(void *Data) {
 		static char GeneralDescriptionText[800];
 		GeneralStatusTextBoxPtr->show();
 		snprintf(GeneralDescriptionText, sizeof(GeneralDescriptionText) - 1, 
-				 "Port %s\nModbus %s  Błąd %04X %04X  Aktywny %d  Ini. %d", SerialPortRequestedNamePtr->c_str(),
+				 "Port %s\nModbus %s  Błąd %04X %04X  Akt. %d  Ini. %d", SerialPortRequestedNamePtr->c_str(),
 		         getTransmissionQualityIndicatorTextForGui(),
 				 atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ERROR_CODE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire),
 				 atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ERROR_STORAGE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire),
