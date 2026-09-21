@@ -353,7 +353,7 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 	BackgroundPtr->color(ColorDirtyOrange);
 	BackgroundPtr->hide();
 
-	TitleTextBoxPtr = new Fl_Box(X + 0, Y+10, 400, 15, "Tytuł");
+	TitleTextBoxPtr = new Fl_Box(X + 0, Y+10, MAIN_WINDOW_WIDTH - 20, 15, "Tytuł");
 	TitleTextBoxPtr->labelfont(ORDINARY_TEXT_FONT);
 	TitleTextBoxPtr->labelsize(ORDINARY_TEXT_SIZE);
 #if 0
@@ -376,20 +376,20 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 	PadlockImagePtr = new ImageWidget(X + 380, Y + 30, 54, 54, padlock_png, padlock_png_len, nullptr);
 	PadlockImagePtr->hide();
 
-	UnconnectedImagePtr = new ImageWidget(X + 380, Y + 30, 51, 51, unconnected_png, unconnected_png_len, nullptr);
+	UnconnectedImagePtr = new ImageWidget(X + 270, Y + 37, 51, 51, unconnected_png, unconnected_png_len, nullptr);
 	UnconnectedImagePtr->hide();
 
 	LockoutTextBoxPtr = new Fl_Box(X + 340, Y + 90, 150, 25, "Blokada Aktywna");
 	LockoutTextBoxPtr->hide();
 	LockoutTextBoxPtr->labelfont(FL_HELVETICA_BOLD);
-	LockoutTextBoxPtr->labelsize(16);
+	LockoutTextBoxPtr->labelsize(14);
 	LockoutTextBoxPtr->labelcolor(COLOR_DARK_RED);
 	LockoutTextBoxPtr->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
-	UnconnectedTextBoxPtr = new Fl_Box(X + 330, Y + 82, 150, 40, "Błąd Modbus:\nBrak Połączenia");
+	UnconnectedTextBoxPtr = new Fl_Box(X + 220, Y + 90, 150, 40, "Błąd Modbus:\nBrak Połączenia");
 	UnconnectedTextBoxPtr->hide();
 	UnconnectedTextBoxPtr->labelfont(FL_HELVETICA_BOLD);
-	UnconnectedTextBoxPtr->labelsize(16);
+	UnconnectedTextBoxPtr->labelsize(14);
 	UnconnectedTextBoxPtr->box(FL_FLAT_BOX);
 	UnconnectedTextBoxPtr->color(ColorDirtyYellow);
 	UnconnectedTextBoxPtr->labelcolor(COLOR_DARK_RED);
