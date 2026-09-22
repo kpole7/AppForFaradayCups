@@ -668,10 +668,7 @@ void CupGuiGroup::redrawButton() {
 	else {
 		CupInsertionButtonPtr->label("Wsuń");
 	}
-	if (!isTransmissionCorrect() || 
-	    atomic_load_explicit(&ModbusCoilsReadout[getIndexForBlockage()], std::memory_order_acquire) ||
-		(0 != atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_ERROR-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire))) 
-	{
+	if (!isTransmissionCorrect() || atomic_load_explicit(&ModbusCoilsReadout[getIndexForBlockage()], std::memory_order_acquire)) {
 		CupInsertionButtonPtr->deactivate();
 	}
 	else {
