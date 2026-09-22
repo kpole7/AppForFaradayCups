@@ -13,6 +13,7 @@
 
 #define CHANNELS_PER_CUP 4
 
+#define PNEUMATIC_WITH_LOCK_CUP_TYPE 1
 #define MOTORIZED_CUP_TYPE 2
 
 //.................................................................................................

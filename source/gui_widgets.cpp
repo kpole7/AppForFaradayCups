@@ -152,17 +152,17 @@ static const int16_t LocationOfMeasuredValues[CUPS_NUMBER][VALUES_PER_DISC] =
 
 const char *PneumaticFsmStateMnemonics[] = {
     "Boot ",
-    " Out ",
+    "Out  ",
     "GoIn ",
-    " In  ",
+    "In   ",
     "GoOut",
     "Undef"
 };
 static const char *PneumaticWithLockFsmStateMnemonics[] = {
     "Boot ",
-    " Out ",
+    "Out  ",
     "GoIn ",
-    " In  ",
+    "In   ",
     "GoOut",
     "P Lck",
     "Lock ",
@@ -171,14 +171,14 @@ static const char *PneumaticWithLockFsmStateMnemonics[] = {
 };
 static const char *MotorFsmStateMnemonics[] = {
     "Boot ",
-    " In  ",
+    "In   ",
     "GoOut",
-    "P Out",
-    "B Out",
-    " Out ",
+    "P_Out",
+    "B_Out",
+    "Out  ",
     "GoIn ",
-    "P In ",
-    "B In ",
+    "P_In ",
+    "B_In ",
     "Undef"
 };
 #define PNEUMATIC_FSM_STATE_MNEMONICS_COUNT (sizeof(PneumaticFsmStateMnemonics) / sizeof(PneumaticFsmStateMnemonics[0]))
@@ -603,47 +603,62 @@ void CupGuiGroup::redrawStatusLabel() {
 		StatusTextBoxPtr->box(FL_FLAT_BOX);
 #endif
 	}
+	
+	const char SecondCoilDescription[3][8] = {"Lock 0 ", "Lock 1 ", "\0"};
+	const char *SecondCoilDescriptionPtr = SecondCoilDescription[2];
+	if (getConfigurationRegisterValue(MODBUS_ADDR_CUP1_TYPE+CupId) == PNEUMATIC_WITH_LOCK_CUP_TYPE) {
+		uint16_t SecondCoil = atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 1], std::memory_order_acquire) ? '1' : '0';
+		SecondCoil &= 0x01;
+		SecondCoilDescriptionPtr = SecondCoilDescription[SecondCoil];
+	}
+
 	char FourthCoil = ' ';
 	if (getConfigurationRegisterValue(MODBUS_ADDR_CUP1_TYPE+CupId) == MOTORIZED_CUP_TYPE) {
 		FourthCoil = atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 3], std::memory_order_acquire) ? '1' : '0';
 	}
+
 	assert(CupId < CUPS_NUMBER);
 	DescriptionPtr[CupId] = stateDescriptionForCup(CupId);
 
     uint16_t MyState = atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_FSM_STATE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire);
-    const char *MyText;
+    const char *StatusMnemonicPtr;
     if (0 == CupId){
         assert(MyState < PNEUMATIC_FSM_STATE_MNEMONICS_COUNT);
-        MyText = PneumaticFsmStateMnemonics[MyState];
+        StatusMnemonicPtr = PneumaticFsmStateMnemonics[MyState];
     }
     else if (1 == CupId){
         assert(MyState < PNEUMATIC_WITH_LOCK_FSM_STATE_MNEMONICS_COUNT);
-        MyText = PneumaticWithLockFsmStateMnemonics[MyState];
+        StatusMnemonicPtr = PneumaticWithLockFsmStateMnemonics[MyState];
     }
     else{
         assert(MyState < MOTOR_FSM_STATE_MNEMONICS_COUNT);
-        MyText = MotorFsmStateMnemonics[MyState];
+        StatusMnemonicPtr = MotorFsmStateMnemonics[MyState];
     }
 
 	snprintf(StatusText, sizeof(StatusText) - 1,
 	         "%s\n"
-	         "We: %05u %05u %05u %05u\n"
-	         "Bity: %c %c %c %c Stan:%2d  %s\n"
-			 "Błąd: %04X %04X",
+			 "Błąd: %04X %04X Stan:%2d  %s\n"
+			 "Bity: Ctrl %c %sSw %c %c\n"
+	         "We: %05u %05u %05u %05u",
 	         DescriptionPtr[CupId],
+
+			 atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_ERROR-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire),
+			 atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_ERROR_STORAGE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire),
+			 atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_FSM_STATE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire),
+             StatusMnemonicPtr,
+
+ 	         atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 0], std::memory_order_acquire) ? '1' : '0',
+	         SecondCoilDescriptionPtr,
+	         atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 2], std::memory_order_acquire) ? '1' : '0',
+	         FourthCoil,
+
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 0], std::memory_order_acquire),
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 1], std::memory_order_acquire),
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 2], std::memory_order_acquire),
-	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 3], std::memory_order_acquire),
-	         atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 0], std::memory_order_acquire) ? '1' : '0',
-	         atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 1], std::memory_order_acquire) ? '1' : '0',
-	         atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 2], std::memory_order_acquire) ? '1' : '0',
-	         FourthCoil,
-			 atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_FSM_STATE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire),
-             MyText,
-			 atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_ERROR-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire),
-			 atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_ERROR_STORAGE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire));
-	StatusTextBoxPtr->label(StatusText);
+	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 3], std::memory_order_acquire)
+			 );
+
+			 StatusTextBoxPtr->label(StatusText);
 }
 
 void CupGuiGroup::redrawButton() {
