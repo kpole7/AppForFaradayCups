@@ -5,7 +5,13 @@ O.K.    -                (jest "b.d.")
 
 O.K.    Timeouty w pliku konfiguracyjnym
 O.K.    Zrobić przegląd rejestrów Modbus
-Menu Pomoc -> Instrukcja użytkowania
+
+        Menu Pomoc -> Instrukcja użytkowania
+
+        Symulacja zdarzeń:
+        - brak połączenia RS-232
+        - blokada
+        - błąd napędu
 
 
 
