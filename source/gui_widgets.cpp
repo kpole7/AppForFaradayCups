@@ -129,7 +129,7 @@ class CupGuiGroup : public Fl_Group {
 	Fl_Box *SeparatorPtr;
 	[[nodiscard]] int getIndexForSwitchPressed() const;
 	[[nodiscard]] int getIndexForBlockage() const;
-	void redrawTripleDisc();
+	void redrawDiskPicture();
 	void redrawLabelsValues();
 	void redrawSwitchErrorLabel();
 	void redrawIndicatorsOfErrorsOrLockout();
@@ -316,7 +316,7 @@ void OnErrorGroup::draw() {
 	fl_color(FL_RED);
 	fl_rectf(x(), y(), w(), h());
 	fl_color(FL_YELLOW);
-	fl_rectf(x() + 8, y() + 8, w() - 16, h() - 16);
+	fl_rectf(x() + 5, y() + 5, w() - 10, h() - 10);
 	Fl_Group::draw();
 	fl_pop_clip();
 }
@@ -331,9 +331,9 @@ OnErrorGroup::OnErrorGroup(int X, int Y, int W, int H, const char *L) : Fl_Group
 	this->begin();
 	this->box(FL_NO_BOX);
 
-	ErrorTextBoxPtr = new Fl_Box(X + 16, Y + 25, W - 32, H - 48, "Błąd krańcówki");
+	ErrorTextBoxPtr = new Fl_Box(X + 16, Y + 20, W - 32, 40, "Błąd\nnapędu");
 	ErrorTextBoxPtr->labelfont(FL_HELVETICA_BOLD);
-	ErrorTextBoxPtr->labelsize(16);
+	ErrorTextBoxPtr->labelsize(14);
 	ErrorTextBoxPtr->labelcolor(COLOR_BLACK);
 	ErrorTextBoxPtr->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 	ErrorTextBoxPtr->box(FL_NO_BOX);
@@ -353,7 +353,7 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 	BackgroundPtr->color(ColorDirtyOrange);
 	BackgroundPtr->hide();
 
-	TitleTextBoxPtr = new Fl_Box(X + 0, Y+10, MAIN_WINDOW_WIDTH - 20, 15, "Tytuł");
+	TitleTextBoxPtr = new Fl_Box(X + 0, Y+5, MAIN_WINDOW_WIDTH - 20, 15, "Tytuł");
 	TitleTextBoxPtr->labelfont(ORDINARY_TEXT_FONT);
 	TitleTextBoxPtr->labelsize(ORDINARY_TEXT_SIZE);
 #if 0
@@ -373,13 +373,13 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 		CupValueLabelPtr[J]->hide();
 	}
 
-	PadlockImagePtr = new ImageWidget(X + 380, Y + 30, 54, 54, padlock_png, padlock_png_len, nullptr);
+	PadlockImagePtr = new ImageWidget(X + 270, Y + 37, 54, 54, padlock_png, padlock_png_len, nullptr);
 	PadlockImagePtr->hide();
 
 	UnconnectedImagePtr = new ImageWidget(X + 270, Y + 37, 51, 51, unconnected_png, unconnected_png_len, nullptr);
 	UnconnectedImagePtr->hide();
 
-	LockoutTextBoxPtr = new Fl_Box(X + 340, Y + 90, 150, 25, "Blokada Aktywna");
+	LockoutTextBoxPtr = new Fl_Box(X + 230, Y + 95, 150, 25, "Blokada Aktywna");
 	LockoutTextBoxPtr->hide();
 	LockoutTextBoxPtr->labelfont(FL_HELVETICA_BOLD);
 	LockoutTextBoxPtr->labelsize(14);
@@ -395,7 +395,7 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 	UnconnectedTextBoxPtr->labelcolor(COLOR_DARK_RED);
 	UnconnectedTextBoxPtr->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
-	OnErrorGroupPtr = new OnErrorGroup(X + 60, Y + 60, 220, 105);
+	OnErrorGroupPtr = new OnErrorGroup(X + 60+170, Y + 40, 120, 80);
 	OnErrorGroupPtr->hide();
 
 	CupInsertionButtonPtr = new Fl_Button(X + 260, Y + 138, 70, 30, " ");
@@ -442,10 +442,9 @@ int CupGuiGroup::getIndexForSwitchPressed() const { return MODBUS_COILS_PER_CUP 
 
 int CupGuiGroup::getIndexForBlockage() const { return MODBUS_COILS_PER_CUP * CupId + COIL_OFFSET_IS_CUP_BLOCKED; }
 
-void CupGuiGroup::redrawTripleDisc() {
+void CupGuiGroup::redrawDiskPicture() {
 	if (isTransmissionCorrect() && 
-	    atomic_load_explicit(&ModbusCoilsReadout[getIndexForSwitchPressed()], std::memory_order_acquire) &&
-	    (0 == atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_ERROR-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire))) 
+	    atomic_load_explicit(&ModbusCoilsReadout[getIndexForSwitchPressed()], std::memory_order_acquire)) 
 	{
 		if (0 == PictureOfDisc->visible()) {
 			PictureOfDisc->show();
@@ -467,7 +466,7 @@ void CupGuiGroup::redrawLabelsValues() {
 			int TemporaryRegisterIndex = CupId * VALUES_PER_DISC + J;
 			assert(TemporaryRegisterIndex < MODBUS_INPUT_REGISTERS_NUMBER);
 			uint16_t TemporaryValue = atomic_load_explicit(&ModbusInputRegisters[TemporaryRegisterIndex], std::memory_order_acquire);
-
+#if 0
 			bool IsValueValid = false;
 			if (atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ACTIVE_CUP-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire) == (uint16_t)(CupId + 1)) {
 				IsValueValid = true;
@@ -479,7 +478,7 @@ void CupGuiGroup::redrawLabelsValues() {
 				}
 			}
 			CupValueLabelPtr[J]->labelfont(IsValueValid ? FL_HELVETICA_BOLD : FL_HELVETICA);
-
+#endif
 			double TemporaryFloatingPoint = 0.01 * (double)TemporaryValue;
 #if 0					
 			// Final correction.
@@ -671,7 +670,7 @@ void CupGuiGroup::refreshData() {
 	assert(getIndexForSwitchPressed() < MODBUS_COILS_NUMBER);
 	assert(getIndexForBlockage() < MODBUS_COILS_NUMBER);
 
-	redrawTripleDisc();
+	redrawDiskPicture();
 	redrawLabelsValues();
 	redrawSwitchErrorLabel();
 	redrawIndicatorsOfErrorsOrLockout();
