@@ -468,7 +468,7 @@ void CupGuiGroup::redrawLabelsValues() {
 			uint16_t TemporaryValue = atomic_load_explicit(&ModbusInputRegisters[TemporaryRegisterIndex], std::memory_order_acquire);
 #if 0
 			bool IsValueValid = false;
-			if (atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ACTIVE_CUP-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire) == (uint16_t)(CupId + 1)) {
+			if ((0x0F & atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ACTIVE_CUP-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire)) == (uint16_t)(CupId + 1)) {
 				IsValueValid = true;
 			}
 			for (int K = 0; K < CupId; K++) {
@@ -635,11 +635,13 @@ void CupGuiGroup::redrawStatusLabel() {
         StatusMnemonicPtr = MotorFsmStateMnemonics[MyState];
     }
 
+	uint16_t HighGainFlags = atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ACTIVE_CUP-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire);
+	HighGainFlags >>= (4*CupId+4);
 	snprintf(StatusText, sizeof(StatusText) - 1,
 	         "%s\n"
 			 "Błąd: %04X %04X Stan:%2d  %s\n"
 			 "Bity: Ctrl %c %sSw %c %c\n"
-	         "We: %05u %05u %05u %05u",
+	         "We: %05u%c %05u%c %05u%c %05u%c",
 	         DescriptionPtr[CupId],
 
 			 atomic_load_explicit(&ModbusInputRegisters[CupId+MODBUS_ADDR_CUP1_ERROR-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire),
@@ -653,9 +655,13 @@ void CupGuiGroup::redrawStatusLabel() {
 	         FourthCoil,
 
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 0], std::memory_order_acquire),
+			 ((HighGainFlags & 1) != 0) ? '+' : '-',
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 1], std::memory_order_acquire),
+			 ((HighGainFlags & 2) != 0) ? '+' : '-',
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 2], std::memory_order_acquire),
-	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 3], std::memory_order_acquire)
+			 ((HighGainFlags & 4) != 0) ? '+' : '-',
+	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 3], std::memory_order_acquire),
+			 ((HighGainFlags & 8) != 0) ? '+' : '-'
 			 );
 
 			 StatusTextBoxPtr->label(StatusText);
@@ -708,7 +714,7 @@ void refreshGui(void *Data) {
 		         getTransmissionQualityIndicatorTextForGui(),
 				 atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ERROR_CODE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire),
 				 atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ERROR_STORAGE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire),
-				 atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ACTIVE_CUP-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire),
+				 (0x0F & atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ACTIVE_CUP-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire)),
 				 atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_SUCCESSFULL_INITIALIZATION-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire) );
 		GeneralStatusTextBoxPtr->label(GeneralDescriptionText);
 	}
