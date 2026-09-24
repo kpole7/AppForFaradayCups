@@ -407,7 +407,7 @@ CupGuiGroup::CupGuiGroup(int X, int Y, int W, int H, const char *L) : Fl_Group(X
 
 	int StatusTextBoxPositionX = X + 200; 
 	StatusTextBoxPtr = new Fl_Box(StatusTextBoxPositionX, Y + 168, MAIN_WINDOW_WIDTH - StatusTextBoxPositionX, 45, " ");
-	StatusTextBoxPtr->labelfont(FL_COURIER);
+	StatusTextBoxPtr->labelfont(FL_HELVETICA_BOLD);
 	StatusTextBoxPtr->labelsize(ORDINARY_TEXT_SIZE);
 	StatusTextBoxPtr->labelcolor(FL_BLACK);
 	StatusTextBoxPtr->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
@@ -587,6 +587,7 @@ void CupGuiGroup::redrawStatusLabel() {
 	if (1 == StatusLevelForGui) {
 		if (StatusTextBoxPtr->labelsize() != ORDINARY_TEXT_SIZE) {
 			StatusTextBoxPtr->labelsize(ORDINARY_TEXT_SIZE);
+			StatusTextBoxPtr->labelfont(FL_HELVETICA_BOLD);
 		}
 		assert(CupId < CUPS_NUMBER);
 		DescriptionPtr[CupId] = stateDescriptionForCup(CupId);
@@ -598,6 +599,7 @@ void CupGuiGroup::redrawStatusLabel() {
 	StatusTextBoxPtr->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 	if (StatusTextBoxPtr->labelsize() != 9) {
 		StatusTextBoxPtr->labelsize(9);
+		StatusTextBoxPtr->labelfont(FL_COURIER_BOLD);
 #if 0 // debugging
 		StatusTextBoxPtr->color(FL_YELLOW);
 		StatusTextBoxPtr->box(FL_FLAT_BOX);
