@@ -655,13 +655,13 @@ void CupGuiGroup::redrawStatusLabel() {
 	         FourthCoil,
 
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 0], std::memory_order_acquire),
-			 ((HighGainFlags & 1) != 0) ? '+' : '-',
+			 ((HighGainFlags & 1) != 0) ? '-' : '+',
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 1], std::memory_order_acquire),
-			 ((HighGainFlags & 2) != 0) ? '+' : '-',
+			 ((HighGainFlags & 2) != 0) ? '-' : '+',
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 2], std::memory_order_acquire),
-			 ((HighGainFlags & 4) != 0) ? '+' : '-',
+			 ((HighGainFlags & 4) != 0) ? '-' : '+',
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 3], std::memory_order_acquire),
-			 ((HighGainFlags & 8) != 0) ? '+' : '-'
+			 ((HighGainFlags & 8) != 0) ? '-' : '+'
 			 );
 
 			 StatusTextBoxPtr->label(StatusText);
