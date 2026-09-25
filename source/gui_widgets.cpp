@@ -606,7 +606,7 @@ void CupGuiGroup::redrawStatusLabel() {
 #endif
 	}
 	
-	const char SecondCoilDescription[3][8] = {"Lock 0 ", "Lock 1 ", "\0"};
+	const char SecondCoilDescription[3][6] = {"Bl 0 ", "Bl 1 ", "\0"};
 	const char *SecondCoilDescriptionPtr = SecondCoilDescription[2];
 	if (getConfigurationRegisterValue(MODBUS_ADDR_CUP1_TYPE+CupId) == PNEUMATIC_WITH_LOCK_CUP_TYPE) {
 		uint16_t SecondCoil = atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 1], std::memory_order_acquire) ? '1' : '0';
@@ -639,10 +639,26 @@ void CupGuiGroup::redrawStatusLabel() {
 
 	uint16_t HighGainFlags = atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ACTIVE_CUP-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire);
 	HighGainFlags >>= (4*CupId+4);
+
+	char OutputsDescriptionPtr[4] = "X  ";
+	if (2 > CupId){
+		uint16_t Mask = ((CupId == 0) ? 0x8000u : 0x4000u);
+		OutputsDescriptionPtr[0] = ((Mask & atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_SUCCESSFULL_INITIALIZATION-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire)) == 0) ? '1' : '0';
+	}
+	else {
+		uint16_t Mask = 0x3000u;
+		uint16_t MotorActuator = ((Mask & atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_SUCCESSFULL_INITIALIZATION-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire)) >> 12);
+		assert(MotorActuator < 4);
+		const char MotorActuatorDescriptionPtr[4] = { '0', '-', '+', '?' };
+		OutputsDescriptionPtr[0] = MotorActuatorDescriptionPtr[MotorActuator];
+		Mask = 0x0800u;
+		OutputsDescriptionPtr[2] = ((Mask & atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_SUCCESSFULL_INITIALIZATION-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire)) == 0) ? '0' : '1';
+	}
+
 	snprintf(StatusText, sizeof(StatusText) - 1,
 	         "%s\n"
 			 "Błąd: %04X %04X Stan:%2d  %s\n"
-			 "Bity: Ctrl %c %sSw %c %c\n"
+			 "Bity: Ctrl %c Sw %c %c %s Wy: %s\n"
 	         "We: %05u%c %05u%c %05u%c %05u%c",
 	         DescriptionPtr[CupId],
 
@@ -652,9 +668,10 @@ void CupGuiGroup::redrawStatusLabel() {
              StatusMnemonicPtr,
 
  	         atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 0], std::memory_order_acquire) ? '1' : '0',
-	         SecondCoilDescriptionPtr,
 	         atomic_load_explicit(&ModbusCoilsReadout[MODBUS_COILS_PER_CUP * CupId + 2], std::memory_order_acquire) ? '1' : '0',
 	         FourthCoil,
+	         SecondCoilDescriptionPtr,
+			 OutputsDescriptionPtr,
 
 	         (uint16_t)atomic_load_explicit(&ModbusInputRegisters[MODBUS_INPUTS_PER_CUP * CupId + 0], std::memory_order_acquire),
 			 ((HighGainFlags & 1) != 0) ? '-' : '+',
@@ -712,12 +729,12 @@ void refreshGui(void *Data) {
 		static char GeneralDescriptionText[800];
 		GeneralStatusTextBoxPtr->show();
 		snprintf(GeneralDescriptionText, sizeof(GeneralDescriptionText) - 1, 
-				 "Port %s\nModbus %s  Błąd %04X %04X  Akt. %d  Ini. %d", SerialPortRequestedNamePtr->c_str(),
+				 "Port %s\nModbus %s  Błąd %04X %04X  Akt. %d", SerialPortRequestedNamePtr->c_str(),
 		         getTransmissionQualityIndicatorTextForGui(),
 				 atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ERROR_CODE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire),
 				 atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ERROR_STORAGE-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire),
-				 (0x0F & atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ACTIVE_CUP-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire)),
-				 atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_SUCCESSFULL_INITIALIZATION-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire) );
+				 (0x000Fu & atomic_load_explicit(&ModbusInputRegisters[MODBUS_ADDR_ACTIVE_CUP-MODBUS_INPUT_REGISTERS_ADDRESS], std::memory_order_acquire))
+				);
 		GeneralStatusTextBoxPtr->label(GeneralDescriptionText);
 	}
 }
