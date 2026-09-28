@@ -15,7 +15,7 @@
 
 #define PERIPHERAL_THREAD_LOOP_DURATION 50 // milliseconds
 
-#define MODBUS_RESPONSE_TIMEOUT 50 // milliseconds
+#define MODBUS_RESPONSE_TIMEOUT 200 // milliseconds
 
 #define NEGLIGIBLE_CURRENT 0.2 // microamperes
 
